@@ -1,6 +1,7 @@
 import './user/style_recuperar_senha.css'
 import imagemRecuperacao from '../assets/bg_nami2.png'
 import imagemLateral from '../assets/bg_nami.png'
+import { Link } from "react-router-dom";
 
 export default function RecuperarSenha() {
   return (
@@ -38,7 +39,7 @@ export default function RecuperarSenha() {
 
           <div className="input-box-recuperar">
             <p>
-              Lembrou sua senha? <a href="#">Voltar para login</a>
+              <Link to="/">Voltar para login</Link>
             </p>
           </div>
         </form>

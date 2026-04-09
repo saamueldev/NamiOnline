@@ -1,6 +1,7 @@
 import './user/style_tela_login.css'
 import namiVideo from '../assets/nami_video.mp4'
 import bgNami2 from '../assets/bg_nami2.png'
+import { Link } from "react-router-dom";
 
 export default function TelaLogin() {
   return (
@@ -33,7 +34,7 @@ export default function TelaLogin() {
             <label>
               <input type="checkbox" /> Lembre-me
             </label>
-            <a href="#">Esqueceu a senha?</a>
+            <Link to="/recuperarsenha">Esqueceu a senha?</Link>
           </div>
 
           <div className="input-box">
@@ -42,7 +43,7 @@ export default function TelaLogin() {
 
           <div className="input-box">
             <p>
-              Não tem uma conta? <a href="#">Cadastre-se</a>
+              <Link to="/cadastro">Cadastre-se</Link>
             </p>
           </div>
         </form>

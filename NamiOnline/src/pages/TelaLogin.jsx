@@ -37,8 +37,8 @@ export default function TelaLogin() {
             <Link to="/recuperarsenha">Esqueceu a senha?</Link>
           </div>
 
-          <div className="input-box">
-            <button type="submit">Entrar</button>
+          <div className="input-box-entrar">
+            <Link to ="/telainicial" type="submit">Entrar</Link>
           </div>
 
           <div className="input-box">

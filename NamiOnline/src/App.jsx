@@ -4,6 +4,8 @@ import RecuperarSenha from './pages/RecuperarSenha'
 import TelaCadastro from './pages/TelaCadastro'
 import RedefinirSenha from './pages/RedefinirSenha'
 import TelaInicial from './pages/TelaInicial'
+import ConsultaEspecialidade from "./pages/ConsultaEspecialidade";
+import AnexarGuiaConsulta from "./pages/AnexarGuiaConsulta";
 
 function App() {
   return (
@@ -14,6 +16,8 @@ function App() {
         <Route path="/cadastro" element={<TelaCadastro />} />
         <Route path="/redefinirsenha" element={<RedefinirSenha/>} />
         <Route path="/telainicial" element={<TelaInicial/>} />
+        <Route path="/especialidades" element={<ConsultaEspecialidade/>} />
+        <Route path="/anexarguia" element={<AnexarGuiaConsulta/>} />
       </Routes>
     </BrowserRouter>
   )

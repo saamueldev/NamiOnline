@@ -48,9 +48,9 @@ export default function TelaInicial() {
                 <h1 className="logo">Nami Online</h1>
 
                 <nav className="navbar">
-                    <Link to="/consultas">Consultas</Link>
-                    <Link to="/exames">Exames</Link>
-                    <Link to="/agendamentos">Agendamentos</Link>
+                    <Link to="/especialidades">Consultas</Link>
+                    <Link to="/anexarguia">Exames</Link>
+                    <Link to="/consulta/data">Agendamentos</Link>
                     <Link to="/retornos">Retornos</Link>
                     <Link to="/perfil" className="avatar"><FaUserCircle /></Link>
                 </nav>

@@ -7,6 +7,9 @@ import TelaInicial from './pages/TelaInicial'
 import ConsultaEspecialidade from "./pages/ConsultaEspecialidade";
 import AnexarGuiaConsulta from "./pages/AnexarGuiaConsulta";
 import ConfirmarConsulta from "./pages/ConfirmarConsulta";
+import TelaRetorno from './pages/TelaRetorno'
+import TelaAgendarRetorno from './pages/TelaAgendarRetorno'
+import TelaPerfil from './pages/TelaPerfil'
 
 function App() {
   return (
@@ -20,6 +23,9 @@ function App() {
         <Route path="/especialidades" element={<ConsultaEspecialidade/>} />
         <Route path="/anexarguia" element={<AnexarGuiaConsulta/>} />
         <Route path="/consulta/data" element={<ConfirmarConsulta/>} />
+        <Route path="/retornos" element={<TelaRetorno />} />
+        <Route path="/agendarretorno" element={<TelaAgendarRetorno />} />
+        <Route path="/perfil" element={<TelaPerfil />} />
       </Routes>
     </BrowserRouter>
   )

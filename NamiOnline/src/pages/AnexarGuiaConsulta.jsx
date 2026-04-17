@@ -1,5 +1,6 @@
 import React from "react"
 import { FaFileUpload, FaIdCard, FaFileMedical } from "react-icons/fa"
+import { Link } from "react-router-dom"
 import "../pages/user/style_anexar_guia_consulta.css"
 
 const AnexarGuiaConsulta = () => {
@@ -43,6 +44,10 @@ const AnexarGuiaConsulta = () => {
           <button className="botao-enviar" type="button">
             Selecionar arquivos
           </button>
+        </div>
+
+        <div className="acoes-anexo">
+          <Link to="/telainicial" className="botao-voltar">Voltar</Link>
         </div>
       </div>
     </div>

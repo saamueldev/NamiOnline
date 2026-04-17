@@ -1,7 +1,10 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import "../pages/user/style_confirmar_consulta.css";
 
 function ConfirmarConsulta() {
+  const navigate = useNavigate();
+
   return (
     <div className="pagina-agendamento">
       <div className="agendamento-container">
@@ -148,7 +151,7 @@ function ConfirmarConsulta() {
               </div>
             </section>
 
-            <button className="botao-continuar" type="button">
+            <button className="botao-continuar" type="button" onClick={() => navigate('/retornos')}>
               Continuar
             </button>
           </div>

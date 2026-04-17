@@ -1,5 +1,6 @@
 import "./user/style_consulta_especialidade.css"
 import imgConsulta from "../assets/img_consulta.jpg"
+import { useNavigate } from "react-router-dom"
 
 const especialidades = [
   "Alergologia",
@@ -24,6 +25,8 @@ const especialidades = [
 
 
 const ConsultaEspecialidade = () => {
+  const navigate = useNavigate()
+
   return (
     <div className="container-consulta">
       <section id="bannerConsulta">
@@ -47,7 +50,7 @@ const ConsultaEspecialidade = () => {
         {especialidades.map((item) => (
           <div className="card-especialidade" key={item}>
             <span className="nome-especialidade">{item}</span>
-            <button className="botao-seta" type="button">
+            <button className="botao-seta" type="button" onClick={() => navigate('/consulta/data')}>
               →
             </button>
           </div>

@@ -6,6 +6,7 @@ import RedefinirSenha from './pages/RedefinirSenha'
 import TelaInicial from './pages/TelaInicial'
 import ConsultaEspecialidade from "./pages/ConsultaEspecialidade";
 import AnexarGuiaConsulta from "./pages/AnexarGuiaConsulta";
+import ConfirmarConsulta from "./pages/ConfirmarConsulta";
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
         <Route path="/telainicial" element={<TelaInicial/>} />
         <Route path="/especialidades" element={<ConsultaEspecialidade/>} />
         <Route path="/anexarguia" element={<AnexarGuiaConsulta/>} />
+        <Route path="/consulta/data" element={<ConfirmarConsulta/>} />
       </Routes>
     </BrowserRouter>
   )

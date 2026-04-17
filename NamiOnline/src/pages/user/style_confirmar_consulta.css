@@ -1,0 +1,265 @@
+:root {
+  --color-clinic-anil: #004AF7;
+  --color-clinic-marinho: #132190;
+  --color-clinic-gelo: #E4F2FE;
+  --color-clinic-azulclaro: #87B7FE;
+
+  --color-branco: #FFFFFF;
+  --color-borda: #D6E4F7;
+  --color-texto: #334155;
+  --color-texto-suave: #64748B;
+
+  --color-azul-hover: #EAF2FF;
+  --color-azul-selecao: #F2F7FF;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+
+body {
+  background-color: var(--color-clinic-gelo);
+  font-family: Arial, Helvetica, sans-serif;
+  color: var(--color-texto);
+}
+
+.pagina-agendamento {
+  min-height: 100vh;
+  padding: 32px 20px;
+  background-color: var(--color-clinic-gelo); 
+}
+
+.agendamento-container {
+  max-width: 1240px;
+  margin: 0 auto;
+}
+
+.agendamento-topo {
+  text-align: center;
+  margin-bottom: 28px;
+}
+
+.agendamento-topo h1 {
+  font-size: 46px;
+  color: var(--color-clinic-marinho);
+  margin-bottom: 10px;
+}
+
+.agendamento-topo p {
+  font-size: 17px;
+  color: var(--color-texto-suave);
+}
+
+
+.agendamento-grid {
+  display: grid;
+  grid-template-columns: 1.05fr 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+.coluna-esquerda {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.lado-direito {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.card-agendamento {
+  background-color: var(--color-branco);
+  border: 1px solid var(--color-borda);
+  border-radius: 24px;
+  padding: 24px;
+  box-shadow: 0 10px 30px rgba(19, 33, 144, 0.08);
+}
+
+.unidade-card h2,
+.medicos-card h2,
+.horarios-card h2,
+.card-header h2 {
+  font-size: 22px;
+  color: var(--color-clinic-marinho);
+  margin-bottom: 18px;
+}
+
+
+.unidade-fixa {
+  background: linear-gradient(
+    135deg,
+    var(--color-clinic-anil),
+    var(--color-clinic-marinho)
+  );
+  color: var(--color-branco);
+  border-radius: 20px;
+  padding: 22px;
+}
+
+.unidade-fixa h3 {
+  font-size: 26px;
+  margin-bottom: 10px;
+}
+
+.unidade-fixa p {
+  font-size: 15px;
+}
+
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+.navegacao-mes {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.navegacao-mes button {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid var(--color-borda);
+  background-color: var(--color-branco);
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.navegacao-mes span {
+  font-weight: bold;
+  color: var(--color-clinic-marinho);
+}
+
+
+.dias-semana {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  margin-bottom: 10px;
+}
+
+.dias-semana span {
+  text-align: center;
+  font-size: 13px;
+  color: var(--color-texto-suave);
+}
+
+.grade-calendario {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+}
+
+.dia-calendario {
+  height: 48px;
+  border-radius: 12px;
+  border: 1px solid var(--color-borda);
+  background: var(--color-branco);
+  cursor: pointer;
+  color: var(--color-clinic-marinho);
+}
+
+.dia-calendario:hover {
+  background: var(--color-azul-hover);
+}
+
+.dia-calendario.ativo {
+  background: var(--color-clinic-anil);
+  color: white;
+}
+
+.dia-calendario.vazio {
+  visibility: hidden;
+}
+
+
+.lista-medicos {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.medico-item {
+  border: 1px solid var(--color-borda);
+  border-radius: 16px;
+  padding: 14px;
+  display: flex;
+  justify-content: space-between;
+  cursor: pointer;
+}
+
+.medico-item:hover {
+  background: var(--color-azul-hover);
+}
+
+.medico-item.ativo {
+  border-color: var(--color-clinic-anil);
+  background: var(--color-azul-selecao);
+}
+
+
+.lista-horarios {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.horario-item {
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--color-borda);
+  background: white;
+  cursor: pointer;
+}
+
+.horario-item:hover {
+  background: var(--color-azul-hover);
+}
+
+.horario-item.ativo {
+  background: var(--color-clinic-anil);
+  color: white;
+}
+
+
+.botao-continuar {
+  width: 100%;
+  border: none;
+  border-radius: 18px;
+  padding: 18px;
+  font-size: 18px;
+  font-weight: bold;
+  background: linear-gradient(
+    135deg,
+    var(--color-clinic-anil),
+    var(--color-clinic-marinho)
+  );
+  color: white;
+  cursor: pointer;
+}
+
+
+@media (max-width: 1024px) {
+  .agendamento-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .agendamento-topo h1 {
+    font-size: 28px;
+  }
+
+  .dia-calendario {
+    height: 42px;
+  }
+}

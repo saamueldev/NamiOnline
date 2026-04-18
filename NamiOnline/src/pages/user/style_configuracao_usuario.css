@@ -1,0 +1,258 @@
+.config-usuario-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #004AF7 0%, #132190 100%);
+  padding: 40px 20px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.config-usuario-wrapper {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+/* Header */
+.config-usuario-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 30px;
+  gap: 15px;
+}
+
+.config-usuario-back-btn {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: white;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 18px;
+  transition: all 0.3s ease;
+}
+
+.config-usuario-back-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateX(-5px);
+}
+
+.config-usuario-title {
+  color: white;
+  font-size: 32px;
+  font-weight: 700;
+}
+
+/* Action Top */
+.config-usuario-action-top {
+  text-align: right;
+  margin-bottom: 30px;
+}
+
+.config-usuario-btn-editar {
+  background: white;
+  color: #132190;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.config-usuario-btn-editar:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+}
+
+/* Sections */
+.config-usuario-section {
+  background: white;
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  margin-bottom: 25px;
+}
+
+.config-usuario-section-title {
+  background: linear-gradient(135deg, #004AF7 0%, #132190 100%);
+  color: white;
+  padding: 18px 25px;
+  font-size: 17px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.config-usuario-section-content {
+  padding: 30px;
+}
+
+/* Form */
+.config-form-group {
+  margin-bottom: 25px;
+}
+
+.config-form-group:last-child {
+  margin-bottom: 0;
+}
+
+.config-form-group label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 8px;
+}
+
+.config-form-group input,
+.config-form-group select,
+.config-form-group textarea {
+  width: 100%;
+  padding: 12px 15px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: inherit;
+  transition: all 0.3s ease;
+}
+
+.config-form-group input:focus,
+.config-form-group select:focus,
+.config-form-group textarea:focus {
+  outline: none;
+  border-color: #132190;
+  box-shadow: 0 0 0 3px rgba(0, 74, 175, 0.1);
+  background: #f9f9ff;
+}
+
+.config-form-group input:disabled,
+.config-form-group select:disabled,
+.config-form-group textarea:disabled {
+  background: #f5f5f5;
+  color: #999;
+  cursor: not-allowed;
+}
+
+.config-input-disabled {
+  background: #f0f0f0 !important;
+  color: #888 !important;
+}
+
+.config-form-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+}
+
+.config-form-row .config-form-group {
+  margin-bottom: 0;
+}
+
+/* Ações */
+.config-usuario-acoes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+  padding: 30px;
+  background: white;
+  border-radius: 15px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  margin-bottom: 25px;
+}
+
+.config-usuario-btn-cancelar {
+  background: #f0f0f0;
+  color: #333;
+  border: none;
+  padding: 14px 24px;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.config-usuario-btn-cancelar:hover {
+  background: #e0e0e0;
+  transform: translateY(-2px);
+}
+
+.config-usuario-btn-salvar {
+  background: linear-gradient(135deg, #004AF7 0%, #132190 100%);
+  color: white;
+  border: none;
+  padding: 14px 24px;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.config-usuario-btn-salvar:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(0, 74, 175, 0.4);
+}
+
+/* Voltar */
+.config-usuario-voltar {
+  text-align: center;
+}
+
+.config-usuario-btn-voltar {
+  background: white;
+  color: #132190;
+  border: none;
+  padding: 14px 32px;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.config-usuario-btn-voltar:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+}
+
+/* Responsivo */
+@media (max-width: 768px) {
+  .config-usuario-container {
+    padding: 20px;
+  }
+
+  .config-usuario-title {
+    font-size: 24px;
+  }
+
+  .config-usuario-section-content {
+    padding: 20px;
+  }
+
+  .config-form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .config-usuario-acoes {
+    grid-template-columns: 1fr;
+    padding: 20px;
+  }
+
+  .config-usuario-btn-salvar {
+    grid-column: 1;
+  }
+}

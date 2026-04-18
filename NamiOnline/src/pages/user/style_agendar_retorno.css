@@ -8,9 +8,7 @@
 .agendar-page {
   min-height: 100vh;
   padding: 36px 24px;
-  background: radial-gradient(circle at top left, rgba(59, 130, 246, 0.18), transparent 24%),
-    radial-gradient(circle at bottom right, rgba(14, 165, 233, 0.16), transparent 20%),
-    linear-gradient(180deg, #0b1120 0%, #101827 50%, #0b1220 100%);
+  background: linear-gradient(135deg, #004AF7 0%, #132190 100%);
   color: #e2e8f0;
 }
 

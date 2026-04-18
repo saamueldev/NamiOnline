@@ -113,8 +113,8 @@
 }
 
 .input-box-recuperar input:focus {
-    border-color: #4aa4ee;
-    box-shadow: 0 0 0 3px rgba(74, 164, 238, 0.15);
+    border-color: #132190;
+    box-shadow: 0 0 0 3px rgba(19, 33, 144, 0.15);
 }
 
 .input-box-recuperar input::placeholder {
@@ -124,7 +124,7 @@
 .input-box-recuperar button {
     width: 100%;
     padding: 13px 14px;
-    background: linear-gradient(135deg, #4aa4ee, #3286ca);
+    background: linear-gradient(135deg, #004AF7, #132190);
     color: #fff;
     border: none;
     font-weight: 600;
@@ -135,7 +135,7 @@
 }
 
 .input-box-recuperar button:hover {
-    background: #3286ca;
+    background: #004AF7;
 }
 
 .input-box-recuperar p {
@@ -145,13 +145,13 @@
 }
 
 .input-box-recuperar p a {
-    color: #4aa4ee;
+    color: #132190;
     text-decoration: none;
     font-weight: 600;
 }
 
 .input-box-recuperar p a:hover {
-    color: #3286ca;
+    color: #004AF7;
 }
 
 @media (max-width: 1024px) {

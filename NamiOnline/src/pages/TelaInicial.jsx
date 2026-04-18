@@ -1,12 +1,14 @@
 import './user/style_tela_inicial.css'
 import { Link } from "react-router-dom"
 import { FaUserCircle, FaChevronLeft, FaChevronRight } from "react-icons/fa"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useContext } from "react"
+import { AuthContext } from "../context/AuthContext"
 import noticia1 from "../assets/nami-clinica.jpg"
 import noticia2 from "../assets/nami-predio.jpg"
 import noticia3 from "../assets/vacinacao-nami.jpg"
 
 export default function TelaInicial() {
+    const { user, isAdmin } = useContext(AuthContext)
 
     const noticias = [
         {
@@ -46,12 +48,25 @@ export default function TelaInicial() {
 
             <header className="header">
                 <h1 className="logo">Nami Online</h1>
+                <div style={{color: 'white', fontSize: '12px'}}>
+                  {isAdmin() ? '👨‍💼 Admin' : '👤 Usuário'}
+                </div>
 
                 <nav className="navbar">
-                    <Link to="/especialidades">Consultas</Link>
-                    <Link to="/anexarguia">Exames</Link>
-                    <Link to="/consulta/data">Agendamentos</Link>
-                    <Link to="/retornos">Retornos</Link>
+                    {isAdmin() ? (
+                        <>
+                            <Link to="/agendamentos">Agendamentos</Link>
+                            <Link to="/notificacoes-admin">Notificações</Link>
+                            <Link to="/configuracao-usuario">Configurações</Link>
+                        </>
+                    ) : (
+                        <>
+                            <Link to="/especialidades">Consultas</Link>
+                            <Link to="/anexarguia">Exames</Link>
+                            <Link to="/consulta/data">Agendamentos</Link>
+                            <Link to="/retornos">Retornos</Link>
+                        </>
+                    )}
                     <Link to="/perfil" className="avatar"><FaUserCircle /></Link>
                 </nav>
             </header>

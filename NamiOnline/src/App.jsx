@@ -14,6 +14,9 @@ import TelaPerfil from './pages/TelaPerfil'
 import TelaAgendamentos from './pages/TelaAgendamentos'
 import TelaConfiguracaoUsuario from './pages/TelaConfiguracaoUsuario'
 import TelaNotificacaoAdmin from './pages/TelaNotificacaoAdmin'
+import AdicionarEspecialidade from "./pages/AdicionarEspecialidade";
+import AdicionarMedico from "./pages/AdicionarMedico";
+import AdicionarConsulta from "./pages/AdicionarEspecialidade";
 
 function App() {
   return (
@@ -34,6 +37,8 @@ function App() {
           <Route path="/agendamentos" element={<TelaAgendamentos />} />
           <Route path="/configuracao-usuario" element={<TelaConfiguracaoUsuario />} />
           <Route path="/notificacoes-admin" element={<TelaNotificacaoAdmin />} />
+          <Route path="/adicionar/medico" element={<AdicionarMedico />} />
+          <Route path="/adicionar/consulta" element={<AdicionarConsulta />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>

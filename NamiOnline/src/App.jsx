@@ -17,6 +17,7 @@ import TelaNotificacaoAdmin from './pages/TelaNotificacaoAdmin'
 import AdicionarEspecialidade from "./pages/AdicionarEspecialidade";
 import AdicionarMedico from "./pages/AdicionarMedico";
 import AdicionarConsulta from "./pages/AdicionarEspecialidade";
+import TelaInicialAdmin from './pages/TelaInicialAdmin'
 
 function App() {
   return (
@@ -39,6 +40,7 @@ function App() {
           <Route path="/notificacoes-admin" element={<TelaNotificacaoAdmin />} />
           <Route path="/adicionar/medico" element={<AdicionarMedico />} />
           <Route path="/adicionar/consulta" element={<AdicionarConsulta />} />
+          <Route path="/admin/telainicial" element={<TelaInicialAdmin />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>

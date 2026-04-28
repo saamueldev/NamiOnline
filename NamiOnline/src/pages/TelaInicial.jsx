@@ -7,7 +7,7 @@ import { AuthContext } from "../context/AuthContext"
 import noticia1 from "../assets/nami-clinica.jpg"
 import noticia2 from "../assets/nami-predio.jpg"
 import noticia3 from "../assets/vacinacao-nami.jpg"
-import logounifor from "../assets/LOGO.png"
+import logounifor from "../assets/LogoUnifor.png"
 
 export default function TelaInicial() {
 

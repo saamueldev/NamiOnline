@@ -18,6 +18,14 @@ import AdicionarEspecialidade from "./pages/AdicionarEspecialidade";
 import AdicionarMedico from "./pages/AdicionarMedico";
 import AdicionarConsulta from "./pages/AdicionarEspecialidade";
 import TelaInicialAdmin from './pages/TelaInicialAdmin'
+import Exames from './pages/Exames'
+import ModalSolicitacaoSucesso from './pages/ModalSolicitacaoSucesso'
+import AprovarGuia from './pages/AprovarGuia'
+import AgendarExame from './pages/AgendarExame'
+import AdminAgendarExame from './pages/adm/AdminAgendarExame'
+import AdminEditarExames from './pages/adm/AdminEditarExames'
+import AdminCadastrarExames from './pages/adm/AdminCadastrarExames'
+
 
 function App() {
   return (
@@ -41,6 +49,13 @@ function App() {
           <Route path="/adicionar/medico" element={<AdicionarMedico />} />
           <Route path="/adicionar/consulta" element={<AdicionarConsulta />} />
           <Route path="/admin/telainicial" element={<TelaInicialAdmin />} />
+          <Route path="/Exames" element={<Exames />} />
+          <Route path="/ModalSolicitacaoSucesso" element={<ModalSolicitacaoSucesso />} />
+          <Route path="/AprovarGuia" element={<AprovarGuia />} />
+          <Route path="/AgendarExame" element={<AgendarExame />} />
+          <Route path="/admin/AdminAgendarExame" element={<AdminAgendarExame />} />
+          <Route path="/admin/AdminEditarExames" element={<AdminEditarExames />} />
+          <Route path="/admin/AdminCadastrarExames" element={<AdminCadastrarExames />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>

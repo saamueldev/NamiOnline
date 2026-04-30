@@ -13,11 +13,11 @@ import TelaAgendarRetorno from './pages/TelaAgendarRetorno'
 import TelaPerfil from './pages/TelaPerfil'
 import TelaAgendamentos from './pages/TelaAgendamentos'
 import TelaConfiguracaoUsuario from './pages/TelaConfiguracaoUsuario'
-import TelaNotificacaoAdmin from './pages/TelaNotificacaoAdmin'
+import TelaNotificacaoAdmin from './pages/adm/TelaNotificacaoAdmin'
 import AdicionarEspecialidade from "./pages/AdicionarEspecialidade";
 import AdicionarMedico from "./pages/AdicionarMedico";
 import AdicionarConsulta from "./pages/AdicionarEspecialidade";
-import TelaInicialAdmin from './pages/TelaInicialAdmin'
+import TelaInicialAdmin from './pages/adm/TelaInicialAdmin'
 import Exames from './pages/Exames'
 import ModalSolicitacaoSucesso from './pages/ModalSolicitacaoSucesso'
 import AprovarGuia from './pages/AprovarGuia'
@@ -25,7 +25,8 @@ import AgendarExame from './pages/AgendarExame'
 import AdminAgendarExame from './pages/adm/AdminAgendarExame'
 import AdminEditarExames from './pages/adm/AdminEditarExames'
 import AdminCadastrarExames from './pages/adm/AdminCadastrarExames'
-import TelaNoticiasAdmin from './pages/TelaNoticiasAdmin'
+import TelaNoticiasAdmin from './pages/adm/TelaNoticiasAdmin'
+import TelaEventosAdmin from './pages/adm/TelaEventosAdmin'
 
 
 function App() {
@@ -58,6 +59,7 @@ function App() {
           <Route path="/admin/AdminEditarExames" element={<AdminEditarExames />} />
           <Route path="/admin/AdminCadastrarExames" element={<AdminCadastrarExames />} />
           <Route path="/admin/noticias" element={<TelaNoticiasAdmin />} />
+          <Route path="/admin/eventos" element={<TelaEventosAdmin />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>

@@ -1,9 +1,9 @@
-import './adm/style_tela_inicial_adm.css'
+import './style_tela_inicial_adm.css'
 import { Link } from "react-router-dom"
 import { FaUserCircle, FaChevronLeft, FaChevronRight, FaCalendarCheck, FaFileMedical, FaHistory, FaNotesMedical } from "react-icons/fa"
 import { useState, useEffect, useContext } from "react"
-import { AuthContext } from "../context/AuthContext"
-import logounifor from "../assets/LogoUnifor.png"
+import logounifor from "../../assets/LogoUnifor.png";
+import { AuthContext } from "../../context/AuthContext"
 
 export default function TelaInicialADM() {
 
@@ -63,7 +63,7 @@ export default function TelaInicialADM() {
                             Consultas
                         </Link>
 
-                        <Link to="/admin/exames" className="menu-item">
+                        <Link to="/admin/cadastrarExames" className="menu-item">
                             Exames
                         </Link>
 

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { FaArrowLeft, FaBell, FaCheck, FaTimes, FaTrash, FaCheckDouble } from 'react-icons/fa'
-import './user/style_notificacao_admin.css'
+import './style_notificacao_admin.css'
 
 export default function TelaNotificacaoAdmin() {
   const navigate = useNavigate()

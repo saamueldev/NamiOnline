@@ -25,6 +25,7 @@ import AgendarExame from './pages/AgendarExame'
 import AdminAgendarExame from './pages/adm/AdminAgendarExame'
 import AdminEditarExames from './pages/adm/AdminEditarExames'
 import AdminCadastrarExames from './pages/adm/AdminCadastrarExames'
+import TelaNoticiasAdmin from './pages/TelaNoticiasAdmin'
 
 
 function App() {
@@ -56,6 +57,7 @@ function App() {
           <Route path="/admin/AdminAgendarExame" element={<AdminAgendarExame />} />
           <Route path="/admin/AdminEditarExames" element={<AdminEditarExames />} />
           <Route path="/admin/AdminCadastrarExames" element={<AdminCadastrarExames />} />
+          <Route path="/admin/noticias" element={<TelaNoticiasAdmin />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>

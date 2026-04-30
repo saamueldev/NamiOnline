@@ -1,9 +1,4 @@
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: Inter, Arial, Helvetica, sans-serif;
-}
+
 
 .agendar-page {
   min-height: 100vh;
@@ -113,7 +108,7 @@ textarea {
   border-radius: 18px;
   border: 1px solid rgba(148, 163, 184, 0.16);
   background: rgba(15, 23, 42, 0.78);
-  color: #e2e8f0;
+  color: #000000;
   outline: none;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }

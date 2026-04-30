@@ -87,9 +87,10 @@ display:block;
 }
 
 .overlay h3 {
-    background-color:#999999;
+    background:#f7fbff;
     text-align: center;
     color: black;
+    font-size: 18px;
 }
 
 .arrow{
@@ -104,7 +105,7 @@ cursor:pointer;
 }
 
 .left{left:10px}
-.right{right:10px}
+.right{right:0px}
 
 .arrow:hover{
     background-color: #464646;

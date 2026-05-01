@@ -35,9 +35,11 @@ import AprovarGuia from './pages/AprovarGuia';
 import ConsultaDia from "./pages/adm/AdminConsultaDia"
 
 function App() {
+  const tipoUsuario = "user"; // ou "admin"
   return (
     <AuthProvider>
       <BrowserRouter>
+        <BarraNavegacao tipoUsuario={tipoUsuario} />
         <Routes>
           {/* 1. ROTAS PÚBLICAS (AUTENTICAÇÃO) */}
           <Route path="/" element={<TelaLogin />} />

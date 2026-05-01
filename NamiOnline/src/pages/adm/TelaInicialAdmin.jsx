@@ -11,34 +11,6 @@ export default function TelaInicialADM() {
     return (
 
         <div className="home">
-            <header className="header">
-
-                <div className="logo-area">
-                    <img
-                        src={logounifor}
-                        alt="Logo Hospital"
-                        className="logo-img"
-                    />
-                </div>
-
-                <div className="search-container">
-                    <input
-                        type="text"
-                        placeholder="Buscar..."
-                        className="search-input"
-                    />
-                </div>
-
-                <div className="header-actions">
-                    <Link to="/notificacoes" className="notification-btn">
-                        🔔
-                    </Link>
-                    <Link to="/perfil" className="avatar">
-                        <FaUserCircle />
-                    </Link>
-                </div>
-            </header>
-
             <main className="admin-main">
 
                 <aside className="sidebar">

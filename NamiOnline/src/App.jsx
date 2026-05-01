@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from './context/AuthContext'
+import BarraNavegacao from "./components/BarraNavegacao";
 import TelaLogin from './pages/TelaLogin'
 import RecuperarSenha from './pages/RecuperarSenha'
 import TelaCadastro from './pages/TelaCadastro'
@@ -30,18 +31,20 @@ import TelaEventosAdmin from './pages/adm/TelaEventosAdmin'
 
 
 function App() {
+  const tipoUsuario = "user"; // ou "admin"
   return (
     <AuthProvider>
       <BrowserRouter>
+        <BarraNavegacao tipoUsuario={tipoUsuario} />
         <Routes>
           <Route path="/" element={<TelaLogin />} />
           <Route path="/recuperarsenha" element={<RecuperarSenha />} />
           <Route path="/cadastro" element={<TelaCadastro />} />
-          <Route path="/redefinirsenha" element={<RedefinirSenha/>} />
-          <Route path="/telainicial" element={<TelaInicial/>} />
-          <Route path="/especialidades" element={<ConsultaEspecialidade/>} />
-          <Route path="/anexarguia" element={<AnexarGuiaConsulta/>} />
-          <Route path="/consulta/data" element={<ConfirmarConsulta/>} />
+          <Route path="/redefinirsenha" element={<RedefinirSenha />} />
+          <Route path="/telainicial" element={<TelaInicial />} />
+          <Route path="/especialidades" element={<ConsultaEspecialidade />} />
+          <Route path="/anexarguia" element={<AnexarGuiaConsulta />} />
+          <Route path="/consulta/data" element={<ConfirmarConsulta />} />
           <Route path="/retornos" element={<TelaRetorno />} />
           <Route path="/agendarretorno" element={<TelaAgendarRetorno />} />
           <Route path="/perfil" element={<TelaPerfil />} />

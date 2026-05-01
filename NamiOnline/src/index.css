@@ -1,5 +1,26 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
+/* Garante que o navegador permita o scroll vertical */
+html,
+body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  /* Importante: Use min-height em vez de height para permitir expansão */
+  min-height: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+  background-color: white;
+}
 
+#root {
+  width: 100%;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Opcional: Deixa o scroll mais suave */
+html {
+  scroll-behavior: smooth;
+}

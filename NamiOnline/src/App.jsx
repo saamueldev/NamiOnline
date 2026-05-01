@@ -1,69 +1,91 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { AuthProvider } from './context/AuthContext'
-import TelaLogin from './pages/TelaLogin'
-import RecuperarSenha from './pages/RecuperarSenha'
-import TelaCadastro from './pages/TelaCadastro'
-import RedefinirSenha from './pages/RedefinirSenha'
-import TelaInicial from './pages/TelaInicial'
-import ConsultaEspecialidade from "./pages/ConsultaEspecialidade";
-import AnexarGuiaConsulta from "./pages/AnexarGuiaConsulta";
-import ConfirmarConsulta from "./pages/ConfirmarConsulta";
-import TelaRetorno from './pages/TelaRetorno'
-import TelaAgendarRetorno from './pages/TelaAgendarRetorno'
-import TelaPerfil from './pages/TelaPerfil'
-import TelaAgendamentos from './pages/TelaAgendamentos'
-import TelaConfiguracaoUsuario from './pages/TelaConfiguracaoUsuario'
-import TelaNotificacaoAdmin from './pages/adm/TelaNotificacaoAdmin'
-import AdicionarEspecialidade from "./pages/AdicionarEspecialidade";
-import AdicionarMedico from "./pages/AdicionarMedico";
-import AdicionarConsulta from "./pages/AdicionarEspecialidade";
-import TelaInicialAdmin from './pages/adm/TelaInicialAdmin'
-import Exames from './pages/Exames'
-import ModalSolicitacaoSucesso from './pages/ModalSolicitacaoSucesso'
-import AprovarGuia from './pages/AprovarGuia'
-import AgendarExame from './pages/AgendarExame'
-import AdminAgendarExame from './pages/adm/AdminAgendarExame'
-import AdminEditarExames from './pages/adm/AdminEditarExames'
-import AdminCadastrarExames from './pages/adm/AdminCadastrarExames'
-import TelaNoticiasAdmin from './pages/adm/TelaNoticiasAdmin'
-import TelaEventosAdmin from './pages/adm/TelaEventosAdmin'
+import { AuthProvider } from './context/AuthContext';
 
+// --- COMPONENTES DE AUTENTICAÇÃO & ACESSO COMUM ---
+import TelaLogin from './pages/TelaLogin';
+import TelaCadastro from './pages/TelaCadastro';
+import RecuperarSenha from './pages/RecuperarSenha';
+import RedefinirSenha from './pages/RedefinirSenha';
+
+// --- COMPONENTES DO PACIENTE (USER) ---
+import TelaInicial from './pages/TelaInicial';
+import TelaPerfil from './pages/TelaPerfil';
+import TelaConfiguracaoUsuario from './pages/TelaConfiguracaoUsuario';
+import TelaAgendamentos from './pages/TelaAgendamentos';
+import ConsultaEspecialidade from "./pages/user/ConsultaEspecialidade";
+import AnexarGuiaConsulta from "./pages/user/AnexarGuiaConsulta";
+import ConfirmarConsulta from "./pages/user/ConfirmarConsulta";
+import TelaRetorno from './pages/TelaRetorno';
+import TelaAgendarRetorno from './pages/TelaAgendarRetorno';
+import ExamesPaciente from './pages/Exames';
+import AgendarExamePaciente from './pages/AgendarExame';
+import ModalSolicitacaoSucesso from './pages/ModalSolicitacaoSucesso';
+
+// --- COMPONENTES do ADMINISTRADOR (ADM) ---
+import TelaInicialAdmin from './pages/adm/TelaInicialAdmin';
+import AdicionarMedico from "./pages/adm/AdminAdicionarMedico";
+import AdicionarEspecialidade from "./pages/adm/CadastroEspecialidades"; 
+import TelaNotificacaoAdmin from './pages/adm/TelaNotificacaoAdmin';
+import AdminAgendarExame from './pages/adm/AdminAgendarExame';
+import AdminEditarExames from './pages/adm/AdminEditarExames';
+import AdminCadastrarExames from './pages/adm/AdminCadastrarExames';
+import TelaNoticiasAdmin from './pages/adm/TelaNoticiasAdmin';
+import TelaEventosAdmin from './pages/adm/TelaEventosAdmin';
+import AprovarGuia from './pages/AprovarGuia';
+import ConsultaDia from "./pages/adm/AdminConsultaDia"
 
 function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
         <Routes>
+          {/* 1. ROTAS PÚBLICAS (AUTENTICAÇÃO) */}
           <Route path="/" element={<TelaLogin />} />
-          <Route path="/recuperarsenha" element={<RecuperarSenha />} />
           <Route path="/cadastro" element={<TelaCadastro />} />
-          <Route path="/redefinirsenha" element={<RedefinirSenha/>} />
-          <Route path="/telainicial" element={<TelaInicial/>} />
-          <Route path="/especialidades" element={<ConsultaEspecialidade/>} />
-          <Route path="/anexarguia" element={<AnexarGuiaConsulta/>} />
-          <Route path="/consulta/data" element={<ConfirmarConsulta/>} />
-          <Route path="/retornos" element={<TelaRetorno />} />
-          <Route path="/agendarretorno" element={<TelaAgendarRetorno />} />
+          <Route path="/recuperar-senha" element={<RecuperarSenha />} />
+          <Route path="/redefinir-senha" element={<RedefinirSenha />} />
+
+          {/* 2. ROTAS DO PACIENTE (USER) */}
+          <Route path="/home" element={<TelaInicial />} />
           <Route path="/perfil" element={<TelaPerfil />} />
-          <Route path="/agendamentos" element={<TelaAgendamentos />} />
-          <Route path="/configuracao-usuario" element={<TelaConfiguracaoUsuario />} />
-          <Route path="/notificacoes-admin" element={<TelaNotificacaoAdmin />} />
-          <Route path="/adicionar/medico" element={<AdicionarMedico />} />
-          <Route path="/adicionar/consulta" element={<AdicionarConsulta />} />
-          <Route path="/admin/telainicial" element={<TelaInicialAdmin />} />
-          <Route path="/Exames" element={<Exames />} />
-          <Route path="/ModalSolicitacaoSucesso" element={<ModalSolicitacaoSucesso />} />
-          <Route path="/AprovarGuia" element={<AprovarGuia />} />
-          <Route path="/AgendarExame" element={<AgendarExame />} />
-          <Route path="/admin/AdminAgendarExame" element={<AdminAgendarExame />} />
-          <Route path="/admin/AdminEditarExames" element={<AdminEditarExames />} />
-          <Route path="/admin/AdminCadastrarExames" element={<AdminCadastrarExames />} />
+          <Route path="/perfil/configuracoes" element={<TelaConfiguracaoUsuario />} />
+          
+          {/* Consultas e Retornos */}
+          <Route path="/meus-agendamentos" element={<TelaAgendamentos />} />
+          <Route path="/agendar/especialidades" element={<ConsultaEspecialidade />} />
+          <Route path="/agendar/anexar-guia" element={<AnexarGuiaConsulta />} />
+          <Route path="/agendar/confirmar-data" element={<ConfirmarConsulta />} />
+          <Route path="/retornos" element={<TelaRetorno />} />
+          <Route path="/retornos/agendar" element={<TelaAgendarRetorno />} />
+          
+          {/* Exames */}
+          <Route path="/exames" element={<ExamesPaciente />} />
+          <Route path="/exames/agendar" element={<AgendarExamePaciente />} />
+          <Route path="/exames/sucesso" element={<ModalSolicitacaoSucesso />} />
+
+          {/* 3. ROTAS ADMINISTRATIVAS (ADM) */}
+          <Route path="/admin/dashboard" element={<TelaInicialAdmin />} />
+          
+          {/* Gestão de Médicos e Consultas */}
+          <Route path="/admin/cadastrar-medico" element={<AdicionarMedico />} />
+          <Route path="/admin/cadastrar-especialidade" element={<AdicionarEspecialidade />} />
+          <Route path="/admin/aprovar-guias" element={<AprovarGuia />} />
+          <Route path="/admin/consultas-dia" element={<ConsultaDia />} />
+          
+          {/* Gestão de Exames */}
+          <Route path="/admin/exames/agendar" element={<AdminAgendarExame />} />
+          <Route path="/admin/exames/editar" element={<AdminEditarExames />} />
+          <Route path="/admin/exames/cadastrar" element={<AdminCadastrarExames />} />
+          
+          {/* Comunicação e Notificações */}
+          <Route path="/admin/notificacoes" element={<TelaNotificacaoAdmin />} />
           <Route path="/admin/noticias" element={<TelaNoticiasAdmin />} />
           <Route path="/admin/eventos" element={<TelaEventosAdmin />} />
+
         </Routes>
       </BrowserRouter>
     </AuthProvider>
-  )
+  );
 }
 
-export default App
+export default App;

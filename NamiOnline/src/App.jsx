@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from './context/AuthContext';
+import LayoutComNavbar from "./layouts/LayoutComNavbar";
 
 // --- COMPONENTES DE AUTENTICAÇÃO & ACESSO COMUM ---
 import TelaLogin from './pages/TelaLogin';
@@ -24,7 +25,7 @@ import ModalSolicitacaoSucesso from './pages/ModalSolicitacaoSucesso';
 // --- COMPONENTES do ADMINISTRADOR (ADM) ---
 import TelaInicialAdmin from './pages/adm/TelaInicialAdmin';
 import AdicionarMedico from "./pages/adm/AdminAdicionarMedico";
-import AdicionarEspecialidade from "./pages/adm/CadastroEspecialidades"; 
+import AdicionarEspecialidade from "./pages/adm/CadastroEspecialidades";
 import TelaNotificacaoAdmin from './pages/adm/TelaNotificacaoAdmin';
 import AdminAgendarExame from './pages/adm/AdminAgendarExame';
 import AdminEditarExames from './pages/adm/AdminEditarExames';
@@ -39,19 +40,22 @@ function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
-        <BarraNavegacao tipoUsuario={tipoUsuario} />
         <Routes>
+          {/* Rotas SEM Nav Bar*/}
           {/* 1. ROTAS PÚBLICAS (AUTENTICAÇÃO) */}
           <Route path="/" element={<TelaLogin />} />
           <Route path="/cadastro" element={<TelaCadastro />} />
           <Route path="/recuperar-senha" element={<RecuperarSenha />} />
           <Route path="/redefinir-senha" element={<RedefinirSenha />} />
 
+          {/* Rotas SEM Nav Bar*/}
+         <Route element={<LayoutComNavbar />}>
+
           {/* 2. ROTAS DO PACIENTE (USER) */}
           <Route path="/home" element={<TelaInicial />} />
           <Route path="/perfil" element={<TelaPerfil />} />
           <Route path="/perfil/configuracoes" element={<TelaConfiguracaoUsuario />} />
-          
+
           {/* Consultas e Retornos */}
           <Route path="/meus-agendamentos" element={<TelaAgendamentos />} />
           <Route path="/agendar/especialidades" element={<ConsultaEspecialidade />} />
@@ -59,7 +63,7 @@ function App() {
           <Route path="/agendar/confirmar-data" element={<ConfirmarConsulta />} />
           <Route path="/retornos" element={<TelaRetorno />} />
           <Route path="/retornos/agendar" element={<TelaAgendarRetorno />} />
-          
+
           {/* Exames */}
           <Route path="/exames" element={<ExamesPaciente />} />
           <Route path="/exames/agendar" element={<AgendarExamePaciente />} />
@@ -67,26 +71,26 @@ function App() {
 
           {/* 3. ROTAS ADMINISTRATIVAS (ADM) */}
           <Route path="/admin/dashboard" element={<TelaInicialAdmin />} />
-          
+
           {/* Gestão de Médicos e Consultas */}
           <Route path="/admin/cadastrar-medico" element={<AdicionarMedico />} />
           <Route path="/admin/cadastrar-especialidade" element={<AdicionarEspecialidade />} />
           <Route path="/admin/aprovar-guias" element={<AprovarGuia />} />
           <Route path="/admin/consultas-dia" element={<ConsultaDia />} />
-          
+
           {/* Gestão de Exames */}
           <Route path="/admin/exames/agendar" element={<AdminAgendarExame />} />
           <Route path="/admin/exames/editar" element={<AdminEditarExames />} />
           <Route path="/admin/exames/cadastrar" element={<AdminCadastrarExames />} />
-          
+
           {/* Comunicação e Notificações */}
           <Route path="/admin/notificacoes" element={<TelaNotificacaoAdmin />} />
           <Route path="/admin/noticias" element={<TelaNoticiasAdmin />} />
           <Route path="/admin/eventos" element={<TelaEventosAdmin />} />
-
+        </Route>
         </Routes>
-      </BrowserRouter>
-    </AuthProvider>
+    </BrowserRouter>
+    </AuthProvider >
   );
 }
 

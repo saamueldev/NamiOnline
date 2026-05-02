@@ -53,7 +53,7 @@ export default function TelaAgendamentos() {
         
         {/* Header */}
         <div className="agendamentos-header">
-          <button className="agendamentos-back-btn" onClick={() => navigate('/telainicial')}>
+          <button className="agendamentos-back-btn" onClick={() => navigate('/home')}>
             <FaArrowLeft />
           </button>
           <h1 className="agendamentos-title">Meus Agendamentos</h1>
@@ -152,7 +152,7 @@ export default function TelaAgendamentos() {
         <div className="agendamentos-acoes">
           <button 
             className="agendamentos-btn-voltar"
-            onClick={() => navigate('/telainicial')}
+            onClick={() => navigate('/home')}
           >
             ← Voltar
           </button>

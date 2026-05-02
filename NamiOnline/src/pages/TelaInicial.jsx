@@ -69,15 +69,15 @@ export default function TelaInicial() {
                               <span>Acesso rápido</span>
                         </h3>
                     <div className="actions-grid">
-                        <Link to="/especialidades" className="action-card">
+                        <Link to="/agendar/especialidades" className="action-card">
                             <FaCalendarCheck />
                             <span>Agendar Consulta</span>
                         </Link>
-                        <Link to="/anexarguia" className="action-card">
+                        <Link to="/agendar/anexar-guia" className="action-card">
                             <FaFileMedical />
                             <span>Meus Exames</span>
                         </Link>
-                        <Link to="/agendamentos" className="action-card">
+                        <Link to="/meus-agendamentos" className="action-card">
                             <FaHistory />
                             <span>Agendamentos</span>
                         </Link>

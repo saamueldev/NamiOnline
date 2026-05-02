@@ -43,7 +43,7 @@ export default function TelaPerfil() {
         
         {/* Header */}
         <div className="perfil-header">
-          <button className="perfil-back-btn" onClick={() => navigate('/telainicial')}>
+          <button className="perfil-back-btn" onClick={() => navigate('/home')}>
             <FaArrowLeft />
           </button>
           <h1 className="perfil-title">Meu Perfil</h1>
@@ -265,7 +265,7 @@ export default function TelaPerfil() {
                 <div className="perfil-option-control">
                   <button 
                     className="perfil-btn perfil-btn-secondary"
-                    onClick={() => navigate('/agendamentos')}
+                    onClick={() => navigate('/meus-agendamentos')}
                     style={{width: '120px'}}
                   >
                     Acessar
@@ -369,7 +369,7 @@ export default function TelaPerfil() {
               <div className="perfil-actions">
                 <button 
                   className="perfil-btn perfil-btn-secondary"
-                  onClick={() => navigate('/telainicial')}
+                  onClick={() => navigate('/home')}
                 >
                   ← Voltar
                 </button>

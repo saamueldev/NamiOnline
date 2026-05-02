@@ -44,7 +44,7 @@ export default function TelaRetorno() {
 
           <div className="retorno-actions">
             <Link to="/agendarretorno" className="btn btn-primary">Agendar próximo retorno</Link>
-            <Link to="/telainicial" className="btn btn-outline">Voltar para início</Link>
+            <Link to="/home" className="btn btn-outline">Voltar para início</Link>
           </div>
         </section>
         <aside className="retorno-card retorno-aside-card">

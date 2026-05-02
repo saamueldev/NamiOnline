@@ -61,7 +61,7 @@ export default function TelaAgendarRetorno() {
             </label>
 
             <div className="form-actions">
-              <Link to="/telainicial" className="btn btn-cancel">Voltar para início</Link>
+              <Link to="/home" className="btn btn-cancel">Voltar para início</Link>
               <button type="submit" className="btn btn-confirm">Confirmar agendamento</button>
                </div>
           </form>

@@ -30,7 +30,7 @@ export default function TelaLogin() {
       
       if (resultado.sucesso) {
         // Redireciona baseado no tipo de usuário
-        navigate('/telainicial')
+        navigate('/home')
       } else {
         setErro('Email ou senha inválidos')
       }
@@ -80,7 +80,7 @@ export default function TelaLogin() {
             <label>
               <input type="checkbox" /> Lembre-me
             </label>
-            <Link to="/recuperarsenha">Esqueceu a senha?</Link>
+            <Link to="/recuperar-senha">Esqueceu a senha?</Link>
           </div>
 
           <div className="input-box-entrar">

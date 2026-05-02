@@ -63,7 +63,7 @@ const AnexarGuiaConsulta = () => {
         {/* Ações Inferiores */}
         <div className="mt-8 flex justify-center">
           <Link 
-            to="/telainicial" 
+            to="/home" 
             className="text-[#4b5d7a] font-semibold hover:text-[#132190] transition-colors flex items-center gap-2 text-sm md:text-base"
           >
             Voltar para o início

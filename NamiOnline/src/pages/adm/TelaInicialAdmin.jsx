@@ -27,7 +27,7 @@ export default function TelaInicialADM() {
                             Pacientes
                         </Link>
 
-                        <Link to="/admin/medicos" className="menu-item">
+                        <Link to="/admin/cadastrar-medico" className="menu-item">
                             Médicos
                         </Link>
 

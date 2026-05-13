@@ -183,12 +183,6 @@ export default function AdminEventsCrud() {
               </h1>
             </div>
             <div className="relative w-full md:max-w-sm">
-              <input
-                value={search}
-                onChange={(event) => setSearch(event.target.value)}
-                placeholder="Buscar evento..."
-                className="w-full rounded-2xl border border-slate-200 bg-slate-50 py-3 pl-10 pr-4 text-sm outline-none transition focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-100"
-              />
             </div>
           </div>
         </header>

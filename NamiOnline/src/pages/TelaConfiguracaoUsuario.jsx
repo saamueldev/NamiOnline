@@ -1,11 +1,21 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { FaArrowLeft, FaUser, FaEnvelope, FaPhone, FaMapMarkerAlt, FaCalendarAlt, FaVenusMars, FaHeart, FaEdit, FaSave } from 'react-icons/fa'
-import './user/style_configuracao_usuario.css'
+
+import {
+  FaArrowLeft,
+  FaUser,
+  FaEnvelope,
+  FaMapMarkerAlt,
+  FaHeart,
+  FaEdit,
+  FaSave
+} from 'react-icons/fa'
 
 export default function TelaConfiguracaoUsuario() {
   const navigate = useNavigate()
+
   const [editar, setEditar] = useState(false)
+
   const [formData, setFormData] = useState({
     nome: 'João Silva Santos',
     email: 'joao.silva@email.com',
@@ -26,6 +36,7 @@ export default function TelaConfiguracaoUsuario() {
 
   const handleChange = (e) => {
     const { name, value } = e.target
+
     setFormData({
       ...formData,
       [name]: value
@@ -33,292 +44,381 @@ export default function TelaConfiguracaoUsuario() {
   }
 
   const handleSalvar = () => {
-    // Aqui você poderia enviar para um servidor
     console.log('Dados salvos:', formData)
     setEditar(false)
   }
 
+  const inputClass = `
+    w-full rounded-xl border border-slate-300
+    px-4 py-3 text-sm outline-none transition
+    focus:border-[#132190] focus:ring-4 focus:ring-blue-100
+    disabled:bg-slate-100 disabled:text-slate-400
+  `
+
   return (
-    <div className="config-usuario-container">
-      <div className="config-usuario-wrapper">
-        
-        {/* Header */}
-        <div className="config-usuario-header">
-          <button className="config-usuario-back-btn" onClick={() => navigate('/perfil')}>
+    <div className="min-h-screen bg-gradient-to-br from-[#004AF7] to-[#132190] px-5 py-10">
+      
+      <div className="mx-auto max-w-5xl">
+
+        {/* HEADER */}
+        <div className="mb-8 flex items-center gap-4">
+
+          <button
+            onClick={() => navigate('/perfil')}
+            className="flex h-11 w-11 items-center justify-center rounded-full bg-white/20 text-white transition hover:-translate-x-1 hover:bg-white/30"
+          >
             <FaArrowLeft />
           </button>
-          <h1 className="config-usuario-title">Configurações Pessoais</h1>
+
+          <h1 className="text-3xl font-bold text-white">
+            Configurações Pessoais
+          </h1>
+
         </div>
 
-        {/* Botão Editar */}
-        <div className="config-usuario-action-top">
-          {!editar && (
-            <button 
-              className="config-usuario-btn-editar"
+        {/* BOTÃO EDITAR */}
+        {!editar && (
+          <div className="mb-6 text-right">
+
+            <button
               onClick={() => setEditar(true)}
+              className="inline-flex items-center gap-2 rounded-xl bg-white px-6 py-3 font-semibold text-[#132190] shadow-xl transition hover:-translate-y-1"
             >
-              <FaEdit /> Editar Informações
+              <FaEdit />
+              Editar Informações
             </button>
-          )}
-        </div>
 
-        {/* Dados Pessoais */}
-        <div className="config-usuario-section">
-          <div className="config-usuario-section-title">
-            <FaUser /> Dados Pessoais
           </div>
-          <div className="config-usuario-section-content">
-            
-            <div className="config-form-group">
-              <label>Nome Completo *</label>
-              <input 
-                type="text" 
+        )}
+
+        {/* DADOS PESSOAIS */}
+        <section className="mb-6 overflow-hidden rounded-[24px] bg-white shadow-2xl">
+
+          <div className="flex items-center gap-3 bg-gradient-to-r from-[#004AF7] to-[#132190] px-6 py-5 text-lg font-semibold text-white">
+            <FaUser />
+            Dados Pessoais
+          </div>
+
+          <div className="space-y-6 p-6">
+
+            <div>
+              <label className="mb-2 block font-semibold text-slate-700">
+                Nome Completo
+              </label>
+
+              <input
+                type="text"
                 name="nome"
                 value={formData.nome}
                 onChange={handleChange}
                 disabled={!editar}
-                placeholder="Digite seu nome"
+                className={inputClass}
               />
             </div>
 
-            <div className="config-form-row">
-              <div className="config-form-group">
-                <label>Data de Nascimento *</label>
-                <input 
-                  type="date" 
+            <div className="grid gap-5 md:grid-cols-3">
+
+              <div>
+                <label className="mb-2 block font-semibold text-slate-700">
+                  Data de Nascimento
+                </label>
+
+                <input
+                  type="date"
                   name="dataNascimento"
                   value={formData.dataNascimento}
                   onChange={handleChange}
                   disabled={!editar}
+                  className={inputClass}
                 />
               </div>
-              <div className="config-form-group">
-                <label>Sexo *</label>
-                <select 
+
+              <div>
+                <label className="mb-2 block font-semibold text-slate-700">
+                  Sexo
+                </label>
+
+                <select
                   name="sexo"
                   value={formData.sexo}
                   onChange={handleChange}
                   disabled={!editar}
+                  className={inputClass}
                 >
                   <option value="masculino">Masculino</option>
                   <option value="feminino">Feminino</option>
                   <option value="outro">Outro</option>
                 </select>
               </div>
-              <div className="config-form-group">
-                <label>Tipo Sanguíneo</label>
-                <select 
+
+              <div>
+                <label className="mb-2 block font-semibold text-slate-700">
+                  Tipo Sanguíneo
+                </label>
+
+                <select
                   name="sangue"
                   value={formData.sangue}
                   onChange={handleChange}
                   disabled={!editar}
+                  className={inputClass}
                 >
-                  <option value="O+">O+</option>
-                  <option value="O-">O-</option>
-                  <option value="A+">A+</option>
-                  <option value="A-">A-</option>
-                  <option value="B+">B+</option>
-                  <option value="B-">B-</option>
-                  <option value="AB+">AB+</option>
-                  <option value="AB-">AB-</option>
+                  <option>O+</option>
+                  <option>O-</option>
+                  <option>A+</option>
+                  <option>A-</option>
+                  <option>B+</option>
+                  <option>B-</option>
+                  <option>AB+</option>
+                  <option>AB-</option>
                 </select>
               </div>
+
             </div>
 
-            <div className="config-form-group">
-              <label>CPF *</label>
-              <input 
-                type="text" 
-                name="cpf"
+            <div>
+              <label className="mb-2 block font-semibold text-slate-700">
+                CPF
+              </label>
+
+              <input
+                type="text"
                 value={formData.cpf}
-                onChange={handleChange}
                 disabled
-                placeholder="CPF"
-                className="config-input-disabled"
+                className={`${inputClass} bg-slate-200`}
               />
             </div>
 
           </div>
-        </div>
+        </section>
 
-        {/* Contato */}
-        <div className="config-usuario-section">
-          <div className="config-usuario-section-title">
-            <FaEnvelope /> Contato
+        {/* CONTATO */}
+        <section className="mb-6 overflow-hidden rounded-[24px] bg-white shadow-2xl">
+
+          <div className="flex items-center gap-3 bg-gradient-to-r from-[#004AF7] to-[#132190] px-6 py-5 text-lg font-semibold text-white">
+            <FaEnvelope />
+            Contato
           </div>
-          <div className="config-usuario-section-content">
-            
-            <div className="config-form-group">
-              <label>Email *</label>
-              <input 
-                type="email" 
+
+          <div className="space-y-6 p-6">
+
+            <div>
+              <label className="mb-2 block font-semibold text-slate-700">
+                Email
+              </label>
+
+              <input
+                type="email"
                 name="email"
                 value={formData.email}
                 onChange={handleChange}
                 disabled={!editar}
-                placeholder="seu@email.com"
+                className={inputClass}
               />
             </div>
 
-            <div className="config-form-row">
-              <div className="config-form-group">
-                <label>Telefone *</label>
-                <input 
-                  type="tel" 
+            <div className="grid gap-5 md:grid-cols-3">
+
+              <div>
+                <label className="mb-2 block font-semibold text-slate-700">
+                  Telefone
+                </label>
+
+                <input
+                  type="tel"
                   name="telefone"
                   value={formData.telefone}
                   onChange={handleChange}
                   disabled={!editar}
-                  placeholder="(85) 99999-8888"
+                  className={inputClass}
                 />
               </div>
-              <div className="config-form-group">
-                <label>Responsável</label>
-                <input 
-                  type="text" 
+
+              <div>
+                <label className="mb-2 block font-semibold text-slate-700">
+                  Responsável
+                </label>
+
+                <input
+                  type="text"
                   name="responsavel"
                   value={formData.responsavel}
                   onChange={handleChange}
                   disabled={!editar}
-                  placeholder="Nome do responsável"
+                  className={inputClass}
                 />
               </div>
-              <div className="config-form-group">
-                <label>Telefone Responsável</label>
-                <input 
-                  type="tel" 
+
+              <div>
+                <label className="mb-2 block font-semibold text-slate-700">
+                  Telefone Responsável
+                </label>
+
+                <input
+                  type="tel"
                   name="telefonResponsavel"
                   value={formData.telefonResponsavel}
                   onChange={handleChange}
                   disabled={!editar}
-                  placeholder="(85) 98888-7777"
+                  className={inputClass}
                 />
               </div>
+
             </div>
 
           </div>
-        </div>
+        </section>
 
-        {/* Endereço */}
-        <div className="config-usuario-section">
-          <div className="config-usuario-section-title">
-            <FaMapMarkerAlt /> Endereço
+        {/* ENDEREÇO */}
+        <section className="mb-6 overflow-hidden rounded-[24px] bg-white shadow-2xl">
+
+          <div className="flex items-center gap-3 bg-gradient-to-r from-[#004AF7] to-[#132190] px-6 py-5 text-lg font-semibold text-white">
+            <FaMapMarkerAlt />
+            Endereço
           </div>
-          <div className="config-usuario-section-content">
-            
-            <div className="config-form-group">
-              <label>Endereço *</label>
-              <input 
-                type="text" 
+
+          <div className="space-y-6 p-6">
+
+            <div>
+              <label className="mb-2 block font-semibold text-slate-700">
+                Endereço
+              </label>
+
+              <input
+                type="text"
                 name="endereco"
                 value={formData.endereco}
                 onChange={handleChange}
                 disabled={!editar}
-                placeholder="Rua, número, complemento"
+                className={inputClass}
               />
             </div>
 
-            <div className="config-form-row">
-              <div className="config-form-group">
-                <label>CEP *</label>
-                <input 
-                  type="text" 
+            <div className="grid gap-5 md:grid-cols-3">
+
+              <div>
+                <label className="mb-2 block font-semibold text-slate-700">
+                  CEP
+                </label>
+
+                <input
+                  type="text"
                   name="cep"
                   value={formData.cep}
                   onChange={handleChange}
                   disabled={!editar}
-                  placeholder="00000-000"
+                  className={inputClass}
                 />
               </div>
-              <div className="config-form-group">
-                <label>Cidade *</label>
-                <input 
-                  type="text" 
+
+              <div>
+                <label className="mb-2 block font-semibold text-slate-700">
+                  Cidade
+                </label>
+
+                <input
+                  type="text"
                   name="cidade"
                   value={formData.cidade}
                   onChange={handleChange}
                   disabled={!editar}
-                  placeholder="Fortaleza"
+                  className={inputClass}
                 />
               </div>
-              <div className="config-form-group">
-                <label>Estado *</label>
-                <input 
-                  type="text" 
+
+              <div>
+                <label className="mb-2 block font-semibold text-slate-700">
+                  Estado
+                </label>
+
+                <input
+                  type="text"
                   name="estado"
                   value={formData.estado}
                   onChange={handleChange}
                   disabled={!editar}
-                  placeholder="CE"
-                  maxLength="2"
+                  className={inputClass}
                 />
               </div>
+
             </div>
 
           </div>
-        </div>
+        </section>
 
-        {/* Informações Médicas */}
-        <div className="config-usuario-section">
-          <div className="config-usuario-section-title">
-            <FaHeart /> Informações Médicas
+        {/* INFORMAÇÕES MÉDICAS */}
+        <section className="mb-6 overflow-hidden rounded-[24px] bg-white shadow-2xl">
+
+          <div className="flex items-center gap-3 bg-gradient-to-r from-[#004AF7] to-[#132190] px-6 py-5 text-lg font-semibold text-white">
+            <FaHeart />
+            Informações Médicas
           </div>
-          <div className="config-usuario-section-content">
-            
-            <div className="config-form-group">
-              <label>Alergias Conhecidas</label>
-              <textarea 
+
+          <div className="space-y-6 p-6">
+
+            <div>
+              <label className="mb-2 block font-semibold text-slate-700">
+                Alergias Conhecidas
+              </label>
+
+              <textarea
+                rows="4"
                 name="alergias"
                 value={formData.alergias}
                 onChange={handleChange}
                 disabled={!editar}
-                placeholder="Liste suas alergias conhecidas"
-                rows="3"
+                className={inputClass}
               />
             </div>
 
-            <div className="config-form-group">
-              <label>Medicamentos em Uso</label>
-              <textarea 
+            <div>
+              <label className="mb-2 block font-semibold text-slate-700">
+                Medicamentos em Uso
+              </label>
+
+              <textarea
+                rows="4"
                 name="medicamentos"
                 value={formData.medicamentos}
                 onChange={handleChange}
                 disabled={!editar}
-                placeholder="Liste os medicamentos que está tomando"
-                rows="3"
+                className={inputClass}
               />
             </div>
 
           </div>
-        </div>
+        </section>
 
-        {/* Ações */}
-        {editar && (
-          <div className="config-usuario-acoes">
-            <button 
-              className="config-usuario-btn-cancelar"
+        {/* BOTÕES */}
+        {editar ? (
+          <div className="grid gap-4 md:grid-cols-2">
+
+            <button
               onClick={() => setEditar(false)}
+              className="rounded-xl bg-slate-200 px-6 py-4 font-semibold text-slate-700 transition hover:bg-slate-300"
             >
               Cancelar
             </button>
-            <button 
-              className="config-usuario-btn-salvar"
-              onClick={handleSalvar}
-            >
-              <FaSave /> Salvar Alterações
-            </button>
-          </div>
-        )}
 
-        {/* Voltar */}
-        {!editar && (
-          <div className="config-usuario-voltar">
-            <button 
-              className="config-usuario-btn-voltar"
+            <button
+              onClick={handleSalvar}
+              className="flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#004AF7] to-[#132190] px-6 py-4 font-semibold text-white shadow-xl transition hover:-translate-y-1"
+            >
+              <FaSave />
+              Salvar Alterações
+            </button>
+
+          </div>
+        ) : (
+          <div className="text-center">
+
+            <button
               onClick={() => navigate('/perfil')}
+              className="rounded-xl bg-white px-8 py-4 font-semibold text-[#132190] shadow-xl transition hover:-translate-y-1"
             >
               ← Voltar
             </button>
+
           </div>
         )}
 

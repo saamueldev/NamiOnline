@@ -1,98 +1,200 @@
 import { Link, useNavigate } from 'react-router-dom'
-import './user/style_agendar_retorno.css'
 
 export default function TelaAgendarRetorno() {
   const navigate = useNavigate()
 
   const handleSubmit = (e) => {
     e.preventDefault()
-    // Here you could add form validation or API call
     navigate('/retornos')
   }
+
   return (
-    <div className="agendar-page">
-      <div className="agendar-shell">
-        <main className="agendar-card agendar-main-card">
-          <div className="agendar-title-bar">
+    <div className="min-h-screen bg-gradient-to-br from-[#004AF7] to-[#132190] px-6 py-10 text-slate-200">
+
+      <div className="mx-auto grid max-w-7xl grid-cols-1 gap-6 lg:grid-cols-[1.6fr_1fr]">
+
+        {/* MAIN CARD */}
+        <main className="flex flex-col gap-7 rounded-[28px] border border-slate-400/10 bg-slate-900/90 p-8 shadow-2xl backdrop-blur-xl">
+
+          {/* TITLE */}
+          <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+
             <div>
-              <span className="agendar-badge">Retorno médico</span>
-              <h1>Agende seu próximo retorno</h1>
-              <p>Organize sua consulta de forma rápida e mantenha seu histórico clínico sempre atualizado.</p>
+              <span className="inline-flex rounded-full bg-sky-400/20 px-4 py-3 text-sm font-bold uppercase tracking-[0.08em] text-sky-200">
+                Retorno médico
+              </span>
+
+              <h1 className="mt-5 text-4xl font-bold leading-tight text-slate-50">
+                Agende seu próximo retorno
+              </h1>
+
+              <p className="mt-3 max-w-2xl text-base leading-relaxed text-slate-300">
+                Organize sua consulta de forma rápida e mantenha seu histórico clínico sempre atualizado.
+              </p>
             </div>
-            <div className="agendar-meta">
-              <strong>Disponível em</strong>
-              <p>Segunda a sexta • 08:00 - 18:00</p>
-               </div>
+
+            <div className="min-w-[220px] lg:text-right">
+              <strong className="mb-2 block text-sm text-blue-300">
+                Disponível em
+              </strong>
+
+              <p className="leading-relaxed text-slate-200">
+                Segunda a sexta • 08:00 - 18:00
+              </p>
+            </div>
+
           </div>
 
-          <form className="agendar-form" onSubmit={handleSubmit}>
-            <div className="form-grid">
-              <label>
+          {/* FORM */}
+          <form
+            onSubmit={handleSubmit}
+            className="flex flex-col gap-6"
+          >
+
+            <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+
+              {/* ESPECIALIDADE */}
+              <label className="flex flex-col gap-3 text-sm text-slate-300">
                 Especialidade
-                <select>
+
+                <select className="w-full rounded-2xl border border-slate-400/20 bg-slate-800/80 px-4 py-4 text-white outline-none transition focus:border-sky-400 focus:ring-4 focus:ring-sky-400/10">
                   <option>Cardiologia</option>
                   <option>Dermatologia</option>
                   <option>Ortopedia</option>
                 </select>
               </label>
 
-              <label>
+              {/* MÉDICO */}
+              <label className="flex flex-col gap-3 text-sm text-slate-300">
                 Médico responsável
-                <select>
+
+                <select className="w-full rounded-2xl border border-slate-400/20 bg-slate-800/80 px-4 py-4 text-white outline-none transition focus:border-sky-400 focus:ring-4 focus:ring-sky-400/10">
                   <option>Dra. Marina Soares</option>
                   <option>Dr. Lucas Mota</option>
                   <option>Dra. Fernanda Alves</option>
                 </select>
               </label>
-              <label>
+
+              {/* DATA */}
+              <label className="flex flex-col gap-3 text-sm text-slate-300">
                 Data do retorno
-                <input type="date" />
+
+                <input
+                  type="date"
+                  className="w-full rounded-2xl border border-slate-400/20 bg-slate-800/80 px-4 py-4 text-white outline-none transition focus:border-sky-400 focus:ring-4 focus:ring-sky-400/10"
+                />
               </label>
 
-              <label>
+              {/* HORÁRIO */}
+              <label className="flex flex-col gap-3 text-sm text-slate-300">
                 Horário
-                <input type="time" />
+
+                <input
+                  type="time"
+                  className="w-full rounded-2xl border border-slate-400/20 bg-slate-800/80 px-4 py-4 text-white outline-none transition focus:border-sky-400 focus:ring-4 focus:ring-sky-400/10"
+                />
               </label>
+
             </div>
 
-            <label className="form-fullwidth">
+            {/* OBSERVAÇÕES */}
+            <label className="flex flex-col gap-3 text-sm text-slate-300">
               Observações adicionais
-              <textarea placeholder="Informe se precisa de instruções especiais" rows="4" />
+
+              <textarea
+                rows="5"
+                placeholder="Informe se precisa de instruções especiais"
+                className="min-h-[140px] w-full resize-y rounded-2xl border border-slate-400/20 bg-slate-800/80 px-4 py-4 text-white outline-none transition focus:border-sky-400 focus:ring-4 focus:ring-sky-400/10"
+              />
             </label>
 
-            <div className="form-actions">
-              <Link to="/telainicial" className="btn btn-cancel">Voltar para início</Link>
-              <button type="submit" className="btn btn-confirm">Confirmar agendamento</button>
-               </div>
+            {/* BUTTONS */}
+            <div className="flex flex-col gap-4 md:flex-row">
+
+              <Link
+                to="/home"
+                className="flex min-w-[190px] items-center justify-center rounded-2xl border border-slate-400/20 bg-white/5 px-6 py-4 font-bold text-slate-300 transition hover:-translate-y-1"
+              >
+                Voltar para início
+              </Link>
+
+              <button
+                type="submit"
+                className="flex min-w-[190px] items-center justify-center rounded-2xl border border-sky-400/30 bg-gradient-to-r from-sky-400 to-cyan-500 px-6 py-4 font-bold text-white shadow-xl transition hover:-translate-y-1"
+              >
+                Confirmar agendamento
+              </button>
+
+            </div>
+
           </form>
         </main>
 
-        <aside className="agendar-card agendar-aside-card">
-          <div className="aside-header">
-            <h2>Por que agendar aqui?</h2>
-            <p>Seu próximo retorno fica registrado em seu perfil e você recebe lembrete automaticamente.</p>
+        {/* ASIDE */}
+        <aside className="flex flex-col gap-5 rounded-[28px] border border-slate-400/10 bg-slate-900/90 p-8 shadow-2xl backdrop-blur-xl">
+
+          {/* HEADER */}
+          <div>
+            <h2 className="mb-3 text-2xl font-bold text-slate-50">
+              Por que agendar aqui?
+            </h2>
+
+            <p className="leading-relaxed text-slate-300">
+              Seu próximo retorno fica registrado em seu perfil e você recebe lembrete automaticamente.
+            </p>
           </div>
 
-          <div className="aside-list">
-            <div>
-              <strong>✔ Agendamento rápido</strong>
-              <p>Escolha dia e horário em segundos.</p>
+          {/* BENEFITS */}
+          <div className="grid gap-4">
+
+            <div className="rounded-3xl border border-slate-400/10 bg-slate-800/90 p-5">
+              <strong className="mb-2 block text-blue-300">
+                ✔ Agendamento rápido
+              </strong>
+
+              <p className="leading-relaxed text-slate-300">
+                Escolha dia e horário em segundos.
+              </p>
             </div>
-            <div>
-              <strong>✔ Atendimento priorizado</strong>
-              <p>Mantenha o histórico de consultas alinhado com a equipe.</p>
+
+            <div className="rounded-3xl border border-slate-400/10 bg-slate-800/90 p-5">
+              <strong className="mb-2 block text-blue-300">
+                ✔ Atendimento priorizado
+              </strong>
+
+              <p className="leading-relaxed text-slate-300">
+                Mantenha o histórico de consultas alinhado com a equipe.
+              </p>
             </div>
-            <div>
-              <strong>✔ Alertas via app</strong>
-              <p>Receba aviso de retorno e instruções pré-consulta.</p>
+
+            <div className="rounded-3xl border border-slate-400/10 bg-slate-800/90 p-5">
+              <strong className="mb-2 block text-blue-300">
+                ✔ Alertas via app
+              </strong>
+
+              <p className="leading-relaxed text-slate-300">
+                Receba aviso de retorno e instruções pré-consulta.
+              </p>
             </div>
+
           </div>
 
-          <div className="aside-note">
-            <h3>Importante</h3>
-            <p>Leve seus exames mais recentes e medicamentos. Para alterações de horário, contate a central com antecedência.</p>
+          {/* NOTE */}
+          <div className="rounded-3xl border border-sky-400/20 bg-gradient-to-b from-sky-400/10 to-slate-900 p-6">
+
+            <h3 className="mb-3 text-xl font-bold text-slate-50">
+              Importante
+            </h3>
+
+            <p className="leading-relaxed text-slate-300">
+              Leve seus exames mais recentes e medicamentos.
+              Para alterações de horário, contate a central com antecedência.
+            </p>
+
           </div>
+
         </aside>
+
       </div>
     </div>
   )

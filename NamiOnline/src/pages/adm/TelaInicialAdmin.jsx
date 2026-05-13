@@ -1,136 +1,158 @@
-import './style_tela_inicial_adm.css'
-import { Link } from "react-router-dom"
-import { FaUserCircle, FaChevronLeft, FaChevronRight, FaCalendarCheck, FaFileMedical, FaHistory, FaNotesMedical } from "react-icons/fa"
-import { useState, useEffect, useContext } from "react"
-import logounifor from "../../assets/LogoUnifor.png";
-import { AuthContext } from "../../context/AuthContext"
+import { Link } from "react-router-dom";
 
 export default function TelaInicialADM() {
+  return (
+    <div className="h-screen overflow-hidden flex flex-col bg-[#f7fbff]">
+      <main className="flex gap-5 px-10 py-6">
+        <aside className="w-[260px] h-fit bg-white rounded-xl p-[25px] shadow-[0_8px_20px_rgba(0,0,0,0.1)]">
+          <h2 className="text-[22px] mb-5 text-[#132190] font-bold">
+            Painel ADM
+          </h2>
 
-    const { isAdmin } = useContext(AuthContext)
-    return (
+          <nav className="flex flex-col gap-3">
+            <Link
+              to="/admin/dashboard"
+              className="no-underline px-[14px] py-3 rounded-lg text-[#333] font-medium transition duration-200 hover:bg-[#004AF7] hover:text-white"
+            >
+              Dashboard
+            </Link>
 
-        <div className="home">
-            <main className="admin-main">
+            <Link
+              to="/admin/pacientes"
+              className="no-underline px-[14px] py-3 rounded-lg text-[#333] font-medium transition duration-200 hover:bg-[#004AF7] hover:text-white"
+            >
+              Pacientes
+            </Link>
 
-                <aside className="sidebar">
+            <Link
+              to="/admin/cadastrar-medico"
+              className="no-underline px-[14px] py-3 rounded-lg text-[#333] font-medium transition duration-200 hover:bg-[#004AF7] hover:text-white"
+            >
+              Médicos
+            </Link>
 
-                    <h2 className="sidebar-title">Painel ADM</h2>
+            <Link
+              to="/admin/consultas"
+              className="no-underline px-[14px] py-3 rounded-lg text-[#333] font-medium transition duration-200 hover:bg-[#004AF7] hover:text-white"
+            >
+              Consultas
+            </Link>
 
-                    <nav className="sidebar-menu">
+            <Link
+              to="/admin/cadastrarExames"
+              className="no-underline px-[14px] py-3 rounded-lg text-[#333] font-medium transition duration-200 hover:bg-[#004AF7] hover:text-white"
+            >
+              Exames
+            </Link>
 
-                        <Link to="/admin/dashboard" className="menu-item">
-                            Dashboard
-                        </Link>
+            <Link
+              to="/admin/noticias"
+              className="no-underline px-[14px] py-3 rounded-lg text-[#333] font-medium transition duration-200 hover:bg-[#004AF7] hover:text-white"
+            >
+              Cadastrar Notícias
+            </Link>
 
-                        <Link to="/admin/pacientes" className="menu-item">
-                            Pacientes
-                        </Link>
+            <Link
+              to="/admin/eventos"
+              className="no-underline px-[14px] py-3 rounded-lg text-[#333] font-medium transition duration-200 hover:bg-[#004AF7] hover:text-white"
+            >
+              Cadastrar Eventos
+            </Link>
 
-                        <Link to="/admin/cadastrar-medico" className="menu-item">
-                            Médicos
-                        </Link>
+            <Link
+              to="/admin/configuracoes"
+              className="no-underline px-[14px] py-3 rounded-lg text-[#333] font-medium transition duration-200 hover:bg-[#004AF7] hover:text-white"
+            >
+              Configurações
+            </Link>
+          </nav>
+        </aside>
 
-                        <Link to="/admin/consultas" className="menu-item">
-                            Consultas
-                        </Link>
+        <section className="flex-1">
+          <h2 className="text-[26px] text-[#132190] mb-[25px] font-bold">
+            Dashboard Administrativo
+          </h2>
 
-                        <Link to="/admin/cadastrarExames" className="menu-item">
-                            Exames
-                        </Link>
+          <div className="grid grid-cols-4 gap-5 mb-[30px]">
+            <div className="bg-white p-[25px] rounded-xl shadow-[0_8px_20px_rgba(0,0,0,0.1)]">
+              <h3 className="font-bold">Consultas Hoje</h3>
+              <p className="text-[32px] font-bold text-[#004AF7] mt-[10px]">
+                48
+              </p>
+            </div>
 
-                        <Link to="/admin/noticias" className="menu-item">
-                            Cadastrar Notícias
-                        </Link>
-                        <Link to="/admin/eventos" className="menu-item">
-                            Cadastrar Eventos
-                        </Link>
+            <div className="bg-white p-[25px] rounded-xl shadow-[0_8px_20px_rgba(0,0,0,0.1)]">
+              <h3 className="font-bold">Pacientes Atendidos</h3>
+              <p className="text-[32px] font-bold text-[#004AF7] mt-[10px]">
+                132
+              </p>
+            </div>
 
-                        <Link to="/admin/configuracoes" className="menu-item">
-                            Configurações
-                        </Link>
+            <div className="bg-white p-[25px] rounded-xl shadow-[0_8px_20px_rgba(0,0,0,0.1)]">
+              <h3 className="font-bold">Médicos Ativos</h3>
+              <p className="text-[32px] font-bold text-[#004AF7] mt-[10px]">
+                27
+              </p>
+            </div>
 
-                    </nav>
+            <div className="bg-white p-[25px] rounded-xl shadow-[0_8px_20px_rgba(0,0,0,0.1)]">
+              <h3 className="font-bold">Exames Pendentes</h3>
+              <p className="text-[32px] font-bold text-[#004AF7] mt-[10px]">
+                15
+              </p>
+            </div>
+          </div>
 
-                </aside>
+          <div className="grid grid-cols-2 gap-[25px]">
+            <div className="bg-white p-[25px] rounded-xl shadow-[0_8px_20px_rgba(0,0,0,0.1)]">
+              <h3 className="font-bold mb-4">Consultas de Hoje</h3>
 
-                <section className="admin-dashboard">
+              <ul>
+                <li className="mb-[10px]">09:00 - Maria Souza Cardiologia</li>
+                <li className="mb-[10px]">
+                  10:30 - João Pereira Clínico Geral
+                </li>
+                <li className="mb-[10px]">
+                  11:15 - Ana Beatriz Dermatologia
+                </li>
+                <li className="mb-[10px]">
+                  14:00 - Pedro Henrique Ortopedia
+                </li>
+              </ul>
+            </div>
 
-                    <h2 className="dashboard-title">Dashboard Administrativo</h2>
+            <div className="bg-white p-[25px] rounded-xl shadow-[0_8px_20px_rgba(0,0,0,0.1)]">
+              <h3 className="font-bold mb-4">Alertas do Sistema</h3>
 
-                    <div className="admin-cards">
+              <ul>
+                <li className="mb-[10px]"> 3 exames aguardando laudo</li>
+                <li className="mb-[10px]">Sistema de vacinação atualizado</li>
+                <li className="mb-[10px]">5 pacientes aguardando confirmação</li>
+              </ul>
+            </div>
+          </div>
+        </section>
+      </main>
 
-                        <div className="admin-card">
-                            <h3>Consultas Hoje</h3>
-                            <p className="card-number">48</p>
-                        </div>
-
-                        <div className="admin-card">
-                            <h3>Pacientes Atendidos</h3>
-                            <p className="card-number">132</p>
-                        </div>
-
-                        <div className="admin-card">
-                            <h3>Médicos Ativos</h3>
-                            <p className="card-number">27</p>
-                        </div>
-
-                        <div className="admin-card">
-                            <h3>Exames Pendentes</h3>
-                            <p className="card-number">15</p>
-                        </div>
-
-                    </div>
-
-                    <div className="admin-panels">
-
-                        <div className="panel">
-                            <h3>Consultas de Hoje</h3>
-
-                            <ul className="consulta-list">
-                                <li>09:00 - Maria Souza (Cardiologia)</li>
-                                <li>10:30 - João Pereira (Clínico Geral)</li>
-                                <li>11:15 - Ana Beatriz (Dermatologia)</li>
-                                <li>14:00 - Pedro Henrique (Ortopedia)</li>
-                            </ul>
-
-                        </div>
-
-                        <div className="panel">
-                            <h3>Alertas do Sistema</h3>
-
-                            <ul className="alert-list">
-                                <li>⚠️ 3 exames aguardando laudo</li>
-                                <li>⚠️ Sistema de vacinação atualizado</li>
-                                <li>⚠️ 5 pacientes aguardando confirmação</li>
-                            </ul>
-
-                        </div>
-
-                    </div>
-
-                </section>
-
-            </main>
-            <footer className="footer">
-                <div>
-                    <h4>Suporte</h4>
-                    <p>Email: suporte@nami.com</p>
-                    <p>Telefone: (85) 99999-9999</p>
-                </div>
-                <div>
-                    <h4>Hospital</h4>
-                    <p>Av. Washington Soares</p>
-                    <p>Fortaleza - CE</p>
-                </div>
-                <div>
-                    <h4>Perguntas Frequentes</h4>
-                    <p>Termos de privacidade</p>
-                    <p>Parceiros</p>
-                </div>
-            </footer>
+      <footer className="mt-[200px] bg-[#132190] text-white flex justify-around p-[30px]">
+        <div>
+          <h4>Suporte</h4>
+          <p>Email: suporte@nami.com</p>
+          <p>Telefone: (85) 99999-9999</p>
         </div>
 
-    )
+        <div>
+          <h4>Hospital</h4>
+          <p>Av. Washington Soares</p>
+          <p>Fortaleza - CE</p>
+        </div>
 
+        <div>
+          <h4>Perguntas Frequentes</h4>
+          <p>Termos de privacidade</p>
+          <p>Parceiros</p>
+        </div>
+      </footer>
+    </div>
+  );
 }

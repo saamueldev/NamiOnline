@@ -28,7 +28,7 @@ export default function TelaLogin() {
       const resultado = login(email, senha)
 
       if (resultado.sucesso) {
-        navigate('/telainicial')
+        navigate('/home')
       } else {
         setErro('Email ou senha inválidos')
       }

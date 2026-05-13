@@ -174,12 +174,7 @@ export default function AdminNewsCrud() {
 
           <div className="relative w-full md:max-w-sm">
               
-              <input
-                value={search}
-                onChange={(event) => setSearch(event.target.value)}
-                placeholder="Buscar notícia..."
-                className="w-full rounded-2xl border border-slate-200 bg-slate-50 py-3 pl-10 pr-4 text-sm outline-none transition"
-              />
+              
               </div>
             </div>
         </header>

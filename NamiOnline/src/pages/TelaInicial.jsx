@@ -1,135 +1,178 @@
-import './user/style_tela_inicial.css'
-import { Link } from "react-router-dom"
-import { FaUserCircle, FaChevronLeft, FaChevronRight, FaCalendarCheck, FaFileMedical, FaHistory, FaNotesMedical } from "react-icons/fa"
-import { useState, useEffect, useContext } from "react"
-import { AuthContext } from "../context/AuthContext"
+import { Link } from "react-router-dom";
+import {
+  FaChevronLeft,
+  FaChevronRight,
+  FaCalendarCheck,
+  FaFileMedical,
+  FaHistory,
+  FaNotesMedical,
+} from "react-icons/fa";
+import { useState, useEffect, useContext } from "react";
+import { AuthContext } from "../context/AuthContext";
 
-import noticia1 from "../assets/nami-clinica.jpg"
-import noticia2 from "../assets/nami-predio.jpg"
-import noticia3 from "../assets/vacinacao-nami.jpg"
-import logounifor from "../assets/LogoUnifor.png"
+import noticia1 from "../assets/nami-clinica.jpg";
+import noticia2 from "../assets/nami-predio.jpg";
+import noticia3 from "../assets/vacinacao-nami.jpg";
 
 export default function TelaInicial() {
+  const { isAdmin } = useContext(AuthContext);
 
-    const { isAdmin } = useContext(AuthContext)
+  const noticias = [
+    {
+      titulo: "Exames NAMI Unifor",
+      imagem: noticia1,
+      link: "/noticia1",
+    },
+    {
+      titulo: "Hospital amplia horário de consultas",
+      imagem: noticia2,
+      link: "/noticia2",
+    },
+    {
+      titulo: "Campanha de vacinação",
+      imagem: noticia3,
+      link: "/noticia3",
+    },
+  ];
 
-    const noticias = [
-        {
-            titulo: "Exames NAMI Unifor",
-            imagem: noticia1,
-            link: "/noticia1"
-        },
-        {
-            titulo: "Hospital amplia horário de consultas",
-            imagem: noticia2,
-            link: "/noticia2"
-        },
-        {
-            titulo: "Campanha de vacinação",
-            imagem: noticia3,
-            link: "/noticia3"
-        }
-    ]
+  const [index, setIndex] = useState(0);
 
-    const [index, setIndex] = useState(0)
+  function next() {
+    setIndex((prev) => (prev + 1) % noticias.length);
+  }
 
-    function next() {
-        setIndex((prev) => (prev + 1) % noticias.length)
-    }
+  function prev() {
+    setIndex((prev) => (prev - 1 + noticias.length) % noticias.length);
+  }
 
-    function prev() {
-        setIndex((prev) => (prev - 1 + noticias.length) % noticias.length)
-    }
+  useEffect(() => {
+    const interval = setInterval(next, 8000);
+    return () => clearInterval(interval);
+  }, []);
 
-    useEffect(() => {
-        const interval = setInterval(next, 8000)
-        return () => clearInterval(interval)
-    }, [])
+  return (
+    <div className="min-h-screen flex flex-col bg-[#f7fbff]">
+      <main className="px-20 py-10">
+        <section className="relative w-[40%] mx-auto mb-10 rounded-[14px] overflow-hidden shadow-[0_15px_30px_rgba(0,0,0,0.15)]">
+          <button
+            className="absolute left-[0px] top-1/2 -translate-y-1/2 bg-black/40 border-none text-white p-[10px] cursor-pointer hover:bg-[#464646] z-10"
+            onClick={prev}
+          >
+            <FaChevronLeft />
+          </button>
 
-    return (
-        <div className="home">
-            <main className="main">
-                <section className="carousel">
-                    <button className="arrow" onClick={prev}>
-                        <FaChevronLeft />
-                    </button>
-                    <Link to={noticias[index].link} className="slide">
-                        <img src={noticias[index].imagem} alt="" />
-                        <div className="overlay">
-                            <h3>{noticias[index].titulo}</h3>
-                        </div>
-                    </Link>
-                    <button className="arrow right" onClick={next}>
-                        <FaChevronRight />
-                    </button>
-                </section>
+          <Link to={noticias[index].link} className="block w-full">
+            <img
+              className="w-full h-[400px] block"
+              src={noticias[index].imagem}
+              alt=""
+            />
 
-                <section className="actions">
-                    <h3 className="section-title">
-                              <span>Acesso rápido</span>
-                        </h3>
-                    <div className="actions-grid">
-                        <Link to="/agendar/especialidades" className="action-card">
-                            <FaCalendarCheck />
-                            <span>Agendar Consulta</span>
-                        </Link>
-                        <Link to="/agendar/anexar-guia" className="action-card">
-                            <FaFileMedical />
-                            <span>Meus Exames</span>
-                        </Link>
-                        <Link to="/meus-agendamentos" className="action-card">
-                            <FaHistory />
-                            <span>Agendamentos</span>
-                        </Link>
-                        <Link to="/retornos" className="action-card">
-                            <FaNotesMedical />
-                            <span>Retornos</span>
-                        </Link>
-                    </div>
-                </section>
+            <div>
+              <h3 className="bg-[#f7fbff] text-center text-black text-[18px]">
+                {noticias[index].titulo}
+              </h3>
+            </div>
+          </Link>
 
-                <section className="dashboard">
-                    <div className="widget">
-                        <h3 className="section-title">
-                            <span>Próxima consulta</span>
-                        </h3>
-                        <p><strong>Clínico Geral</strong></p>
-                        <p>Dr. João Silva</p>
-                        <p>15 Maio - 09:30</p>
-                        <button className="btn">Ver detalhes</button>
-                    </div>
+          <button
+            className="absolute right-0 top-1/2 -translate-y-1/2 bg-black/40 border-none text-white p-[10px] cursor-pointer hover:bg-[#464646] z-10"
+            onClick={next}
+          >
+            <FaChevronRight />
+          </button>
+        </section>
 
-                    <div className="widget">
-                        <h3 className="section-title">
-                            <span>Avisos do hospital</span>
-                        </h3>
-                        <ul>
-                            <li>Campanha de vacinação disponível</li>
-                            <li>Nova ala pediátrica inaugurada</li>
-                            <li>Horário ampliado até 20h</li>
-                        </ul>
-                    </div>
-                </section>
-            </main>
-            <footer className="footer">
-                <div>
-                    <h4>Suporte</h4>
-                    <p>Email: suporte@nami.com</p>
-                    <p>Telefone: (85) 99999-9999</p>
-                </div>
-                <div>
-                    <h4>Hospital</h4>
-                    <p>Av. Washington Soares</p>
-                    <p>Fortaleza - CE</p>
-                </div>
-                <div>
-                    <h4>Perguntas Frequentes</h4>
-                    <p>Termos de privacidade</p>
-                    <p>Parceiros</p>
-                </div>
-            </footer>
+        <section className="mb-10">
+          <h3 className="text-[22px] font-semibold text-[#132190] mb-5 flex items-center gap-[10px] relative">
+            <span>Acesso rápido</span>
+          </h3>
+
+          <div className="grid grid-cols-4 gap-5 mt-5">
+            <Link
+              to="/agendar/especialidades"
+              className="bg-white rounded-xl p-[30px] flex flex-col items-center gap-[10px] text-[22px] text-[#004AF7] no-underline shadow-[0_8px_20px_rgba(0,0,0,0.1)] transition duration-200 hover:-translate-y-1"
+            >
+              <FaCalendarCheck />
+              <span>Agendar Consulta</span>
+            </Link>
+
+            <Link
+              to="/agendar/anexar-guia"
+              className="bg-white rounded-xl p-[30px] flex flex-col items-center gap-[10px] text-[22px] text-[#004AF7] no-underline shadow-[0_8px_20px_rgba(0,0,0,0.1)] transition duration-200 hover:-translate-y-1"
+            >
+              <FaFileMedical />
+              <span>Meus Exames</span>
+            </Link>
+
+            <Link
+              to="/meus-agendamentos"
+              className="bg-white rounded-xl p-[30px] flex flex-col items-center gap-[10px] text-[22px] text-[#004AF7] no-underline shadow-[0_8px_20px_rgba(0,0,0,0.1)] transition duration-200 hover:-translate-y-1"
+            >
+              <FaHistory />
+              <span>Agendamentos</span>
+            </Link>
+
+            <Link
+              to="/retornos"
+              className="bg-white rounded-xl p-[30px] flex flex-col items-center gap-[10px] text-[22px] text-[#004AF7] no-underline shadow-[0_8px_20px_rgba(0,0,0,0.1)] transition duration-200 hover:-translate-y-1"
+            >
+              <FaNotesMedical />
+              <span>Retornos</span>
+            </Link>
+          </div>
+        </section>
+
+        <section className="grid grid-cols-2 gap-[25px]">
+          <div className="bg-white p-[25px] rounded-xl shadow-[0_8px_20px_rgba(0,0,0,0.1)]">
+            <h3 className="text-[22px] font-semibold text-[#132190] mb-[15px] flex items-center gap-[10px] relative">
+              <span>Próxima consulta</span>
+            </h3>
+
+            <p>
+              <strong>Clínico Geral</strong>
+            </p>
+            <p>Dr. João Silva</p>
+            <p>15 Maio - 09:30</p>
+
+            <Link className="mt-[8px] bg-[#004AF7] text-white border-none px-[20px] py-1 rounded-md cursor-pointer" to = "/ver-detalhes">Ver detalhes</Link>
+              
+            
+          </div>
+
+          <div className="bg-white p-[25px] rounded-xl shadow-[0_8px_20px_rgba(0,0,0,0.1)]">
+            <h3 className="text-[22px] font-semibold text-[#132190] mb-[15px] flex items-center gap-[10px] relative">
+              <span>Avisos do hospital</span>
+            </h3>
+
+            <ul>
+              <li>Campanha de vacinação disponível</li>
+              <li>Nova ala pediátrica inaugurada</li>
+              <li>Horário ampliado até 20h</li>
+            </ul>
+          </div>
+        </section>
+      </main>
+
+      <footer className="mt-[60px] bg-[#132190] text-white flex justify-around p-[30px]">
+        <div>
+          <h4>Suporte</h4>
+          <p>Email: suporte@nami.com</p>
+          <p>Telefone: (85) 99999-9999</p>
         </div>
 
-    )
+        <div>
+          <h4>Hospital</h4>
+          <p>Av. Washington Soares</p>
+          <p>Fortaleza - CE</p>
+        </div>
 
+        <div>
+          <h4>Perguntas Frequentes</h4>
+          <p>Termos de privacidade</p>
+          <p>Parceiros</p>
+        </div>
+      </footer>
+    </div>
+  );
 }

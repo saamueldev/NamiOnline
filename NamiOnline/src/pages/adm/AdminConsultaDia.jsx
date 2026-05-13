@@ -1,8 +1,14 @@
 import React from "react";
-import { Calendar, Clock, User, Stethoscope, ChevronRight, Filter } from "lucide-react";
+import {
+  Calendar,
+  Clock,
+  User,
+  ChevronRight,
+  Filter
+} from "lucide-react";
 
 const ConsultasDoDia = () => {
-  // Mock de dados organizado por médico
+
   const agenda = [
     {
       medico: "Dr. João Silva",
@@ -25,106 +31,173 @@ const ConsultasDoDia = () => {
   ];
 
   return (
-    // Fundo da página forçado para branco (!bg-white)
-    <div className="min-h-screen !bg-white px-4 py-8 md:px-8 font-sans">
-      <div className="mx-auto max-w-5xl">
-        
-        {/* CABEÇALHO DA PÁGINA */}
-        <header className="mb-10 flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-6">
-          <div>
-            <h1 className="text-3xl font-bold text-[#1e293b]">Consultas do Dia</h1>
-            <div className="mt-2 flex items-center gap-2 text-slate-500">
-              <Calendar size={18} className="text-[#1d72f3]" />
-              <span className="font-medium text-slate-600">Sexta-feira, 01 de Maio de 2026</span>
-            </div>
-          </div>
-          
-          <button className="flex items-center gap-2 rounded-xl bg-white border border-slate-200 px-5 py-2.5 text-sm font-bold text-slate-600 shadow-sm hover:bg-slate-50 transition-all">
-            <Filter size={18} /> Filtrar por Especialidade
-          </button>
-        </header>
+    <div className="min-h-screen bg-[#E4F2FE] px-4 py-8 md:px-8 font-sans">
 
-        {/* LISTAGEM POR MÉDICO */}
-        <div className="space-y-12">
-          {agenda.map((grupo, idx) => (
-            <section key={idx} className="relative">
-              
-              {/* HEADER DO MÉDICO (STICKY) */}
-              <div className="sticky top-4 z-20 mb-6 flex items-center justify-between rounded-2xl bg-[#1d72f3] p-5 shadow-lg shadow-blue-500/15 text-white">
-                <div className="flex items-center gap-4">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/20 border border-white/30">
-                    <User size={24} />
-                  </div>
-                  <div>
-                    <h2 className="text-xl font-bold leading-tight">{grupo.medico}</h2>
-                    <span className="text-xs font-bold text-blue-100 uppercase tracking-widest">
-                      {grupo.especialidade}
-                    </span>
-                  </div>
-                </div>
-                <div className="hidden sm:block rounded-full bg-black/10 px-4 py-1.5 text-xs font-bold uppercase border border-white/10">
-                  {grupo.consultas.length} Agendamentos
-                </div>
+      <div className="mx-auto max-w-5xl">
+
+        {/* HEADER */}
+        <header className="mb-10">
+
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-5">
+
+            <div>
+
+              <span className="inline-flex rounded-full border border-[#87B7FE]/30 bg-white px-4 py-1 text-sm font-medium text-[#004AF7]">
+                Agenda médica
+              </span>
+
+              <h1 className="mt-4 text-3xl md:text-5xl font-extrabold text-[#132190] tracking-tight">
+                Consultas do Dia
+              </h1>
+
+              <div className="mt-3 flex items-center gap-2 text-slate-600">
+                <Calendar size={18} className="text-[#004AF7]" />
+                <span className="font-medium">
+                  Sexta-feira, 01 de Maio de 2026
+                </span>
               </div>
 
-              {/* LISTA DE CONSULTAS */}
-              <div className="grid gap-4 ml-6 pl-6 border-l-2 border-slate-100">
+            </div>
+
+            <button className="flex items-center gap-2 rounded-xl bg-white border border-[#87B7FE]/20 px-5 py-3 text-sm font-bold text-[#132190] shadow-sm hover:bg-[#E4F2FE] transition-all">
+              <Filter size={18} />
+              Filtrar
+            </button>
+
+          </div>
+
+        </header>
+
+        {/* MÉDICOS */}
+        <div className="space-y-10">
+
+          {agenda.map((grupo, idx) => (
+
+            <section key={idx}>
+
+              {/* CARD MÉDICO */}
+              <div className="mb-5 rounded-3xl bg-gradient-to-r from-[#132190] to-[#004AF7] p-5 text-white shadow-md">
+
+                <div className="flex items-center justify-between">
+
+                  <div className="flex items-center gap-4">
+
+                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/15 border border-white/20">
+                      <User size={22} />
+                    </div>
+
+                    <div>
+
+                      <h2 className="text-xl font-bold">
+                        {grupo.medico}
+                      </h2>
+
+                      <span className="text-sm text-white/80">
+                        {grupo.especialidade}
+                      </span>
+
+                    </div>
+
+                  </div>
+
+                  <div className="hidden md:flex rounded-full bg-white/10 px-4 py-2 text-xs font-bold">
+                    {grupo.consultas.length} Consultas
+                  </div>
+
+                </div>
+
+              </div>
+
+              {/* CONSULTAS */}
+              <div className="space-y-4">
+
                 {grupo.consultas.map((consulta) => (
-                  <div 
+
+                  <div
                     key={consulta.id}
-                    className="group relative flex items-center justify-between rounded-2xl border border-slate-200 bg-white p-5 transition-all hover:border-[#1d72f3] hover:shadow-md"
-                    style={{ backgroundColor: 'white' }}
+                    className="group flex items-center justify-between rounded-3xl border border-[#87B7FE]/20 bg-white p-5 shadow-sm transition-all hover:border-[#004AF7]/30 hover:shadow-md"
                   >
-                    <div className="flex items-center gap-6 md:gap-10">
+
+                    <div className="flex items-center gap-6">
+
                       {/* HORÁRIO */}
-                      <div className="flex flex-col items-center min-w-[70px] border-r border-slate-100 pr-6">
-                        <div className="flex items-center gap-1 text-[#1d72f3] font-black text-xl leading-none">
+                      <div className="min-w-[80px] border-r border-slate-100 pr-5">
+
+                        <h3 className="text-xl font-bold text-[#004AF7]">
                           {consulta.horario}
-                        </div>
-                        <span className="text-[10px] font-bold text-slate-400 mt-1 uppercase tracking-tighter">
+                        </h3>
+
+                        <p className="text-[11px] font-medium text-slate-400">
                           {consulta.data}
-                        </span>
+                        </p>
+
                       </div>
 
                       {/* PACIENTE */}
                       <div>
-                        <h3 className="text-lg font-bold text-[#334155] group-hover:text-[#1d72f3] transition-colors leading-tight">
+
+                        <h3 className="text-lg font-bold text-[#132190] group-hover:text-[#004AF7] transition-colors">
                           {consulta.paciente}
                         </h3>
-                        <div className="flex items-center gap-2 mt-1">
+
+                        <div className="mt-1 flex items-center gap-2">
+
                           <Clock size={14} className="text-slate-400" />
-                          <span className="text-sm font-medium text-slate-500">Início previsto</span>
+
+                          <span className="text-sm text-slate-500">
+                            Início previsto
+                          </span>
+
                         </div>
+
                       </div>
+
                     </div>
 
-                    {/* STATUS / AÇÃO */}
+                    {/* AÇÃO */}
                     <div className="flex items-center gap-4">
-                      <span className={`hidden sm:inline-flex rounded-lg px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider border ${
-                        consulta.tipo === 'Retorno' 
-                        ? 'bg-amber-50 text-amber-600 border-amber-100' 
-                        : 'bg-emerald-50 text-emerald-600 border-emerald-100'
-                      }`}>
+
+                      <span
+                        className={`
+                          hidden sm:inline-flex rounded-full px-3 py-1 text-xs font-bold
+                          ${consulta.tipo === "Retorno"
+                            ? "bg-amber-50 text-amber-600"
+                            : "bg-[#E4F2FE] text-[#004AF7]"
+                          }
+                        `}
+                      >
                         {consulta.tipo}
                       </span>
-                      <button className="rounded-xl p-2.5 text-slate-300 hover:bg-slate-50 hover:text-[#1d72f3] transition-all border border-transparent hover:border-slate-100">
+
+                      <button className="rounded-xl p-2 text-slate-400 hover:bg-[#E4F2FE] hover:text-[#004AF7] transition-all">
                         <ChevronRight size={22} />
                       </button>
+
                     </div>
+
                   </div>
+
                 ))}
+
               </div>
+
             </section>
+
           ))}
+
         </div>
 
-        {/* RODAPÉ */}
-        <footer className="mt-16 mb-8 rounded-2xl bg-white p-8 text-center border-2 border-dashed border-slate-100">
-          <p className="text-sm text-slate-400 font-medium">
+        {/* FOOTER */}
+        <footer className="mt-14 rounded-3xl border border-[#87B7FE]/20 bg-white p-6 text-center">
+
+          <p className="text-sm text-slate-500">
             Você visualizou toda a agenda de hoje.
           </p>
+
         </footer>
+
       </div>
+
     </div>
   );
 };

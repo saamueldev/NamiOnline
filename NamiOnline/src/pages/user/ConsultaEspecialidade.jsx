@@ -19,46 +19,47 @@ const ConsultaEspecialidade = () => {
   );
 
   return (
-    <div className="min-h-screen w-full bg-white font-sans overflow-x-hidden flex flex-col">
-      {/* Banner */}
-      <section className="relative w-full h-[350px] md:h-[430px] shrink-0">
-        <img src={imgConsulta} alt="Consulta" className="w-full h-full object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-600/90 to-blue-400/60" />
-        <div className="absolute z-10 top-1/2 left-[8%] md:left-[12%] -translate-y-1/2 text-white max-w-[600px] px-4">
-          <h1 className="text-4xl md:text-6xl font-bold mb-4 leading-tight">Nossas Especialidades</h1>
-          <p className="text-lg md:text-xl opacity-90">Confira as especialidades médicas disponíveis e agende sua consulta.</p>
-        </div>
-      </section>
+    <div className="min-h-screen w-full bg-[#E4F2FE] font-sans overflow-x-hidden flex flex-col">
+{/* Banner */}
+<section className="relative w-full h-[350px] md:h-[430px] shrink-0 overflow-hidden">
+  <img
+    src={imgConsulta}
+    alt="Consulta"
+    className="absolute inset-0 w-full h-full object-cover"
+  />
 
-      {/* Barra de Pesquisa Blindada */}
+  {/* Overlay mais suave */}
+  <div className="absolute inset-0 bg-gradient-to-r from-[#132190]/65 via-[#004AF7]/35 to-transparent" />
+
+  <div className="absolute z-10 top-1/2 left-[8%] md:left-[12%] -translate-y-1/2 text-white max-w-[650px] px-4">
+    
+    <span className="inline-flex rounded-full border border-white/20 bg-white/10 px-4 py-1 text-sm font-medium text-white backdrop-blur-sm">
+      Área de Consultas
+    </span>
+
+    <h1 className="mt-4 text-4xl md:text-6xl font-bold leading-tight tracking-tight">
+      Nossas Especialidades
+    </h1>
+
+    <p className="mt-4 text-lg md:text-xl text-white/90 leading-7">
+      Confira as especialidades médicas disponíveis e agende sua consulta no NamiOnline.
+    </p>
+
+  </div>
+</section>
+
+      {/* Barra de Pesquisa */}
       <section className="relative z-30 -mt-10 px-6">
-        <div className="max-w-5xl mx-auto">
-          <div className="relative flex items-center w-full" style={{ position: 'relative' }}>
-            
-            {/* Ícone posicionado manualmente para não falhar */}
-            <div 
-              style={{ 
-                position: 'absolute', 
-                left: '20px', 
-                zIndex: 10, 
-                pointerEvents: 'none',
-                display: 'flex',
-                alignItems: 'center'
-              }}
-            >
-              <Search className="text-blue-500" size={24} />
-            </div>
+        <div className="w-full flex justify-center">
+          <div className="relative flex items-center w-full max-w-2xl rounded-3xl border border-white/20 bg-white/10 p-3 backdrop-blur-md">
+            <Search
+              className="absolute left-8 h-6 w-6 text-[#87B7FE] pointer-events-none"
+            />
 
-            {/* Input com Padding manual forçado */}
             <input
               type="text"
               placeholder="Busque por uma especialidade..."
-              style={{ 
-                paddingLeft: '60px', /* Garante que o texto comece DEPOIS da lupa */
-                backgroundColor: 'white',
-                border: 'none'
-              }}
-              className="w-full h-20 pr-8 rounded-2xl shadow-[0_15px_40px_-12px_rgba(0,0,0,0.15)] text-lg outline-none ring-2 ring-transparent focus:ring-blue-500/20 transition-all placeholder:text-slate-400 text-slate-700"
+              className="w-full h-16 rounded-2xl bg-white pl-14 pr-6 text-base md:text-lg text-slate-700 outline-none shadow-lg placeholder:text-slate-400 ring-2 ring-transparent transition-all focus:ring-[#004AF7]/20"
               value={busca}
               onChange={(e) => setBusca(e.target.value)}
             />
@@ -68,20 +69,51 @@ const ConsultaEspecialidade = () => {
 
       {/* Lista de Cards */}
       <main className="flex-1 max-w-5xl mx-auto w-full mt-12 px-6 pb-20">
+        <div className="mb-6">
+          <h2 className="text-2xl font-bold text-[#132190]">
+            Especialidades disponíveis
+          </h2>
+
+          <p className="mt-1 text-sm text-slate-600">
+            Selecione uma especialidade para continuar o agendamento.
+          </p>
+        </div>
+
         <div className="flex flex-col gap-4">
           {filtrados.map((item) => (
-            <div 
-              key={item} 
-              onClick={() => navigate('/consulta/data')}
-              className="flex items-center justify-between p-6 bg-white border border-slate-100 rounded-2xl hover:border-blue-200 hover:shadow-md transition-all group cursor-pointer"
+            <div
+              key={item}
+              onClick={() => navigate("/confirmar-data")}
+              className="group flex items-center justify-between rounded-3xl border border-[#87B7FE]/25 bg-white p-6 shadow-sm transition-all hover:-translate-y-0.5 hover:border-[#004AF7]/30 hover:shadow-md cursor-pointer"
             >
-              <span className="text-lg font-medium text-slate-800 group-hover:text-blue-600">{item}</span>
-              <div className="w-10 h-10 flex items-center justify-center rounded-full bg-slate-50 text-blue-500 group-hover:bg-blue-600 group-hover:text-white transition-all">
+              <div>
+                <span className="text-lg font-semibold text-[#132190] group-hover:text-[#004AF7] transition">
+                  {item}
+                </span>
+
+                <p className="mt-1 text-sm text-slate-500">
+                  Ver horários disponíveis para esta especialidade
+                </p>
+              </div>
+
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#E4F2FE] text-[#004AF7] transition-all group-hover:bg-[#004AF7] group-hover:text-white">
                 <ArrowRight size={18} />
               </div>
             </div>
           ))}
         </div>
+
+        {filtrados.length === 0 && (
+          <div className="mt-8 rounded-3xl border border-[#87B7FE]/25 bg-white p-8 text-center shadow-sm">
+            <h3 className="text-lg font-bold text-[#132190]">
+              Nenhuma especialidade encontrada
+            </h3>
+
+            <p className="mt-2 text-sm text-slate-600">
+              Tente buscar por outro nome de especialidade.
+            </p>
+          </div>
+        )}
       </main>
     </div>
   );

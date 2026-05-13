@@ -1,8 +1,8 @@
 import { useState, useContext } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { AuthContext } from '../context/AuthContext'
-import namiVideo from '../assets/nami_video.mp4'
-import bgNami2 from '../assets/bg_nami2.png'
+import { AuthContext } from '../../context/AuthContext'
+import namiVideo from '../../assets/nami_video.mp4'
+import bgNami2 from '../../assets/bg_nami2.png'
 
 export default function TelaLogin() {
   const navigate = useNavigate()

@@ -8,7 +8,7 @@ const BarraNavegacao = ({ tipoUsuario = "user" }) => {
 
   const handleLogoClick = () => {
     if (tipoUsuario === "user") {
-      navigate("/telainicial");
+      navigate("/home");
     } else {
       navigate("/admin/telainicial");
     }
@@ -42,10 +42,10 @@ const BarraNavegacao = ({ tipoUsuario = "user" }) => {
         className="flex items-center gap-2 cursor-pointer p-2 rounded-xl"
       >
         <img
-          src= {logounifor}
-          alt="Logo"
-          className="h-10"
-        />
+  src={logounifor}
+  alt="Logo"
+  className="h-10 brightness-0 invert"
+/>
       </div>
 
       {/* 🔎 Busca */}

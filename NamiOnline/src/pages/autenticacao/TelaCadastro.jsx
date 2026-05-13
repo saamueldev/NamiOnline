@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import bgNami2 from "../assets/bg_nami2.png";
+import bgNami2 from "../../assets/bg_nami2.png";
 
 export default function TelaCadastro() {
   return (

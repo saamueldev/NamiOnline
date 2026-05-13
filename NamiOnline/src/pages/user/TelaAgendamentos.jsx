@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { FaArrowLeft, FaCalendar, FaUser, FaClock, FaMapMarkerAlt, FaTrash } from 'react-icons/fa'
-import './user/style_agendamentos.css'
+import './style_agendamentos.css'
 
 export default function TelaAgendamentos() {
   const navigate = useNavigate()

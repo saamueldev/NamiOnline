@@ -1,5 +1,5 @@
-import imagemRedefinicao from '../assets/bg_nami2.png'
-import imagemLateral from '../assets/bg_nami.png'
+import imagemRedefinicao from '../../assets/bg_nami2.png'
+import imagemLateral from '../../assets/bg_nami.png'
 import { Link } from 'react-router-dom'
 
 export default function RedefinirSenha() {

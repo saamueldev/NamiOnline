@@ -3,24 +3,24 @@ import { AuthProvider } from './context/AuthContext';
 import LayoutComNavbar from "./layouts/LayoutComNavbar";
 
 // --- COMPONENTES DE AUTENTICAÇÃO & ACESSO COMUM ---
-import TelaLogin from './pages/TelaLogin';
-import TelaCadastro from './pages/TelaCadastro';
-import RecuperarSenha from './pages/RecuperarSenha';
-import RedefinirSenha from './pages/RedefinirSenha';
+import TelaLogin from './pages/autenticacao/TelaLogin';
+import TelaCadastro from './pages/autenticacao/TelaCadastro';
+import RecuperarSenha from './pages/autenticacao/RecuperarSenha';
+import RedefinirSenha from './pages/autenticacao/RedefinirSenha';
 
 // --- COMPONENTES DO PACIENTE (USER) ---
-import TelaInicial from './pages/TelaInicial';
-import TelaPerfil from './pages/TelaPerfil';
-import TelaConfiguracaoUsuario from './pages/TelaConfiguracaoUsuario';
-import TelaAgendamentos from './pages/TelaAgendamentos';
+import TelaInicial from './pages/user/Telainicial';
+import TelaPerfil from './pages/user/TelaPerfil';
+import TelaConfiguracaoUsuario from './pages/user/TelaConfiguracaoUsuario';
+import TelaAgendamentos from './pages/user/TelaAgendamentos';
 import ConsultaEspecialidade from "./pages/user/ConsultaEspecialidade";
 import AnexarGuiaConsulta from "./pages/user/AnexarGuiaConsulta";
 import ConfirmarConsulta from "./pages/user/ConfirmarConsulta";
-import TelaRetorno from './pages/TelaRetorno';
-import TelaAgendarRetorno from './pages/TelaAgendarRetorno';
-import ExamesPaciente from './pages/Exames';
-import AgendarExamePaciente from './pages/AgendarExame';
-import ModalSolicitacaoSucesso from './pages/ModalSolicitacaoSucesso';
+import TelaRetorno from './pages/user/TelaRetorno';
+import TelaAgendarRetorno from './pages/user/TelaAgendarRetorno';
+import ExamesPaciente from './pages/user/Exames';
+import AgendarExamePaciente from './pages/user/AgendarExame';
+import ModalSolicitacaoSucesso from './pages/user/ModalSolicitacaoSucesso';
 
 // --- COMPONENTES do ADMINISTRADOR (ADM) ---
 import TelaInicialAdmin from './pages/adm/TelaInicialAdmin';
@@ -32,7 +32,7 @@ import AdminEditarExames from './pages/adm/AdminEditarExames';
 import AdminCadastrarExames from './pages/adm/AdminCadastrarExames';
 import TelaNoticiasAdmin from './pages/adm/TelaNoticiasAdmin';
 import TelaEventosAdmin from './pages/adm/TelaEventosAdmin';
-import AprovarGuia from './pages/AprovarGuia';
+import AprovarGuia from './pages/adm/AprovarGuia';
 import ConsultaDia from "./pages/adm/AdminConsultaDia"
 
 function App() {

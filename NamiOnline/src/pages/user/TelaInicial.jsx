@@ -7,15 +7,17 @@ import {
   FaHistory,
   FaNotesMedical,
 } from "react-icons/fa";
+import { AuthContext } from "../../context/AuthContext";
 import { useState, useEffect, useContext } from "react";
-import { AuthContext } from "../context/AuthContext";
 
-import noticia1 from "../assets/nami-clinica.jpg";
-import noticia2 from "../assets/nami-predio.jpg";
-import noticia3 from "../assets/vacinacao-nami.jpg";
+
+import noticia1 from "../../assets/nami-clinica.jpg";
+import noticia2 from "../../assets/nami-predio.jpg";
+import noticia3 from "../../assets/vacinacao-nami.jpg";
 
 export default function TelaInicial() {
   const { isAdmin } = useContext(AuthContext);
+  const admin = isAdmin();
 
   const noticias = [
     {
@@ -48,7 +50,7 @@ export default function TelaInicial() {
   useEffect(() => {
     const interval = setInterval(next, 8000);
     return () => clearInterval(interval);
-  }, []);
+  }, [next]);
 
   return (
     <div className="min-h-screen flex flex-col bg-[#f7fbff]">

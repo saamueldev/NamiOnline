@@ -13,28 +13,27 @@ export default function TelaLogin() {
   const [erro, setErro] = useState('')
   const [loading, setLoading] = useState(false)
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault()
     setErro('')
     setLoading(true)
 
-    setTimeout(() => {
+    try {
       if (!email || !senha) {
         setErro('Por favor, preencha todos os campos')
-        setLoading(false)
         return
       }
 
-      const resultado = login(email, senha)
+      const resultado = await login(email, senha)
 
       if (resultado.sucesso) {
         navigate('/home')
-      } else {
-        setErro('Email ou senha inválidos')
       }
-
+    } catch (error) {
+      setErro(error.response?.data?.error || 'Email/CPF ou senha inválidos')
+    } finally {
       setLoading(false)
-    }, 500)
+    }
   }
 
   return (

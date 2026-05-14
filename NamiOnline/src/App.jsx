@@ -9,7 +9,7 @@ import RecuperarSenha from './pages/autenticacao/RecuperarSenha';
 import RedefinirSenha from './pages/autenticacao/RedefinirSenha';
 
 // --- COMPONENTES DO PACIENTE (USER) ---
-import TelaInicial from './pages/user/Telainicial';
+import TelaInicial from "./pages/user/TelaInicial";
 import TelaPerfil from './pages/user/TelaPerfil';
 import TelaConfiguracaoUsuario from './pages/user/TelaConfiguracaoUsuario';
 import TelaAgendamentos from './pages/user/TelaAgendamentos';

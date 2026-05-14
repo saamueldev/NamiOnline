@@ -1,4 +1,5 @@
 import { createContext, useState } from 'react'
+import api from '../services/api'
 
 export const AuthContext = createContext()
 
@@ -9,7 +10,7 @@ export function AuthProvider({ children }) {
     return savedUser ? JSON.parse(savedUser) : null
   })
 
-  const login = (email, senha) => {
+  const login = async (identificador, senha) => {
     // Credenciais de admin
     const adminCredentials = {
       email: 'admin@nami.com',
@@ -17,11 +18,11 @@ export function AuthProvider({ children }) {
     }
 
     // Verifica se é admin
-    if (email === adminCredentials.email && senha === adminCredentials.senha) {
+    if (identificador === adminCredentials.email && senha === adminCredentials.senha) {
       const adminUser = {
         id: 1,
         nome: 'Administrador',
-        email: email,
+        email: identificador,
         tipo: 'admin',
         avatar: '👨‍💼'
       }
@@ -30,17 +31,25 @@ export function AuthProvider({ children }) {
       return { sucesso: true, tipo: 'admin' }
     }
 
-    // Se não for admin, cria usuário comum
+    const response = await api.post('/usuarios/login', {
+      identificador,
+      password: senha
+    })
+
+    const usuarioApi = response.data.user
+
     const commonUser = {
-      id: Math.random(),
-      nome: 'Usuário Nami',
-      email: email,
+      id: usuarioApi._id,
+      nome: usuarioApi.name,
+      email: usuarioApi.email,
+      cpf: usuarioApi.cpf,
       tipo: 'usuario',
       avatar: '👤'
     }
+
     setUser(commonUser)
     localStorage.setItem('nami_user', JSON.stringify(commonUser))
-    return { sucesso: true, tipo: 'usuario' }
+    return { sucesso: true, tipo: 'usuario', user: commonUser }
   }
 
   const logout = () => {

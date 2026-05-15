@@ -29,7 +29,7 @@ import AdicionarEspecialidade from "./pages/adm/CadastroEspecialidades";
 import TelaNotificacaoAdmin from './pages/adm/TelaNotificacaoAdmin';
 import AdminAgendarExame from './pages/adm/AdminAgendarExame';
 import AdminEditarExames from './pages/adm/AdminEditarExames';
-import AdminCadastrarExames from './pages/adm/AdminCadastrarExames';
+import AdminCadastrarTipoExames from './pages/adm/AdminCadastrarTipoExames';
 import TelaNoticiasAdmin from './pages/adm/TelaNoticiasAdmin';
 import TelaEventosAdmin from './pages/adm/TelaEventosAdmin';
 import AprovarGuia from './pages/adm/AprovarGuia';
@@ -81,7 +81,7 @@ function App() {
           {/* Gestão de Exames */}
           <Route path="/admin/exames/agendar" element={<AdminAgendarExame />} />
           <Route path="/admin/exames/editar" element={<AdminEditarExames />} />
-          <Route path="/admin/exames/cadastrar" element={<AdminCadastrarExames />} />
+          <Route path="/admin/exames/cadastrar-tipo-exames" element={<AdminCadastrarTipoExames />} />
 
           {/* Comunicação e Notificações */}
           <Route path="/admin/notificacoes" element={<TelaNotificacaoAdmin />} />

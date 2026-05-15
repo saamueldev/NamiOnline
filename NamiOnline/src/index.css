@@ -6,7 +6,6 @@ body {
   margin: 0;
   padding: 0;
   width: 100%;
-  /* Importante: Use min-height em vez de height para permitir expansão */
   min-height: 100%;
   overflow-x: hidden;
   overflow-y: auto;
@@ -23,4 +22,80 @@ body {
 /* Opcional: Deixa o scroll mais suave */
 html {
   scroll-behavior: smooth;
+}
+
+/* =========================
+   TEMA GLOBAL
+========================= */
+
+body{
+  transition: all 0.3s ease;
+}
+
+/* TEMA ESCURO */
+body.dark{
+  background: #0f172a !important;
+  color: white !important;
+}
+
+/* CARDS */
+body.dark .bg-white{
+  background: #1e293b !important;
+  color: white !important;
+}
+
+/* TEXTOS */
+body.dark .text-black,
+body.dark .text-slate-800,
+body.dark .text-slate-700,
+body.dark .text-slate-600,
+body.dark .text-slate-500{
+  color: #f1f5f9 !important;
+}
+
+/* INPUTS */
+body.dark input,
+body.dark select,
+body.dark textarea{
+  background: #334155 !important;
+  color: white !important;
+  border-color: #475569 !important;
+}
+
+/* PLACEHOLDER */
+body.dark input::placeholder{
+  color: #cbd5e1 !important;
+}
+
+/* BOTÕES CLAROS */
+body.dark .bg-\[\#E4F2FE\]{
+  background: #334155 !important;
+  color: white !important;
+}
+
+/* BORDAS */
+body.dark .border,
+body.dark .border-slate-200,
+body.dark .border-slate-300{
+  border-color: #475569 !important;
+}
+
+/* NAVBAR */
+body.dark nav{
+  background: #020617 !important;
+}
+
+/* FOOTER */
+body.dark footer{
+  background: #020617 !important;
+  color: white !important;
+}
+
+/* GRADIENTES */
+body.dark .from-\[\#004AF7\]{
+  --tw-gradient-from: #1e293b !important;
+}
+
+body.dark .to-\[\#132190\]{
+  --tw-gradient-to: #0f172a !important;
 }

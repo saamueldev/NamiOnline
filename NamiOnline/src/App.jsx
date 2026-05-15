@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from './context/AuthContext';
 import LayoutComNavbar from "./layouts/LayoutComNavbar";
+import { useEffect } from "react";
 
 // --- COMPONENTES DE AUTENTICAÇÃO & ACESSO COMUM ---
 import TelaLogin from './pages/autenticacao/TelaLogin';
@@ -22,6 +23,7 @@ import ExamesPaciente from './pages/user/Exames';
 import AgendarExamePaciente from './pages/user/AgendarExame';
 import ModalSolicitacaoSucesso from './pages/user/ModalSolicitacaoSucesso';
 import TelaNotificacoes from "./pages/user/TelaNotificacoes";
+import CentralAjuda from './pages/user/CentralAjuda'
 
 // --- COMPONENTES do ADMINISTRADOR (ADM) ---
 import TelaInicialAdmin from './pages/adm/TelaInicialAdmin';
@@ -30,72 +32,79 @@ import AdicionarEspecialidade from "./pages/adm/CadastroEspecialidades";
 import TelaNotificacaoAdmin from './pages/adm/TelaNotificacaoAdmin';
 import AdminAgendarExame from './pages/adm/AdminAgendarExame';
 import AdminEditarExames from './pages/adm/AdminEditarExames';
-import AdminCadastrarExames from './pages/adm/AdminCadastrarExames';
+import AdminCadastrarTipoExames from './pages/adm/AdminCadastrarTipoExames';
 import TelaNoticiasAdmin from './pages/adm/TelaNoticiasAdmin';
 import TelaEventosAdmin from './pages/adm/TelaEventosAdmin';
 import AprovarGuia from './pages/adm/AprovarGuia';
 import ConsultaDia from "./pages/adm/AdminConsultaDia"
-import CentralAjuda from './pages/user/CentralAjuda'
 
 function App() {
-  const tipoUsuario = "user"; // ou "admin"
+
+  useEffect(() => {
+    const temaSalvo = localStorage.getItem("tema") || "claro";
+
+    if (temaSalvo === "escuro") {
+      document.body.classList.add("dark");
+    } else {
+      document.body.classList.remove("dark");
+    }
+  }, []);
+
   return (
     <AuthProvider>
       <BrowserRouter>
         <Routes>
-          {/* Rotas SEM Nav Bar*/}
-          {/* 1. ROTAS PÚBLICAS (AUTENTICAÇÃO) */}
+
+          {/* ROTAS PÚBLICAS */}
           <Route path="/" element={<TelaLogin />} />
           <Route path="/cadastro" element={<TelaCadastro />} />
           <Route path="/recuperar-senha" element={<RecuperarSenha />} />
           <Route path="/redefinir-senha" element={<RedefinirSenha />} />
 
-          {/* Rotas SEM Nav Bar*/}
-         <Route element={<LayoutComNavbar />}>
+          {/* ROTAS COM NAVBAR */}
+          <Route element={<LayoutComNavbar />}>
 
-          {/* 2. ROTAS DO PACIENTE (USER) */}
-          <Route path="/home" element={<TelaInicial />} />
-          <Route path="/perfil" element={<TelaPerfil />} />
-          <Route path="/perfil/configuracoes" element={<TelaConfiguracaoUsuario />} />
-          <Route path="/notificacoes" element={<TelaNotificacoes />} />
-          <Route path="/central-ajuda" element={<CentralAjuda />} />
-          
+            {/* USER */}
+            <Route path="/home" element={<TelaInicial />} />
+            <Route path="/perfil" element={<TelaPerfil />} />
+            <Route path="/perfil/configuracoes" element={<TelaConfiguracaoUsuario />} />
+            <Route path="/notificacoes" element={<TelaNotificacoes />} />
+            <Route path="/central-ajuda" element={<CentralAjuda />} />
 
-          {/* Consultas e Retornos */}
-          <Route path="/meus-agendamentos" element={<TelaAgendamentos />} />
-          <Route path="/agendar/especialidades" element={<ConsultaEspecialidade />} />
-          <Route path="/agendar/anexar-guia" element={<AnexarGuiaConsulta />} />
-          <Route path="/agendar/confirmar-data" element={<ConfirmarConsulta />} />
-          <Route path="/retornos" element={<TelaRetorno />} />
-          <Route path="/retornos/agendar" element={<TelaAgendarRetorno />} />
+            {/* CONSULTAS */}
+            <Route path="/meus-agendamentos" element={<TelaAgendamentos />} />
+            <Route path="/agendar/especialidades" element={<ConsultaEspecialidade />} />
+            <Route path="/agendar/anexar-guia" element={<AnexarGuiaConsulta />} />
+            <Route path="/agendar/confirmar-data" element={<ConfirmarConsulta />} />
+            <Route path="/retornos" element={<TelaRetorno />} />
+            <Route path="/retornos/agendar" element={<TelaAgendarRetorno />} />
 
-          {/* Exames */}
-          <Route path="/exames" element={<ExamesPaciente />} />
-          <Route path="/exames/agendar" element={<AgendarExamePaciente />} />
-          <Route path="/exames/sucesso" element={<ModalSolicitacaoSucesso />} />
+            {/* EXAMES */}
+            <Route path="/exames" element={<ExamesPaciente />} />
+            <Route path="/exames/agendar" element={<AgendarExamePaciente />} />
+            <Route path="/exames/sucesso" element={<ModalSolicitacaoSucesso />} />
 
-          {/* 3. ROTAS ADMINISTRATIVAS (ADM) */}
-          <Route path="/admin/dashboard" element={<TelaInicialAdmin />} />
+            {/* ADMIN */}
+            <Route path="/admin/dashboard" element={<TelaInicialAdmin />} />
+            <Route path="/admin/cadastrar-medico" element={<AdicionarMedico />} />
+            <Route path="/admin/cadastrar-especialidade" element={<AdicionarEspecialidade />} />
+            <Route path="/admin/aprovar-guias" element={<AprovarGuia />} />
+            <Route path="/admin/consultas-dia" element={<ConsultaDia />} />
 
-          {/* Gestão de Médicos e Consultas */}
-          <Route path="/admin/cadastrar-medico" element={<AdicionarMedico />} />
-          <Route path="/admin/cadastrar-especialidade" element={<AdicionarEspecialidade />} />
-          <Route path="/admin/aprovar-guias" element={<AprovarGuia />} />
-          <Route path="/admin/consultas-dia" element={<ConsultaDia />} />
+            {/* EXAMES ADMIN */}
+            <Route path="/admin/exames/agendar" element={<AdminAgendarExame />} />
+            <Route path="/admin/exames/editar" element={<AdminEditarExames />} />
+            <Route path="/admin/exames/cadastrar-tipo-exames" element={<AdminCadastrarTipoExames />} />
 
-          {/* Gestão de Exames */}
-          <Route path="/admin/exames/agendar" element={<AdminAgendarExame />} />
-          <Route path="/admin/exames/editar" element={<AdminEditarExames />} />
-          <Route path="/admin/exames/cadastrar" element={<AdminCadastrarExames />} />
+            {/* NOTIFICAÇÕES */}
+            <Route path="/admin/notificacoes" element={<TelaNotificacaoAdmin />} />
+            <Route path="/admin/noticias" element={<TelaNoticiasAdmin />} />
+            <Route path="/admin/eventos" element={<TelaEventosAdmin />} />
 
-          {/* Comunicação e Notificações */}
-          <Route path="/admin/notificacoes" element={<TelaNotificacaoAdmin />} />
-          <Route path="/admin/noticias" element={<TelaNoticiasAdmin />} />
-          <Route path="/admin/eventos" element={<TelaEventosAdmin />} />
-        </Route>
+          </Route>
         </Routes>
-    </BrowserRouter>
-    </AuthProvider >
+      </BrowserRouter>
+    </AuthProvider>
   );
 }
 

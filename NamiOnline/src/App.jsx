@@ -91,10 +91,13 @@ function App() {
             <Route path="/admin/aprovar-guias" element={<AprovarGuia />} />
             <Route path="/admin/consultas-dia" element={<ConsultaDia />} />
 
-            {/* EXAMES ADMIN */}
-            <Route path="/admin/exames/agendar" element={<AdminAgendarExame />} />
-            <Route path="/admin/exames/editar" element={<AdminEditarExames />} />
-            <Route path="/admin/exames/cadastrar-tipo-exames" element={<AdminCadastrarTipoExames />} />
+          {/* Gestão de Exames */}
+          <Route path="/admin/exames/agendar" element={<AdminAgendarExame />} />
+          <Route path="/admin/exames/editar" element={<AdminEditarExames />} />
+          <Route
+  path="/admin/exames/cadastrar-tipo-exames"
+  element={<AdminCadastrarTipoExames />}
+/>
 
             {/* NOTIFICAÇÕES */}
             <Route path="/admin/notificacoes" element={<TelaNotificacaoAdmin />} />

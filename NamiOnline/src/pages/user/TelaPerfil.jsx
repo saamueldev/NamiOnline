@@ -5,11 +5,16 @@ import {
   FaBell,
   FaLock,
   FaEye,
-  FaGlobe,
   FaQuestionCircle,
   FaSignOutAlt,
   FaCamera,
-  FaCog
+  FaCog,
+  FaUserShield,
+  FaEnvelope,
+  FaMoon,
+  FaCalendarCheck,
+  FaUserCog,
+  FaCheckCircle
 } from 'react-icons/fa'
 
 import { AuthContext } from '../../context/AuthContext'
@@ -18,11 +23,9 @@ export default function TelaPerfil() {
   const navigate = useNavigate()
   const { user, logout, isAdmin } = useContext(AuthContext)
 
-  const [avatar] = useState(user?.avatar || '👤')
+  const [avatar] = useState(user?.avatar || null)
   const [notificacoes, setNotificacoes] = useState(true)
-  const [emailNotif, setEmailNotif] = useState(true)
   const [tema, setTema] = useState('claro')
-  const [idioma, setIdioma] = useState('pt-BR')
 
   const handleAvatarChange = (e) => {
     const file = e.target.files[0]
@@ -44,7 +47,7 @@ export default function TelaPerfil() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#004AF7] to-[#132190] px-5 py-10 font-sans">
+    <div className="min-h-screen bg-white px-5 py-10 font-sans">
 
       <div className="mx-auto max-w-5xl">
 
@@ -53,23 +56,31 @@ export default function TelaPerfil() {
 
           <button
             onClick={() => navigate('/home')}
-            className="flex h-10 w-10 items-center justify-center rounded-full bg-white/20 text-xl text-white transition hover:-translate-x-1 hover:bg-white/30"
+            className="flex h-10 w-10 items-center justify-center rounded-full bg-[#132190] text-xl text-white transition hover:-translate-x-1 hover:bg-[#004AF7]"
           >
             <FaArrowLeft />
           </button>
 
-          <h1 className="text-3xl font-bold text-white">
+          <h1 className="text-3xl font-bold text-[#132190]">
             Meu Perfil
           </h1>
         </div>
 
         {/* AVATAR */}
-        <div className="mb-8 rounded-[24px] bg-white p-10 text-center shadow-2xl">
+        <div className="mb-8 rounded-[24px] border border-slate-200 bg-white p-10 text-center shadow-xl">
 
           <div className="relative mb-6 inline-block">
 
             <div className="flex h-[150px] w-[150px] items-center justify-center rounded-full border-[5px] border-slate-100 bg-gradient-to-br from-[#004AF7] to-[#132190] text-6xl text-white">
-              {avatar}
+              {avatar ? (
+                <img
+                  src={avatar}
+                  alt="Avatar"
+                  className="h-full w-full rounded-full object-cover"
+                />
+              ) : (
+                <FaUserShield />
+              )}
             </div>
 
             <label className="absolute -bottom-2 -right-2 flex h-12 w-12 cursor-pointer items-center justify-center rounded-full border-[3px] border-[#132190] bg-white text-2xl shadow-lg transition hover:scale-110 hover:bg-[#132190] hover:text-white">
@@ -85,16 +96,13 @@ export default function TelaPerfil() {
           </div>
 
           <div>
-            <h2 className="mb-1 text-2xl font-semibold text-slate-800">
+            <h2 className="mb-3 text-2xl font-semibold text-slate-800">
               {user?.nome || 'Usuário Nami'}
             </h2>
 
-            <p className="mb-4 text-sm text-slate-500">
-              {user?.email || 'usuario@nami.com.br'}
-            </p>
-
-            <div className="inline-block rounded-full bg-green-100 px-4 py-2 text-sm font-semibold text-green-700">
-              {isAdmin() ? '👨‍💼 Administrador' : '✓ Conta Verificada'}
+            <div className="inline-flex items-center gap-2 rounded-full bg-green-100 px-4 py-2 text-sm font-semibold text-green-700">
+              <FaCheckCircle />
+              {isAdmin() ? 'Administrador' : 'Conta ativa'}
             </div>
           </div>
         </div>
@@ -103,7 +111,7 @@ export default function TelaPerfil() {
         <div className="grid gap-6">
 
           {/* NOTIFICAÇÕES */}
-          <div className="overflow-hidden rounded-[24px] bg-white shadow-2xl">
+          <div className="overflow-hidden rounded-[24px] bg-white shadow-xl border border-slate-200">
 
             <div className="flex items-center gap-3 bg-gradient-to-r from-[#004AF7] to-[#132190] px-6 py-5 text-lg font-semibold text-white">
               <FaBell />
@@ -112,12 +120,11 @@ export default function TelaPerfil() {
 
             <div className="p-6">
 
-              {/* OPTION */}
-              <div className="flex flex-col justify-between gap-4 border-b border-slate-100 py-5 md:flex-row md:items-center">
+              <div className="flex flex-col justify-between gap-4 py-5 md:flex-row md:items-center">
 
                 <div className="flex items-center gap-4">
                   <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-100 text-xl text-[#004AF7]">
-                    🔔
+                    <FaBell />
                   </div>
 
                   <div>
@@ -145,57 +152,24 @@ export default function TelaPerfil() {
                 </button>
               </div>
 
-              {/* OPTION */}
-              <div className="flex flex-col justify-between gap-4 py-5 md:flex-row md:items-center">
-
-                <div className="flex items-center gap-4">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-100 text-xl text-[#004AF7]">
-                    ✉️
-                  </div>
-
-                  <div>
-                    <h3 className="font-semibold text-slate-800">
-                      Notificações por Email
-                    </h3>
-
-                    <p className="text-sm text-slate-500">
-                      Receberá atualizações importantes
-                    </p>
-                  </div>
-                </div>
-
-                <button
-                  onClick={() => setEmailNotif(!emailNotif)}
-                  className={`relative h-8 w-14 rounded-full transition ${
-                    emailNotif ? 'bg-[#132190]' : 'bg-slate-300'
-                  }`}
-                >
-                  <span
-                    className={`absolute top-1 h-6 w-6 rounded-full bg-white transition ${
-                      emailNotif ? 'left-7' : 'left-1'
-                    }`}
-                  />
-                </button>
-              </div>
-
             </div>
           </div>
 
           {/* PREFERÊNCIAS */}
-          <div className="overflow-hidden rounded-[24px] bg-white shadow-2xl">
+          <div className="overflow-hidden rounded-[24px] bg-white shadow-xl border border-slate-200">
 
             <div className="flex items-center gap-3 bg-gradient-to-r from-[#004AF7] to-[#132190] px-6 py-5 text-lg font-semibold text-white">
               <FaEye />
               Preferências
             </div>
 
-            <div className="p-6 space-y-6">
+            <div className="p-6">
 
               <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
 
                 <div className="flex items-center gap-4">
                   <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-100 text-[#004AF7]">
-                    🎨
+                    <FaMoon />
                   </div>
 
                   <div>
@@ -204,7 +178,7 @@ export default function TelaPerfil() {
                     </h3>
 
                     <p className="text-sm text-slate-500">
-                      Altere a aparência do app
+                      Altere a aparência do sistema
                     </p>
                   </div>
                 </div>
@@ -220,40 +194,11 @@ export default function TelaPerfil() {
                 </select>
               </div>
 
-              <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
-
-                <div className="flex items-center gap-4">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-100 text-[#004AF7]">
-                    <FaGlobe />
-                  </div>
-
-                  <div>
-                    <h3 className="font-semibold text-slate-800">
-                      Idioma
-                    </h3>
-
-                    <p className="text-sm text-slate-500">
-                      Idioma de preferência
-                    </p>
-                  </div>
-                </div>
-
-                <select
-                  value={idioma}
-                  onChange={(e) => setIdioma(e.target.value)}
-                  className="rounded-lg border border-slate-300 px-4 py-2 text-sm outline-none transition focus:border-[#132190] focus:ring-4 focus:ring-blue-100"
-                >
-                  <option value="pt-BR">Português</option>
-                  <option value="en-US">English</option>
-                  <option value="es-ES">Español</option>
-                </select>
-              </div>
-
             </div>
           </div>
 
           {/* SEGURANÇA */}
-          <div className="overflow-hidden rounded-[24px] bg-white shadow-2xl">
+          <div className="overflow-hidden rounded-[24px] bg-white shadow-xl border border-slate-200">
 
             <div className="flex items-center gap-3 bg-gradient-to-r from-[#004AF7] to-[#132190] px-6 py-5 text-lg font-semibold text-white">
               <FaLock />
@@ -262,19 +207,16 @@ export default function TelaPerfil() {
 
             <div className="p-6 space-y-5">
 
-              <button className="w-full rounded-xl bg-[#E4F2FE] px-5 py-4 font-semibold text-[#132190] transition hover:-translate-y-1 hover:bg-[#87B7FE] hover:text-white">
+              <button className="w-full rounded-xl bg-[#E4F2FE] px-5 py-4 font-semibold text-[#132190] transition hover:-translate-y-1 hover:bg-[#87B7FE] hover:text-white flex items-center justify-center gap-3">
+                <FaLock />
                 Alterar Senha
-              </button>
-
-              <button className="w-full rounded-xl bg-[#E4F2FE] px-5 py-4 font-semibold text-[#132190] transition hover:-translate-y-1 hover:bg-[#87B7FE] hover:text-white">
-                Gerenciar Dispositivos
               </button>
 
             </div>
           </div>
 
           {/* GERENCIAMENTO */}
-          <div className="overflow-hidden rounded-[24px] bg-white shadow-2xl">
+          <div className="overflow-hidden rounded-[24px] bg-white shadow-xl border border-slate-200">
 
             <div className="flex items-center gap-3 bg-gradient-to-r from-[#004AF7] to-[#132190] px-6 py-5 text-lg font-semibold text-white">
               <FaCog />
@@ -285,31 +227,25 @@ export default function TelaPerfil() {
 
               <button
                 onClick={() => navigate('/meus-agendamentos')}
-                className="rounded-xl bg-[#E4F2FE] px-5 py-4 font-semibold text-[#132190] transition hover:bg-[#87B7FE] hover:text-white"
+                className="flex items-center justify-center gap-3 rounded-xl bg-[#E4F2FE] px-5 py-4 font-semibold text-[#132190] transition hover:bg-[#87B7FE] hover:text-white"
               >
+                <FaCalendarCheck />
                 Meus Agendamentos
               </button>
 
               <button
                 onClick={() => navigate('/perfil/configuracoes')}
-                className="rounded-xl bg-[#E4F2FE] px-5 py-4 font-semibold text-[#132190] transition hover:bg-[#87B7FE] hover:text-white"
+                className="flex items-center justify-center gap-3 rounded-xl bg-[#E4F2FE] px-5 py-4 font-semibold text-[#132190] transition hover:bg-[#87B7FE] hover:text-white"
               >
+                <FaUserCog />
                 Configurações de Usuário
               </button>
 
-              {isAdmin() && (
-                <button
-                  onClick={() => navigate('/notificacoes-admin')}
-                  className="rounded-xl bg-[#E4F2FE] px-5 py-4 font-semibold text-[#132190] transition hover:bg-[#87B7FE] hover:text-white"
-                >
-                  Notificações Admin
-                </button>
-              )}
             </div>
           </div>
 
           {/* AJUDA */}
-          <div className="overflow-hidden rounded-[24px] bg-white shadow-2xl">
+          <div className="overflow-hidden rounded-[24px] bg-white shadow-xl border border-slate-200">
 
             <div className="flex items-center gap-3 bg-gradient-to-r from-[#004AF7] to-[#132190] px-6 py-5 text-lg font-semibold text-white">
               <FaQuestionCircle />
@@ -318,31 +254,38 @@ export default function TelaPerfil() {
 
             <div className="p-6 space-y-4">
 
-              <div className="rounded-xl border border-slate-200 p-4">
-                <h3 className="font-semibold text-slate-800">
-                  Centro de Ajuda
-                </h3>
+            <button
+              onClick={() => navigate('/central-ajuda')}
+              className="w-full rounded-xl border border-slate-200 p-4 text-left transition hover:bg-[#E4F2FE]"
+              >
+              <h3 className="font-semibold text-slate-800">
+              Centro de Ajuda
+              </h3>
 
-                <p className="text-sm text-slate-500">
-                  Dúvidas frequentes e suporte
-                </p>
-              </div>
+              <p className="text-sm text-slate-500">
+              Dúvidas frequentes e suporte
+                  </p>
+            </button>
 
-              <div className="rounded-xl border border-slate-200 p-4">
-                <h3 className="font-semibold text-slate-800">
-                  Contato com Suporte
-                </h3>
+              <div className="rounded-xl border border-slate-200 p-4 flex items-center gap-3">
+                <FaEnvelope className="text-[#004AF7]" />
 
-                <p className="text-sm text-slate-500">
-                  (11) 4000-1234
-                </p>
+                <div>
+                  <h3 className="font-semibold text-slate-800">
+                    Contato com Suporte
+                  </h3>
+
+                  <p className="text-sm text-slate-500">
+                    suporte@nami.com
+                  </p>
+                </div>
               </div>
 
             </div>
           </div>
 
           {/* ACTIONS */}
-          <div className="rounded-[24px] bg-white p-6 shadow-2xl">
+          <div className="rounded-[24px] bg-white p-6 shadow-xl border border-slate-200">
 
             <div className="grid gap-4 md:grid-cols-2">
 
@@ -353,7 +296,7 @@ export default function TelaPerfil() {
                 ← Voltar
               </button>
 
-              <button className="rounded-xl bg-[#E4F2FE] px-5 py-4 font-semibold text-[#132190] transition hover:bg-[#87B7FE] hover:text-white">
+              <button className="rounded-xl bg-[#004AF7] px-5 py-4 font-semibold text-white transition hover:bg-[#132190]">
                 💾 Salvar
               </button>
 
@@ -371,7 +314,7 @@ export default function TelaPerfil() {
         </div>
 
         {/* FOOTER */}
-        <div className="mt-10 text-center text-xs text-white">
+        <div className="mt-10 text-center text-xs text-slate-500">
           © 2026 Nami Online - Todos os direitos reservados
         </div>
 

@@ -23,7 +23,11 @@ const BarraNavegacao = ({ tipoUsuario = "user" }) => {
   };
 
   const handleNotificacaoClick = () => {
-    navigate("/notificacoes");
+    if (tipoUsuario === "admin") {
+      navigate("/admin/notificacoes");
+    } else {
+      navigate("/notificacoes");
+    }
   };
 
   const handleBusca = (e) => {

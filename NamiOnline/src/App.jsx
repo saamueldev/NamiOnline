@@ -21,6 +21,7 @@ import TelaAgendarRetorno from './pages/user/TelaAgendarRetorno';
 import ExamesPaciente from './pages/user/Exames';
 import AgendarExamePaciente from './pages/user/AgendarExame';
 import ModalSolicitacaoSucesso from './pages/user/ModalSolicitacaoSucesso';
+import TelaNotificacoes from "./pages/user/TelaNotificacoes";
 
 // --- COMPONENTES do ADMINISTRADOR (ADM) ---
 import TelaInicialAdmin from './pages/adm/TelaInicialAdmin';
@@ -34,6 +35,7 @@ import TelaNoticiasAdmin from './pages/adm/TelaNoticiasAdmin';
 import TelaEventosAdmin from './pages/adm/TelaEventosAdmin';
 import AprovarGuia from './pages/adm/AprovarGuia';
 import ConsultaDia from "./pages/adm/AdminConsultaDia"
+import CentralAjuda from './pages/user/CentralAjuda'
 
 function App() {
   const tipoUsuario = "user"; // ou "admin"
@@ -55,6 +57,9 @@ function App() {
           <Route path="/home" element={<TelaInicial />} />
           <Route path="/perfil" element={<TelaPerfil />} />
           <Route path="/perfil/configuracoes" element={<TelaConfiguracaoUsuario />} />
+          <Route path="/notificacoes" element={<TelaNotificacoes />} />
+          <Route path="/central-ajuda" element={<CentralAjuda />} />
+          
 
           {/* Consultas e Retornos */}
           <Route path="/meus-agendamentos" element={<TelaAgendamentos />} />

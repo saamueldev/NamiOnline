@@ -11,17 +11,28 @@ import {
 
 import api from '../../services/api'
 
-export default function AdminCadastrarTipoExames() {
+export default function AdminCadastrarTiposExames() {
+  const [categoriasExame, setCategoriasExame] = useState([])
   const [tiposExame, setTiposExame] = useState([])
-  const [categoriaPrincipal, setCategoriaPrincipal] = useState('')
+  const [categoriaExameId, setCategoriaExameId] = useState('')
   const [nome, setNome] = useState('')
   const [descricao, setDescricao] = useState('')
   const [busca, setBusca] = useState('')
   const [carregando, setCarregando] = useState(false)
 
+  async function carregarCategoriasExame() {
+    try {
+      const resposta = await api.get('/categorias-exames')
+      setCategoriasExame(resposta.data)
+    } catch (error) {
+      console.error('Erro ao carregar categorias de exame:', error)
+      alert('Erro ao carregar categorias de exame.')
+    }
+  }
+
   async function carregarTiposExame() {
     try {
-      const resposta = await api.get('/tipos-exame')
+      const resposta = await api.get('/tipos-exames')
       setTiposExame(resposta.data)
     } catch (error) {
       console.error('Erro ao carregar tipos de exame:', error)
@@ -32,7 +43,7 @@ export default function AdminCadastrarTipoExames() {
   async function cadastrarTipoExame(event) {
     event.preventDefault()
 
-    if (!categoriaPrincipal || !nome || !descricao) {
+    if (!categoriaExameId || !nome || !descricao) {
       alert('Preencha todos os campos.')
       return
     }
@@ -40,13 +51,13 @@ export default function AdminCadastrarTipoExames() {
     try {
       setCarregando(true)
 
-      await api.post('/tipos-exame', {
-        categoriaPrincipal,
+      await api.post('/tipos-exames', {
+        categoriaExameId,
         nome,
         descricao,
       })
 
-      setCategoriaPrincipal('')
+      setCategoriaExameId('')
       setNome('')
       setDescricao('')
 
@@ -73,7 +84,7 @@ export default function AdminCadastrarTipoExames() {
     if (!confirmar) return
 
     try {
-      await api.delete(`/tipos-exame/${id}`)
+      await api.delete(`/tipos-exames/${id}`)
       await carregarTiposExame()
       alert('Tipo de exame excluído com sucesso.')
     } catch (error) {
@@ -87,21 +98,43 @@ export default function AdminCadastrarTipoExames() {
   }
 
   function limparCampos() {
-    setCategoriaPrincipal('')
+    setCategoriaExameId('')
     setNome('')
     setDescricao('')
   }
 
+  function buscarNomeCategoria(tipo) {
+    if (tipo.categoriaExame?.nome) {
+      return tipo.categoriaExame.nome
+    }
+
+    if (tipo.categoriaExameId?.nome) {
+      return tipo.categoriaExameId.nome
+    }
+
+    const categoriaEncontrada = categoriasExame.find(
+      (categoria) => categoria._id === tipo.categoriaExameId
+    )
+
+    return categoriaEncontrada?.nome || 'Categoria não informada'
+  }
+
   useEffect(() => {
+    carregarCategoriasExame()
     carregarTiposExame()
   }, [])
 
   const tiposFiltrados = tiposExame.filter((tipo) => {
     const nomeTipo = tipo.nome?.toLowerCase() || ''
-    const categoriaTipo = tipo.categoriaPrincipal?.toLowerCase() || ''
+    const descricaoTipo = tipo.descricao?.toLowerCase() || ''
+    const nomeCategoria = buscarNomeCategoria(tipo).toLowerCase()
     const termoBusca = busca.toLowerCase()
 
-    return nomeTipo.includes(termoBusca) || categoriaTipo.includes(termoBusca)
+    return (
+      nomeTipo.includes(termoBusca) ||
+      descricaoTipo.includes(termoBusca) ||
+      nomeCategoria.includes(termoBusca)
+    )
   })
 
   return (
@@ -129,8 +162,8 @@ export default function AdminCadastrarTipoExames() {
               </h1>
 
               <p className="mt-4 max-w-2xl text-base leading-7 text-white/85 md:text-lg">
-                Cadastre novas categorias de exame e remova tipos que não são mais
-                utilizados no sistema.
+                Cadastre tipos de exame vinculados a uma categoria e mantenha o
+                catálogo de exames organizado.
               </p>
             </div>
 
@@ -149,8 +182,8 @@ export default function AdminCadastrarTipoExames() {
                       Tipos de exame
                     </h2>
                     <p className="mt-2 text-sm leading-6 text-slate-600">
-                      Organize as categorias disponíveis para manter o catálogo de exames
-                      sempre atualizado.
+                      Relacione cada tipo de exame à sua categoria correspondente
+                      para facilitar a organização e consulta.
                     </p>
                   </div>
                 </div>
@@ -173,7 +206,7 @@ export default function AdminCadastrarTipoExames() {
                   Adicionar tipo de exame
                 </h2>
                 <p className="mt-1 text-sm text-slate-600">
-                  Cadastre uma nova categoria para organização dos exames.
+                  Cadastre um novo tipo de exame vinculado a uma categoria.
                 </p>
               </div>
             </div>
@@ -181,21 +214,21 @@ export default function AdminCadastrarTipoExames() {
             <form onSubmit={cadastrarTipoExame} className="space-y-6">
               <div>
                 <label className="mb-2 block text-sm font-semibold text-[#132190]">
-                  Categoria principal
+                  Categoria do exame
                 </label>
 
                 <select
-                  value={categoriaPrincipal}
-                  onChange={(event) => setCategoriaPrincipal(event.target.value)}
+                  value={categoriaExameId}
+                  onChange={(event) => setCategoriaExameId(event.target.value)}
                   className="w-full rounded-2xl border border-[#87B7FE]/30 bg-[#F8FBFF] px-4 py-4 text-sm text-slate-700 outline-none transition focus:border-[#004AF7] focus:ring-4 focus:ring-[#004AF7]/10"
                 >
                   <option value="">Selecione uma categoria</option>
-                  <option value="Cardiológicos">Cardiológicos</option>
-                  <option value="Radiológicos">Radiológicos</option>
-                  <option value="Laboratoriais">Laboratoriais</option>
-                  <option value="Neurológicos">Neurológicos</option>
-                  <option value="Ortopédicos">Ortopédicos</option>
-                  <option value="Imagem">Imagem</option>
+
+                  {categoriasExame.map((categoria) => (
+                    <option key={categoria._id} value={categoria._id}>
+                      {categoria.nome}
+                    </option>
+                  ))}
                 </select>
               </div>
 
@@ -208,7 +241,7 @@ export default function AdminCadastrarTipoExames() {
                   type="text"
                   value={nome}
                   onChange={(event) => setNome(event.target.value)}
-                  placeholder="Ex.: Hemograma"
+                  placeholder="Ex.: Eletrocardiograma"
                   className="w-full rounded-2xl border border-[#87B7FE]/30 bg-[#F8FBFF] px-4 py-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[#004AF7] focus:ring-4 focus:ring-[#004AF7]/10"
                 />
               </div>
@@ -222,7 +255,7 @@ export default function AdminCadastrarTipoExames() {
                   rows="5"
                   value={descricao}
                   onChange={(event) => setDescricao(event.target.value)}
-                  placeholder="Descreva brevemente a finalidade dessa categoria de exame."
+                  placeholder="Descreva brevemente a finalidade desse tipo de exame."
                   className="w-full rounded-2xl border border-[#87B7FE]/30 bg-[#F8FBFF] px-4 py-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[#004AF7] focus:ring-4 focus:ring-[#004AF7]/10"
                 />
               </div>
@@ -260,7 +293,7 @@ export default function AdminCadastrarTipoExames() {
                     Tipos cadastrados
                   </h2>
                   <p className="mt-1 text-sm text-slate-600">
-                    Visualize e remova categorias disponíveis no sistema.
+                    Visualize e remova os tipos de exame disponíveis no sistema.
                   </p>
                 </div>
               </div>
@@ -291,17 +324,13 @@ export default function AdminCadastrarTipoExames() {
                   >
                     <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
                       <div>
-                        <div className="inline-flex rounded-full bg-[#E4F2FE] px-3 py-1 text-xs font-semibold text-[#004AF7]">
-                          {tipo.quantidadeExames ?? 0} exames vinculados
-                        </div>
+                        <span className="inline-flex rounded-full bg-[#E4F2FE] px-3 py-1 text-xs font-semibold text-[#004AF7]">
+                          {buscarNomeCategoria(tipo)}
+                        </span>
 
                         <h3 className="mt-3 text-xl font-bold text-[#132190]">
                           {tipo.nome}
                         </h3>
-
-                        <p className="mt-1 text-xs font-semibold text-[#004AF7]">
-                          {tipo.categoriaPrincipal}
-                        </p>
 
                         <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
                           {tipo.descricao}

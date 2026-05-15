@@ -32,7 +32,8 @@ import AdicionarEspecialidade from "./pages/adm/CadastroEspecialidades";
 import TelaNotificacaoAdmin from './pages/adm/TelaNotificacaoAdmin';
 import AdminAgendarExame from './pages/adm/AdminAgendarExame';
 import AdminEditarExames from './pages/adm/AdminEditarExames';
-import AdminCadastrarTipoExames from './pages/adm/AdminCadastrarTipoExames';
+import AdminCadastrarCategoriasExames from './pages/adm/AdminCadastrarCategoriasExames';
+import AdminCadastrarTiposExames from './pages/adm/AdminCadastrarTiposExames';
 import TelaNoticiasAdmin from './pages/adm/TelaNoticiasAdmin';
 import TelaEventosAdmin from './pages/adm/TelaEventosAdmin';
 import AprovarGuia from './pages/adm/AprovarGuia';
@@ -93,10 +94,9 @@ function App() {
 
           {/* Gestão de Exames */}
           <Route path="/admin/exames/agendar" element={<AdminAgendarExame />} />
-          <Route path="/admin/exames/editar" element={<AdminEditarExames />} />
-          <Route
-  path="/admin/exames/cadastrar-tipo-exames"
-  element={<AdminCadastrarTipoExames />}
+          <Route path="/admin/categorias-exames/:categoriaId/exames" element={<AdminEditarExames />} />
+          <Route path="/admin/exames/cadastrar-categorias-exames" element={<AdminCadastrarCategoriasExames />} />
+          <Route path="/admin/exames/cadastrar-tipos-exames" element={<AdminCadastrarTiposExames />}
 />
 
             {/* NOTIFICAÇÕES */}

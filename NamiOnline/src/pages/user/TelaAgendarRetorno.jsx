@@ -1,5 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { useState } from 'react'
+import api from '../../services/api'
 
 export default function TelaAgendarRetorno() {
 
@@ -23,21 +24,15 @@ export default function TelaAgendarRetorno() {
 
     try {
 
-      const response = await fetch("http://localhost:3000/retornos", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          medico,
-          especialidade,
-          data,
-          horario,
-          observacoes,
-        }),
+      const response = await api.post('/retornos', {
+        medico,
+        especialidade,
+        data,
+        horario,
+        observacoes,
       })
 
-      const dataResponse = await response.json()
+      const dataResponse = response.data
 
       console.log(dataResponse)
 

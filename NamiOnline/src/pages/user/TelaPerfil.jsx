@@ -20,6 +20,7 @@ import {
 } from 'react-icons/fa'
 
 import { AuthContext } from '../../context/AuthContext'
+import api from '../../services/api'
 
 export default function TelaPerfil() {
   const navigate = useNavigate()
@@ -55,16 +56,7 @@ export default function TelaPerfil() {
   // =========================
   const salvarTema = async () => {
     try {
-      // ENVIA PARA O BACKEND
-      await fetch("http://localhost:3000/configuracoes/tema", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          tema,
-        }),
-      })
+      await api.post('/configuracoes/tema', { tema })
 
       // SALVA LOCALMENTE
       localStorage.setItem("tema", tema)

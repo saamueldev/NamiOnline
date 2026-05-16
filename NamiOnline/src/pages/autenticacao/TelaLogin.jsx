@@ -27,7 +27,7 @@ export default function TelaLogin() {
       const resultado = await login(email, senha)
 
       if (resultado.sucesso) {
-        navigate('/home')
+        navigate(resultado.tipo === 'admin' ? '/admin/dashboard' : '/home')
       }
     } catch (error) {
       setErro(error.response?.data?.error || 'Email/CPF ou senha inválidos')
@@ -134,11 +134,6 @@ export default function TelaLogin() {
             </p>
           </div>
 
-          <div className="mt-[15px] rounded-lg bg-[#f5f5f5] p-[15px]">
-            <p className="mt-[15px] text-center text-xs text-[#888]">
-              <strong>Teste Admin:</strong> admin@nami.com / admin123
-            </p>
-          </div>
         </form>
       </div>
     </div>

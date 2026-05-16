@@ -32,14 +32,14 @@ export default function TelaInicialADM() {
             </Link>
 
             <Link
-              to="/admin/consultas"
+              to="/admin/consultas-dia"
               className="no-underline px-[14px] py-3 rounded-lg text-[#333] font-medium transition duration-200 hover:bg-[#004AF7] hover:text-white"
             >
               Consultas
             </Link>
 
             <Link
-              to="/admin/cadastrarExames"
+              to="/admin/exames/agendar"
               className="no-underline px-[14px] py-3 rounded-lg text-[#333] font-medium transition duration-200 hover:bg-[#004AF7] hover:text-white"
             >
               Exames

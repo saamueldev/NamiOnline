@@ -1,9 +1,9 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { AuthProvider } from './context/AuthContext';
+import { BrowserRouter, Navigate, Outlet, Route, Routes } from "react-router-dom";
+import { useContext, useEffect } from "react";
+import { AuthContext, AuthProvider } from './context/AuthContext';
 import LayoutComNavbar from "./layouts/LayoutComNavbar";
-import { useEffect } from "react";
 
-// --- COMPONENTES DE AUTENTICAÇÃO & ACESSO COMUM ---
+// --- COMPONENTES DE AUTENTICACAO & ACESSO COMUM ---
 import TelaLogin from './pages/autenticacao/TelaLogin';
 import TelaCadastro from './pages/autenticacao/TelaCadastro';
 import RecuperarSenha from './pages/autenticacao/RecuperarSenha';
@@ -23,9 +23,9 @@ import ExamesPaciente from './pages/user/Exames';
 import AgendarExamePaciente from './pages/user/AgendarExame';
 import ModalSolicitacaoSucesso from './pages/user/ModalSolicitacaoSucesso';
 import TelaNotificacoes from "./pages/user/TelaNotificacoes";
-import CentralAjuda from './pages/user/CentralAjuda'
+import CentralAjuda from './pages/user/CentralAjuda';
 
-// --- COMPONENTES do ADMINISTRADOR (ADM) ---
+// --- COMPONENTES DO ADMINISTRADOR (ADM) ---
 import TelaInicialAdmin from './pages/adm/TelaInicialAdmin';
 import AdicionarMedico from "./pages/adm/AdminAdicionarMedico";
 import AdicionarEspecialidade from "./pages/adm/CadastroEspecialidades";
@@ -37,10 +37,33 @@ import AdminCadastrarTiposExames from './pages/adm/AdminCadastrarTiposExames';
 import TelaNoticiasAdmin from './pages/adm/TelaNoticiasAdmin';
 import TelaEventosAdmin from './pages/adm/TelaEventosAdmin';
 import AprovarGuia from './pages/adm/AprovarGuia';
-import ConsultaDia from "./pages/adm/AdminConsultaDia"
+import ConsultaDia from "./pages/adm/AdminConsultaDia";
+
+function ProtectedLayout() {
+  const { authLoading, isLoggedIn } = useContext(AuthContext);
+
+  if (authLoading) {
+    return null;
+  }
+
+  if (!isLoggedIn()) {
+    return <Navigate to="/" replace />;
+  }
+
+  return <LayoutComNavbar />;
+}
+
+function RoleGuard({ allowedRoles, redirectTo }) {
+  const { user } = useContext(AuthContext);
+
+  if (!allowedRoles.includes(user?.tipo)) {
+    return <Navigate to={redirectTo} replace />;
+  }
+
+  return <Outlet />;
+}
 
 function App() {
-
   useEffect(() => {
     const temaSalvo = localStorage.getItem("tema") || "claro";
 
@@ -55,56 +78,55 @@ function App() {
     <AuthProvider>
       <BrowserRouter>
         <Routes>
-
           {/* ROTAS PÚBLICAS */}
           <Route path="/" element={<TelaLogin />} />
           <Route path="/cadastro" element={<TelaCadastro />} />
           <Route path="/recuperar-senha" element={<RecuperarSenha />} />
           <Route path="/redefinir-senha" element={<RedefinirSenha />} />
 
-          {/* ROTAS COM NAVBAR */}
-          <Route element={<LayoutComNavbar />}>
-
+          <Route element={<ProtectedLayout />}>
+            <Route element={<RoleGuard allowedRoles={['usuario']} redirectTo="/admin/dashboard" />}>
             {/* USER */}
-            <Route path="/home" element={<TelaInicial />} />
-            <Route path="/perfil" element={<TelaPerfil />} />
-            <Route path="/perfil/configuracoes" element={<TelaConfiguracaoUsuario />} />
-            <Route path="/notificacoes" element={<TelaNotificacoes />} />
-            <Route path="/central-ajuda" element={<CentralAjuda />} />
+              <Route path="/home" element={<TelaInicial />} />
+              <Route path="/perfil" element={<TelaPerfil />} />
+              <Route path="/perfil/configuracoes" element={<TelaConfiguracaoUsuario />} />
+              <Route path="/notificacoes" element={<TelaNotificacoes />} />
+              <Route path="/central-ajuda" element={<CentralAjuda />} />
+              {/* CONSULTAS */}
+              <Route path="/meus-agendamentos" element={<TelaAgendamentos />} />
+              <Route path="/agendar/especialidades" element={<ConsultaEspecialidade />} />
+              <Route path="/agendar/anexar-guia" element={<AnexarGuiaConsulta />} />
+              <Route path="/agendar/confirmar-data" element={<ConfirmarConsulta />} />
+              <Route path="/retornos" element={<TelaRetorno />} />
+              <Route path="/retornos/agendar" element={<TelaAgendarRetorno />} />
+               {/* EXAMES */}
+              <Route path="/exames" element={<ExamesPaciente />} />
+              <Route path="/exames/agendar" element={<AgendarExamePaciente />} />
+              <Route path="/exames/sucesso" element={<ModalSolicitacaoSucesso />} />
+            </Route>
 
-            {/* CONSULTAS */}
-            <Route path="/meus-agendamentos" element={<TelaAgendamentos />} />
-            <Route path="/agendar/especialidades" element={<ConsultaEspecialidade />} />
-            <Route path="/agendar/anexar-guia" element={<AnexarGuiaConsulta />} />
-            <Route path="/agendar/confirmar-data" element={<ConfirmarConsulta />} />
-            <Route path="/retornos" element={<TelaRetorno />} />
-            <Route path="/retornos/agendar" element={<TelaAgendarRetorno />} />
+              {/* ADMIN */}
 
-            {/* EXAMES */}
-            <Route path="/exames" element={<ExamesPaciente />} />
-            <Route path="/exames/agendar" element={<AgendarExamePaciente />} />
-            <Route path="/exames/sucesso" element={<ModalSolicitacaoSucesso />} />
-
-            {/* ADMIN */}
-            <Route path="/admin/dashboard" element={<TelaInicialAdmin />} />
-            <Route path="/admin/cadastrar-medico" element={<AdicionarMedico />} />
-            <Route path="/admin/cadastrar-especialidade" element={<AdicionarEspecialidade />} />
-            <Route path="/admin/aprovar-guias" element={<AprovarGuia />} />
-            <Route path="/admin/consultas-dia" element={<ConsultaDia />} />
-
-          {/* Gestão de Exames */}
-          <Route path="/admin/exames/agendar" element={<AdminAgendarExame />} />
-          <Route path="/admin/categorias-exames/:categoriaId/exames" element={<AdminEditarExames />} />
-          <Route path="/admin/exames/cadastrar-categorias-exames" element={<AdminCadastrarCategoriasExames />} />
-          <Route path="/admin/exames/cadastrar-tipos-exames" element={<AdminCadastrarTiposExames />}
-/>
-
-            {/* NOTIFICAÇÕES */}
-            <Route path="/admin/notificacoes" element={<TelaNotificacaoAdmin />} />
-            <Route path="/admin/noticias" element={<TelaNoticiasAdmin />} />
-            <Route path="/admin/eventos" element={<TelaEventosAdmin />} />
-
+            <Route element={<RoleGuard allowedRoles={['admin']} redirectTo="/home" />}>
+            
+              <Route path="/admin/dashboard" element={<TelaInicialAdmin />} />
+              <Route path="/admin/cadastrar-medico" element={<AdicionarMedico />} />
+              <Route path="/admin/cadastrar-especialidade" element={<AdicionarEspecialidade />} />
+              <Route path="/admin/aprovar-guias" element={<AprovarGuia />} />
+              <Route path="/admin/consultas-dia" element={<ConsultaDia />} />
+              {/* Gestão de Exames */}
+              <Route path="/admin/exames/agendar" element={<AdminAgendarExame />} />
+              <Route path="/admin/categorias-exames/:categoriaId/exames" element={<AdminEditarExames />} />
+              <Route path="/admin/exames/cadastrar-categorias-exames" element={<AdminCadastrarCategoriasExames />} />
+              <Route path="/admin/exames/cadastrar-tipos-exames" element={<AdminCadastrarTiposExames />} />
+              {/* NOTIFICAÇÕES */}
+              <Route path="/admin/notificacoes" element={<TelaNotificacaoAdmin />} />
+              <Route path="/admin/noticias" element={<TelaNoticiasAdmin />} />
+              <Route path="/admin/eventos" element={<TelaEventosAdmin />} />
+            </Route>
           </Route>
+
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>

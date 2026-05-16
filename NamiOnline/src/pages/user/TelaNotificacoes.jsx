@@ -6,27 +6,27 @@ import {
   FaCalendarCheck,
   FaCheckCircle,
 } from "react-icons/fa";
+import api from "../../services/api";
 
 export default function TelaNotificacoes() {
   const navigate = useNavigate();
-
   const [notificacoes, setNotificacoes] = useState([]);
 
   useEffect(() => {
-    fetch("http://localhost:3000/notificacoes")
-      .then((res) => res.json())
-      .then((data) => {
-        setNotificacoes(data);
-      })
-      .catch((error) => {
-        console.error("Erro ao buscar notificações:", error);
-      });
+    async function carregarNotificacoes() {
+      try {
+        const response = await api.get("/notificacoes");
+        setNotificacoes(response.data);
+      } catch (error) {
+        console.error("Erro ao buscar notificacoes:", error);
+      }
+    }
+
+    carregarNotificacoes();
   }, []);
 
   return (
     <div className="min-h-screen bg-[#f4f8ff] p-8 dark:bg-[#0f172a]">
-
-      {/* HEADER */}
       <div className="mb-8 flex items-center gap-4">
         <button
           onClick={() => navigate(-1)}
@@ -37,23 +37,18 @@ export default function TelaNotificacoes() {
 
         <h1 className="flex items-center gap-3 text-3xl font-bold text-[#132190] dark:text-white">
           <FaBell />
-          Notificações
+          Notificacoes
         </h1>
       </div>
 
-      {/* CARD PRINCIPAL */}
       <div className="mx-auto max-w-2xl rounded-3xl bg-white p-8 shadow-[0_10px_30px_rgba(0,0,0,0.1)] dark:bg-[#1e293b]">
-
-        {/* NOTIFICAÇÕES DINÂMICAS */}
         {notificacoes.length > 0 ? (
           <div className="space-y-6">
-
             {notificacoes.map((item, index) => (
               <div
                 key={index}
                 className="flex items-start gap-5 rounded-2xl border border-blue-100 bg-blue-50 p-5 dark:border-slate-700 dark:bg-slate-800"
               >
-
                 <div className="rounded-full bg-[#004AF7] p-4 text-white">
                   <FaCalendarCheck className="text-2xl" />
                 </div>
@@ -69,45 +64,40 @@ export default function TelaNotificacoes() {
 
                   <div className="flex items-center gap-2 rounded-xl bg-green-100 px-4 py-3 text-green-700 dark:bg-green-900 dark:text-green-200">
                     <FaCheckCircle />
-                    Notificação recebida com sucesso.
+                    Notificacao recebida com sucesso.
                   </div>
                 </div>
               </div>
             ))}
-
           </div>
         ) : (
           <div className="rounded-2xl bg-slate-100 p-6 text-center dark:bg-slate-800">
             <h2 className="text-xl font-semibold text-[#132190] dark:text-white">
-              Nenhuma notificação encontrada
+              Nenhuma notificacao encontrada
             </h2>
 
             <p className="mt-2 text-gray-600 dark:text-gray-300">
-              Você ainda não possui notificações.
+              Voce ainda nao possui notificacoes.
             </p>
           </div>
         )}
 
-        {/* NOTIFICAÇÃO FIXA */}
         <div className="mt-6 flex items-start gap-5 rounded-2xl border border-slate-200 bg-slate-50 p-5 dark:border-slate-700 dark:bg-slate-800">
-
           <div className="rounded-full bg-[#132190] p-4 text-white">
             <FaBell className="text-2xl" />
           </div>
 
           <div>
             <h2 className="mb-2 text-xl font-semibold text-[#132190] dark:text-white">
-              Campanha de Vacinação
+              Campanha de Vacinacao
             </h2>
 
             <p className="text-gray-600 dark:text-gray-300">
-              A campanha de vacinação contra gripe já está disponível
-              no hospital NAMI.
+              A campanha de vacinacao contra gripe ja esta disponivel no hospital NAMI.
             </p>
           </div>
         </div>
 
-        {/* BOTÃO */}
         <div className="mt-8 flex justify-center">
           <button
             onClick={() => navigate("/home")}
@@ -116,7 +106,6 @@ export default function TelaNotificacoes() {
             Voltar para Home
           </button>
         </div>
-
       </div>
     </div>
   );

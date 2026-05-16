@@ -1,8 +1,72 @@
+import { useState } from 'react'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import imagemRedefinicao from '../../assets/bg_nami2.png'
 import imagemLateral from '../../assets/bg_nami.png'
-import { Link } from 'react-router-dom'
+import api from '../../services/api'
 
 export default function RedefinirSenha() {
+  const { token } = useParams()
+  const navigate = useNavigate()
+
+  const [password, setPassword] = useState('')
+  const [confirmarPassword, setConfirmarPassword] = useState('')
+  const [mensagem, setMensagem] = useState('')
+  const [erro, setErro] = useState('')
+  const [carregando, setCarregando] = useState(false)
+
+  async function redefinirSenha(event) {
+    event.preventDefault()
+
+    setMensagem('')
+    setErro('')
+
+    if (!token) {
+      setErro('Token de redefinição não encontrado.')
+      return
+    }
+
+    if (!password || !confirmarPassword) {
+      setErro('Preencha todos os campos.')
+      return
+    }
+
+    if (password !== confirmarPassword) {
+      setErro('As senhas não conferem.')
+      return
+    }
+
+    if (password.length < 6) {
+      setErro('A senha deve ter pelo menos 6 caracteres.')
+      return
+    }
+
+    try {
+      setCarregando(true)
+
+      const resposta = await api.put(`/usuarios/redefinir-senha/${token}`, {
+        password,
+        confirmarPassword,
+      })
+
+      setMensagem(resposta.data?.message || 'Senha redefinida com sucesso.')
+      setPassword('')
+      setConfirmarPassword('')
+
+      setTimeout(() => {
+        navigate('/')
+      }, 2000)
+    } catch (error) {
+      console.error('Erro ao redefinir senha:', error)
+
+      setErro(
+        error.response?.data?.error ||
+          'Erro ao redefinir senha. Solicite um novo link e tente novamente.'
+      )
+    } finally {
+      setCarregando(false)
+    }
+  }
+
   return (
     <div className="flex h-screen w-full overflow-hidden font-sans">
       <div
@@ -24,7 +88,10 @@ export default function RedefinirSenha() {
       >
         <div className="absolute inset-0 bg-white/35" />
 
-        <form className="relative z-10 w-[90%] rounded-2xl bg-white/80 p-6 shadow-[0_10px_30px_rgba(0,0,0,0.10)] backdrop-blur-md sm:w-[80%] sm:p-9 lg:w-[55%] lg:p-10">
+        <form
+          onSubmit={redefinirSenha}
+          className="relative z-10 w-[90%] rounded-2xl bg-white/80 p-6 shadow-[0_10px_30px_rgba(0,0,0,0.10)] backdrop-blur-md sm:w-[80%] sm:p-9 lg:w-[55%] lg:p-10"
+        >
           <h2 className="mb-[14px] text-center font-['Lucida_Sans'] text-[1.6em] font-bold uppercase text-black sm:text-[2em]">
             Redefinir Senha
           </h2>
@@ -32,6 +99,18 @@ export default function RedefinirSenha() {
           <p className="mb-6 text-center text-sm leading-6 text-[#4b4b68] sm:text-[15px]">
             Digite sua nova senha e confirme a alteração.
           </p>
+
+          {mensagem && (
+            <div className="mb-4 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm font-medium text-green-700">
+              {mensagem} Você será redirecionado para o login.
+            </div>
+          )}
+
+          {erro && (
+            <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+              {erro}
+            </div>
+          )}
 
           <div className="mb-[18px]">
             <span className="mb-1.5 inline-block text-base font-bold text-[#32324f]">
@@ -41,14 +120,22 @@ export default function RedefinirSenha() {
             <input
               type="password"
               placeholder="Digite sua nova senha"
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
               className="w-full rounded-lg border border-[#d9e2ec] bg-white px-[14px] py-[13px] text-[17px] font-normal outline-none placeholder:text-[#a9adb6] focus:border-[#132190] focus:shadow-[0_0_0_3px_rgba(19,33,144,0.15)]"
             />
           </div>
 
           <div className="mb-[18px]">
+            <span className="mb-1.5 inline-block text-base font-bold text-[#32324f]">
+              Confirmar Senha
+            </span>
+
             <input
               type="password"
               placeholder="Digite sua nova senha novamente"
+              value={confirmarPassword}
+              onChange={(event) => setConfirmarPassword(event.target.value)}
               className="w-full rounded-lg border border-[#d9e2ec] bg-white px-[14px] py-[13px] text-[17px] font-normal outline-none placeholder:text-[#a9adb6] focus:border-[#132190] focus:shadow-[0_0_0_3px_rgba(19,33,144,0.15)]"
             />
           </div>
@@ -56,9 +143,10 @@ export default function RedefinirSenha() {
           <div className="mb-[18px]">
             <button
               type="submit"
-              className="w-full cursor-pointer rounded-lg border-0 bg-gradient-to-br from-[#004AF7] to-[#132190] px-[14px] py-[13px] text-xl font-semibold text-white transition hover:bg-[#004AF7]"
+              disabled={carregando}
+              className="w-full cursor-pointer rounded-lg border-0 bg-gradient-to-br from-[#004AF7] to-[#132190] px-[14px] py-[13px] text-xl font-semibold text-white transition hover:bg-[#004AF7] disabled:cursor-not-allowed disabled:opacity-60"
             >
-              Enviar
+              {carregando ? 'Enviando...' : 'Enviar'}
             </button>
           </div>
 

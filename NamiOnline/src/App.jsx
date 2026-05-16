@@ -82,7 +82,7 @@ function App() {
           <Route path="/" element={<TelaLogin />} />
           <Route path="/cadastro" element={<TelaCadastro />} />
           <Route path="/recuperar-senha" element={<RecuperarSenha />} />
-          <Route path="/redefinir-senha" element={<RedefinirSenha />} />
+          <Route path="/redefinir-senha/:token" element={<RedefinirSenha />} />
 
           <Route element={<ProtectedLayout />}>
             <Route element={<RoleGuard allowedRoles={['usuario']} redirectTo="/admin/dashboard" />}>

@@ -1,8 +1,51 @@
+import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import imagemRecuperacao from '../../assets/bg_nami2.png'
 import imagemLateral from '../../assets/bg_nami.png'
-import { Link } from 'react-router-dom'
+import api from '../../services/api'
 
 export default function RecuperarSenha() {
+  const [email, setEmail] = useState('')
+  const [mensagem, setMensagem] = useState('')
+  const [erro, setErro] = useState('')
+  const [carregando, setCarregando] = useState(false)
+
+  async function solicitarRecuperacaoSenha(event) {
+    event.preventDefault()
+
+    setMensagem('')
+    setErro('')
+
+    if (!email) {
+      setErro('Informe seu e-mail cadastrado.')
+      return
+    }
+
+    try {
+      setCarregando(true)
+
+      const resposta = await api.post('/usuarios/recuperar-senha', {
+        email,
+      })
+
+      setMensagem(
+        resposta.data?.message ||
+          'Se o e-mail estiver cadastrado, enviaremos instruções para redefinir a senha.'
+      )
+
+      setEmail('')
+    } catch (error) {
+      console.error('Erro ao solicitar recuperação de senha:', error)
+
+      setErro(
+        error.response?.data?.error ||
+          'Erro ao solicitar recuperação de senha. Tente novamente.'
+      )
+    } finally {
+      setCarregando(false)
+    }
+  }
+
   return (
     <div className="flex h-screen w-full overflow-hidden font-sans">
       <div
@@ -24,7 +67,10 @@ export default function RecuperarSenha() {
       >
         <div className="absolute inset-0 bg-white/35" />
 
-        <form className="relative z-10 w-[90%] rounded-2xl bg-white/80 p-6 shadow-[0_10px_30px_rgba(0,0,0,0.10)] backdrop-blur-md sm:w-[80%] sm:p-9 lg:w-[55%] lg:p-10">
+        <form
+          onSubmit={solicitarRecuperacaoSenha}
+          className="relative z-10 w-[90%] rounded-2xl bg-white/80 p-6 shadow-[0_10px_30px_rgba(0,0,0,0.10)] backdrop-blur-md sm:w-[80%] sm:p-9 lg:w-[55%] lg:p-10"
+        >
           <h2 className="mb-[14px] text-center font-['Lucida_Sans'] text-[1.6em] font-bold uppercase text-black sm:text-[2em]">
             Recuperar Senha
           </h2>
@@ -34,14 +80,28 @@ export default function RecuperarSenha() {
             recuperação de senha.
           </p>
 
+          {mensagem && (
+            <div className="mb-4 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm font-medium text-green-700">
+              {mensagem}
+            </div>
+          )}
+
+          {erro && (
+            <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+              {erro}
+            </div>
+          )}
+
           <div className="mb-[18px]">
             <span className="mb-1.5 inline-block text-base font-bold text-[#32324f]">
               E-mail
             </span>
 
             <input
-              type="text"
+              type="email"
               placeholder="Digite seu e-mail"
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
               className="w-full rounded-lg border border-[#d9e2ec] bg-white px-[14px] py-[13px] text-[17px] font-normal outline-none placeholder:text-[#a9adb6] focus:border-[#132190] focus:shadow-[0_0_0_3px_rgba(19,33,144,0.15)]"
             />
           </div>
@@ -49,9 +109,10 @@ export default function RecuperarSenha() {
           <div className="mb-[18px]">
             <button
               type="submit"
-              className="w-full cursor-pointer rounded-lg border-0 bg-gradient-to-br from-[#004AF7] to-[#132190] px-[14px] py-[13px] text-xl font-semibold text-white transition hover:bg-[#004AF7]"
+              disabled={carregando}
+              className="w-full cursor-pointer rounded-lg border-0 bg-gradient-to-br from-[#004AF7] to-[#132190] px-[14px] py-[13px] text-xl font-semibold text-white transition hover:bg-[#004AF7] disabled:cursor-not-allowed disabled:opacity-60"
             >
-              Enviar
+              {carregando ? 'Enviando...' : 'Enviar'}
             </button>
           </div>
 

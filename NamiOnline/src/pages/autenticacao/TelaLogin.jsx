@@ -108,7 +108,7 @@ export default function TelaLogin() {
             </label>
 
             <Link
-              to="/recuperarsenha"
+              to="/recuperar-senha"
               className="text-[#132190] no-underline hover:text-[#004AF7]"
             >
               Esqueceu a senha?

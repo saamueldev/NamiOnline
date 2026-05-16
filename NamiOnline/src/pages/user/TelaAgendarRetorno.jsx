@@ -1,11 +1,57 @@
 import { Link, useNavigate } from 'react-router-dom'
+import { useState } from 'react'
 
 export default function TelaAgendarRetorno() {
+
   const navigate = useNavigate()
 
-  const handleSubmit = (e) => {
+  // =========================
+  // STATES
+  // =========================
+  const [especialidade, setEspecialidade] = useState('Cardiologia')
+  const [medico, setMedico] = useState('Dra. Marina Soares')
+  const [data, setData] = useState('')
+  const [horario, setHorario] = useState('')
+  const [observacoes, setObservacoes] = useState('')
+
+  // =========================
+  // AGENDAR RETORNO
+  // =========================
+  const agendarRetorno = async (e) => {
+
     e.preventDefault()
-    navigate('/retornos')
+
+    try {
+
+      const response = await fetch("http://localhost:3000/retornos", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          medico,
+          especialidade,
+          data,
+          horario,
+          observacoes,
+        }),
+      })
+
+      const dataResponse = await response.json()
+
+      console.log(dataResponse)
+
+      alert("Retorno agendado com sucesso!")
+
+      navigate('/retornos')
+
+    } catch (error) {
+
+      console.error(error)
+
+      alert("Erro ao agendar retorno")
+
+    }
   }
 
   return (
@@ -47,7 +93,7 @@ export default function TelaAgendarRetorno() {
 
           {/* FORM */}
           <form
-            onSubmit={handleSubmit}
+            onSubmit={agendarRetorno}
             className="flex flex-col gap-6"
           >
 
@@ -57,7 +103,11 @@ export default function TelaAgendarRetorno() {
               <label className="flex flex-col gap-3 text-sm text-slate-300">
                 Especialidade
 
-                <select className="w-full rounded-2xl border border-slate-400/20 bg-slate-800/80 px-4 py-4 text-white outline-none transition focus:border-sky-400 focus:ring-4 focus:ring-sky-400/10">
+                <select
+                  value={especialidade}
+                  onChange={(e) => setEspecialidade(e.target.value)}
+                  className="w-full rounded-2xl border border-slate-400/20 bg-slate-800/80 px-4 py-4 text-white outline-none transition focus:border-sky-400 focus:ring-4 focus:ring-sky-400/10"
+                >
                   <option>Cardiologia</option>
                   <option>Dermatologia</option>
                   <option>Ortopedia</option>
@@ -68,7 +118,11 @@ export default function TelaAgendarRetorno() {
               <label className="flex flex-col gap-3 text-sm text-slate-300">
                 Médico responsável
 
-                <select className="w-full rounded-2xl border border-slate-400/20 bg-slate-800/80 px-4 py-4 text-white outline-none transition focus:border-sky-400 focus:ring-4 focus:ring-sky-400/10">
+                <select
+                  value={medico}
+                  onChange={(e) => setMedico(e.target.value)}
+                  className="w-full rounded-2xl border border-slate-400/20 bg-slate-800/80 px-4 py-4 text-white outline-none transition focus:border-sky-400 focus:ring-4 focus:ring-sky-400/10"
+                >
                   <option>Dra. Marina Soares</option>
                   <option>Dr. Lucas Mota</option>
                   <option>Dra. Fernanda Alves</option>
@@ -81,6 +135,8 @@ export default function TelaAgendarRetorno() {
 
                 <input
                   type="date"
+                  value={data}
+                  onChange={(e) => setData(e.target.value)}
                   className="w-full rounded-2xl border border-slate-400/20 bg-slate-800/80 px-4 py-4 text-white outline-none transition focus:border-sky-400 focus:ring-4 focus:ring-sky-400/10"
                 />
               </label>
@@ -91,6 +147,8 @@ export default function TelaAgendarRetorno() {
 
                 <input
                   type="time"
+                  value={horario}
+                  onChange={(e) => setHorario(e.target.value)}
                   className="w-full rounded-2xl border border-slate-400/20 bg-slate-800/80 px-4 py-4 text-white outline-none transition focus:border-sky-400 focus:ring-4 focus:ring-sky-400/10"
                 />
               </label>
@@ -103,6 +161,8 @@ export default function TelaAgendarRetorno() {
 
               <textarea
                 rows="5"
+                value={observacoes}
+                onChange={(e) => setObservacoes(e.target.value)}
                 placeholder="Informe se precisa de instruções especiais"
                 className="min-h-[140px] w-full resize-y rounded-2xl border border-slate-400/20 bg-slate-800/80 px-4 py-4 text-white outline-none transition focus:border-sky-400 focus:ring-4 focus:ring-sky-400/10"
               />
@@ -119,7 +179,8 @@ export default function TelaAgendarRetorno() {
               </Link>
 
               <button
-                type="submit"
+              onClick={agendarRetorno}
+              type="submit"
                 className="flex min-w-[190px] items-center justify-center rounded-2xl border border-sky-400/30 bg-gradient-to-r from-sky-400 to-cyan-500 px-6 py-4 font-bold text-white shadow-xl transition hover:-translate-y-1"
               >
                 Confirmar agendamento
@@ -133,7 +194,6 @@ export default function TelaAgendarRetorno() {
         {/* ASIDE */}
         <aside className="flex flex-col gap-5 rounded-[28px] border border-slate-400/10 bg-slate-900/90 p-8 shadow-2xl backdrop-blur-xl">
 
-          {/* HEADER */}
           <div>
             <h2 className="mb-3 text-2xl font-bold text-slate-50">
               Por que agendar aqui?
@@ -144,7 +204,6 @@ export default function TelaAgendarRetorno() {
             </p>
           </div>
 
-          {/* BENEFITS */}
           <div className="grid gap-4">
 
             <div className="rounded-3xl border border-slate-400/10 bg-slate-800/90 p-5">
@@ -179,7 +238,6 @@ export default function TelaAgendarRetorno() {
 
           </div>
 
-          {/* NOTE */}
           <div className="rounded-3xl border border-sky-400/20 bg-gradient-to-b from-sky-400/10 to-slate-900 p-6">
 
             <h3 className="mb-3 text-xl font-bold text-slate-50">

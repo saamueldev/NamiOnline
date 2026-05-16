@@ -28,31 +28,65 @@ export default function TelaPerfil() {
   const [avatar] = useState(user?.avatar || null)
   const [notificacoes, setNotificacoes] = useState(true)
 
+  // =========================
   // TEMA
+  // =========================
   const [tema, setTema] = useState(
     localStorage.getItem('tema') || 'claro'
   )
 
-  // APLICA TEMA
+  // =========================
+  // APLICA O TEMA AO ENTRAR
+  // =========================
   useEffect(() => {
-    if (tema === 'escuro') {
+    const temaSalvo = localStorage.getItem('tema') || 'claro'
+
+    setTema(temaSalvo)
+
+    if (temaSalvo === 'escuro') {
       document.body.classList.add('dark')
     } else {
       document.body.classList.remove('dark')
     }
-  }, [tema])
+  }, [])
 
+  // =========================
   // SALVAR TEMA
-  const salvarTema = () => {
-  localStorage.setItem("tema", tema)
+  // =========================
+  const salvarTema = async () => {
+    try {
+      // ENVIA PARA O BACKEND
+      await fetch("http://localhost:3000/configuracoes/tema", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          tema,
+        }),
+      })
 
-  if (tema === "escuro") {
-    document.body.classList.add("dark")
-  } else {
-    document.body.classList.remove("dark")
-  }
+      // SALVA LOCALMENTE
+      localStorage.setItem("tema", tema)
+
+      // ALTERA O BODY
+      if (tema === "escuro") {
+        document.body.classList.add("dark")
+      } else {
+        document.body.classList.remove("dark")
+      }
+
+      alert("Tema salvo com sucesso!")
+
+    } catch (error) {
+      console.error(error)
+      alert("Erro ao salvar tema")
+    }
   }
 
+  // =========================
+  // AVATAR
+  // =========================
   const handleAvatarChange = (e) => {
     const file = e.target.files[0]
 
@@ -67,6 +101,9 @@ export default function TelaPerfil() {
     }
   }
 
+  // =========================
+  // LOGOUT
+  // =========================
   const handleLogout = () => {
     logout()
     navigate('/')

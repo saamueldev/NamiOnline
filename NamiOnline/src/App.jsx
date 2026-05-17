@@ -28,6 +28,7 @@ import CentralAjuda from './pages/user/CentralAjuda';
 // --- COMPONENTES DO ADMINISTRADOR (ADM) ---
 import TelaInicialAdmin from './pages/adm/TelaInicialAdmin';
 import AdicionarMedico from "./pages/adm/AdminAdicionarMedico";
+import CadastrarPaciente from "./pages/adm/AdminCadastrarPaciente"
 import AdicionarEspecialidade from "./pages/adm/CadastroEspecialidades";
 import TelaNotificacaoAdmin from './pages/adm/TelaNotificacaoAdmin';
 import AdminAgendarExame from './pages/adm/AdminAgendarExame';
@@ -111,6 +112,7 @@ function App() {
             
               <Route path="/admin/dashboard" element={<TelaInicialAdmin />} />
               <Route path="/admin/cadastrar-medico" element={<AdicionarMedico />} />
+              <Route path="/admin/cadastrar-paciente" element={<CadastrarPaciente />} />
               <Route path="/admin/cadastrar-especialidade" element={<AdicionarEspecialidade />} />
               <Route path="/admin/aprovar-guias" element={<AprovarGuia />} />
               <Route path="/admin/consultas-dia" element={<ConsultaDia />} />

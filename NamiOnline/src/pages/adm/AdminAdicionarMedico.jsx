@@ -10,6 +10,8 @@ const AdicionarMedico = () => {
     paddingLeft: "14px",
   };
 
+  
+
   return (
     <div className="min-h-screen bg-[#E4F2FE] px-4 py-8 md:px-6 font-sans">
 

@@ -1,5 +1,5 @@
 import { Outlet } from "react-router-dom";
-import BarraNavegacao from "../components/BarraNavegacao";
+import BarraNavegacao from "../components/BarraNavegacaoUsuario";
 
 function LayoutComNavbar() {
   return (

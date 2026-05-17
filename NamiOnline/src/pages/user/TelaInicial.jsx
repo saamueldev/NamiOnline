@@ -155,26 +155,6 @@ export default function TelaInicial() {
           </div>
         </section>
       </main>
-
-      <footer className="mt-[60px] bg-[#132190] text-white flex justify-around p-[30px]">
-        <div>
-          <h4>Suporte</h4>
-          <p>Email: suporte@nami.com</p>
-          <p>Telefone: (85) 99999-9999</p>
-        </div>
-
-        <div>
-          <h4>Hospital</h4>
-          <p>Av. Washington Soares</p>
-          <p>Fortaleza - CE</p>
-        </div>
-
-        <div>
-          <h4>Perguntas Frequentes</h4>
-          <p>Termos de privacidade</p>
-          <p>Parceiros</p>
-        </div>
-      </footer>
     </div>
   );
 }

@@ -20,7 +20,6 @@ const initialEvents = [
   {
     id: 1,
     title: "Mutirão de consultas cardiológicas",
-    type: "Consulta",
     status: "Publicado",
     date: "2026-05-10",
     time: "08:00",
@@ -32,7 +31,6 @@ const initialEvents = [
   {
     id: 2,
     title: "Campanha de atualização cadastral",
-    type: "Institucional",
     status: "Publicado",
     date: "2026-05-20",
     time: "09:00",
@@ -45,7 +43,6 @@ const initialEvents = [
 
 const emptyForm = {
   title: "",
-  type: "Consulta",
   date: new Date().toISOString().slice(0, 10),
   time: "08:00",
   location: "",
@@ -95,7 +92,6 @@ export default function AdminEventsCrud() {
     setEditingId(item.id);
     setForm({
       title: item.title,
-      type: item.type,
       status: item.status,
       date: item.date,
       time: item.time,
@@ -221,7 +217,6 @@ export default function AdminEventsCrud() {
           <div className="overflow-hidden rounded-2xl border border-slate-200">
             <div className="hidden grid-cols-12 bg-slate-50 px-6 py-4 text-xs font-bold uppercase tracking-wide text-slate-500 md:grid">
               <span className="col-span-3">Evento</span>
-              <span className="col-span-2">Tipo</span>
               <span className="col-span-2">Status</span>
               <span className="col-span-2">Data/Hora</span>
               <span className="col-span-1">Vagas</span>
@@ -245,11 +240,6 @@ export default function AdminEventsCrud() {
                     </p>
                   </div>
 
-                  <div className="md:col-span-2">
-                    <span className="inline-flex rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700">
-                      {item.type}
-                    </span>
-                  </div>
 
                   <div className="md:col-span-2">
                     <StatusBadge status={item.status} />
@@ -328,19 +318,11 @@ export default function AdminEventsCrud() {
               />
 
               <Select
-                label="Tipo"
-                name="type"
-                value={form.type}
-                onChange={handleChange}
-                options={["Consulta", "Treinamento", "Campanha", "Institucional", "Urgente"]}
-              />
-
-              <Select
                 label="Status"
                 name="status"
                 value={form.status}
                 onChange={handleChange}
-                options={["Publicado"]}
+                options={["Publicado", "Rascunho"]}
               />
 
               <Input

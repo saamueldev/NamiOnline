@@ -16,21 +16,24 @@ export default function TelaLogin() {
   const handleLogin = async (e) => {
     e.preventDefault()
     setErro('')
+
+    if (!email || !senha) {
+      setErro('Por favor, preencha todos os campos')
+      return
+    }
+
     setLoading(true)
 
     try {
-      if (!email || !senha) {
-        setErro('Por favor, preencha todos os campos')
-        return
-      }
+      const resultado = await login(email.trim(), senha)
 
-      const resultado = await login(email, senha)
-
-      if (resultado.sucesso) {
-        navigate(resultado.tipo === 'admin' ? '/admin/dashboard' : '/home')
+      if (resultado.tipo === 'admin') {
+        navigate('/admin/dashboard')
+      } else {
+        navigate('/home')
       }
     } catch (error) {
-      setErro(error.response?.data?.error || 'Email/CPF ou senha inválidos')
+      setErro(error.response?.data?.error || 'Email ou senha inválidos')
     } finally {
       setLoading(false)
     }
@@ -134,6 +137,11 @@ export default function TelaLogin() {
             </p>
           </div>
 
+          <div className="mt-[15px] rounded-lg bg-[#f5f5f5] p-[15px]">
+            <p className="mt-[15px] text-center text-xs text-[#888]">
+              <strong>Teste Admin:</strong> admin@nami.com / admin123
+            </p>
+          </div>
         </form>
       </div>
     </div>

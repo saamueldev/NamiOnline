@@ -53,7 +53,7 @@ function formatarData(data) {
   }).format(new Date(`${data}T00:00:00`));
 }
 
-
+export default function TelaInicial() {
   const [index, setIndex] = useState(0);
 
   const noticiasOrdenadas = useMemo(() => {

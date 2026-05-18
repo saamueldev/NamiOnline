@@ -573,3 +573,4 @@ function formatDate(date) {
     year: "numeric",
   }).format(new Date(`${date}T00:00:00`));
 }
+

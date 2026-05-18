@@ -1,39 +1,264 @@
-import React, { useState } from 'react';
-import { useNavigate } from "react-router-dom";
+import React, { useEffect, useMemo, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import {
+  AlertCircle,
+  ArrowRight,
   Calendar,
+  CheckCircle2,
   ChevronLeft,
   ChevronRight,
   Clock,
+  Loader2,
   MapPin,
   User,
-  CheckCircle2,
-  ArrowRight
-} from 'lucide-react';
+  X
+} from "lucide-react";
+import api from "../../services/api";
+
+const LOCAL_NAMI = {
+  nome: "NAMI - Unifor",
+  endereco: "Av. Washington Soares, 1321",
+  bairro: "Edson Queiroz, Fortaleza - CE"
+};
+
+const DIAS_SEMANA = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sab"];
+const CHAVES_SEMANA = [
+  "sunday",
+  "monday",
+  "tuesday",
+  "wednesday",
+  "thursday",
+  "friday",
+  "saturday"
+];
+
+function normalizarId(valor) {
+  if (!valor) return "";
+  if (typeof valor === "string") return valor;
+  return valor._id || valor.id || "";
+}
+
+function nomeEspecialidade(especialidade) {
+  return especialidade?.name || especialidade?.nome || "Especialidade";
+}
+
+function minutosDoHorario(horario) {
+  const [hora, minuto] = horario.split(":").map(Number);
+  return hora * 60 + minuto;
+}
+
+function formatarHorario(minutos) {
+  const hora = String(Math.floor(minutos / 60)).padStart(2, "0");
+  const minuto = String(minutos % 60).padStart(2, "0");
+  return `${hora}:${minuto}`;
+}
+
+function gerarHorariosDoDia(data, horariosFixos, duracaoConsulta) {
+  const chaveDia = CHAVES_SEMANA[data.getDay()];
+  const faixas = horariosFixos[chaveDia] || [];
+  const horarios = [];
+
+  faixas.forEach((faixa) => {
+    const inicio = minutosDoHorario(faixa.start);
+    const fim = minutosDoHorario(faixa.end);
+
+    for (let minuto = inicio; minuto + duracaoConsulta <= fim; minuto += duracaoConsulta) {
+      horarios.push(formatarHorario(minuto));
+    }
+  });
+
+  return horarios;
+}
+
+function mesmoDia(dataA, dataB) {
+  return (
+    dataA.getFullYear() === dataB.getFullYear() &&
+    dataA.getMonth() === dataB.getMonth() &&
+    dataA.getDate() === dataB.getDate()
+  );
+}
+
+function criarDataConsulta(data, horario) {
+  const [hora, minuto] = horario.split(":").map(Number);
+  const dataConsulta = new Date(data);
+  dataConsulta.setHours(hora, minuto, 0, 0);
+  return dataConsulta;
+}
+
+function formatarData(data) {
+  return data.toLocaleDateString("pt-BR", {
+    weekday: "long",
+    day: "2-digit",
+    month: "long",
+    year: "numeric"
+  });
+}
 
 const ConfirmarConsulta = () => {
   const navigate = useNavigate();
+  const location = useLocation();
 
-  const [selectedDoctor, setSelectedDoctor] = useState('Dra. Maria Silva');
-  const [selectedDate, setSelectedDate] = useState(4);
-  const [selectedTime, setSelectedTime] = useState('08:00');
+  const especialidade = location.state?.especialidade || null;
+  const guia = location.state?.guia || location.state?.guiaId || null;
+  const especialidadeId = normalizarId(especialidade);
+  const duracaoConsulta = Number(especialidade?.duracaoConsulta) || 30;
 
-  const doctors = [
-    { id: 1, name: 'Dra. Maria Silva', specialty: 'Clínica Geral', crm: 'CRM-CE 12345' },
-    { id: 2, name: 'Dr. João Pereira', specialty: 'Clínica Geral', crm: 'CRM-CE 54321' },
-    { id: 3, name: 'Dra. Ana Costa', specialty: 'Clínica Geral', crm: 'CRM-CE 67890' },
-  ];
+  const hoje = useMemo(() => {
+    const data = new Date();
+    data.setHours(0, 0, 0, 0);
+    return data;
+  }, []);
 
-  const times = [
-    '08:00', '08:30', '09:00', '09:30',
-    '10:00', '10:30', '13:00', '13:30'
-  ];
+  const [mesAtual, setMesAtual] = useState(() => new Date(hoje.getFullYear(), hoje.getMonth(), 1));
+  const [horariosFixos, setHorariosFixos] = useState({});
+  const [medicos, setMedicos] = useState([]);
+  const [carregando, setCarregando] = useState(true);
+  const [erro, setErro] = useState("");
+  const [selectedDoctorId, setSelectedDoctorId] = useState("");
+  const [selectedDate, setSelectedDate] = useState(null);
+  const [selectedTime, setSelectedTime] = useState("");
+  const [confirmando, setConfirmando] = useState(false);
+  const [consultaConfirmada, setConsultaConfirmada] = useState(null);
 
-  const days = Array.from({ length: 30 }, (_, i) => i + 1);
+  useEffect(() => {
+    async function carregarDadosAgendamento() {
+      try {
+        setCarregando(true);
+        setErro("");
+
+        const [medicosResponse, horariosResponse] = await Promise.all([
+          api.get("/medicos"),
+          api.get("/horarios-fixos")
+        ]);
+
+        const medicosApi = Array.isArray(medicosResponse.data) ? medicosResponse.data : [];
+        const medicosFiltrados = especialidadeId
+          ? medicosApi.filter((medico) => normalizarId(medico.especialidadeId) === especialidadeId)
+          : medicosApi;
+
+        setMedicos(medicosFiltrados);
+        setHorariosFixos(horariosResponse.data || {});
+        setSelectedDoctorId(normalizarId(medicosFiltrados[0]));
+      } catch (error) {
+        console.error("Erro ao carregar agendamento:", error);
+        setMedicos([]);
+        setHorariosFixos({});
+        setErro("Nao foi possivel carregar medicos e horarios do servidor.");
+      } finally {
+        setCarregando(false);
+      }
+    }
+
+    carregarDadosAgendamento();
+  }, [especialidadeId]);
+
+  const selectedDoctor = useMemo(
+    () => medicos.find((medico) => normalizarId(medico) === selectedDoctorId),
+    [medicos, selectedDoctorId]
+  );
+
+  const diasDoMes = useMemo(() => {
+    const ano = mesAtual.getFullYear();
+    const mes = mesAtual.getMonth();
+    const primeiroDiaSemana = new Date(ano, mes, 1).getDay();
+    const quantidadeDias = new Date(ano, mes + 1, 0).getDate();
+
+    const espacosIniciais = Array.from({ length: primeiroDiaSemana }, (_, index) => ({
+      tipo: "empty",
+      id: `empty-${index}`
+    }));
+
+    const dias = Array.from({ length: quantidadeDias }, (_, index) => {
+      const data = new Date(ano, mes, index + 1);
+      data.setHours(0, 0, 0, 0);
+
+      const horarios = gerarHorariosDoDia(data, horariosFixos, duracaoConsulta);
+      const disponivel = data >= hoje && horarios.length > 0 && medicos.length > 0;
+
+      return {
+        tipo: "day",
+        id: data.toISOString(),
+        data,
+        dia: index + 1,
+        disponivel
+      };
+    });
+
+    return [...espacosIniciais, ...dias];
+  }, [duracaoConsulta, hoje, horariosFixos, medicos.length, mesAtual]);
+
+  const horariosDisponiveis = useMemo(() => {
+    if (!selectedDate || !selectedDoctor) return [];
+    return gerarHorariosDoDia(selectedDate, horariosFixos, duracaoConsulta);
+  }, [duracaoConsulta, horariosFixos, selectedDate, selectedDoctor]);
+
+  useEffect(() => {
+    const dataAindaExiste =
+      selectedDate &&
+      diasDoMes.some((dia) => dia.tipo === "day" && dia.disponivel && mesmoDia(dia.data, selectedDate));
+
+    if (dataAindaExiste) return;
+
+    const primeiroDiaDisponivel = diasDoMes.find((dia) => dia.tipo === "day" && dia.disponivel);
+    setSelectedDate(primeiroDiaDisponivel?.data || null);
+  }, [diasDoMes, selectedDate]);
+
+  useEffect(() => {
+    if (!horariosDisponiveis.length) {
+      setSelectedTime("");
+      return;
+    }
+
+    setSelectedTime((horarioAtual) =>
+      horariosDisponiveis.includes(horarioAtual) ? horarioAtual : horariosDisponiveis[0]
+    );
+  }, [horariosDisponiveis]);
+
+  function alterarMes(direcao) {
+    setMesAtual((mes) => new Date(mes.getFullYear(), mes.getMonth() + direcao, 1));
+  }
+
+  async function confirmarAgendamento() {
+    if (!selectedDoctor || !selectedDate || !selectedTime) {
+      setErro("Escolha medico, data e horario para confirmar.");
+      return;
+    }
+
+    try {
+      setConfirmando(true);
+      setErro("");
+
+      const dataConsulta = criarDataConsulta(selectedDate, selectedTime);
+
+      await api.post("/consultas", {
+        medicoId: normalizarId(selectedDoctor),
+        especialidadeId: especialidadeId || normalizarId(selectedDoctor.especialidadeId),
+        guiaId: normalizarId(guia) || null,
+        dataConsulta: dataConsulta.toISOString(),
+        tipo: "CONSULTA"
+      });
+
+      setConsultaConfirmada({
+        local: LOCAL_NAMI,
+        data: selectedDate,
+        horario: selectedTime,
+        medico: selectedDoctor
+      });
+    } catch (error) {
+      console.error("Erro ao confirmar consulta:", error);
+      setErro(error.response?.data?.error || "Nao foi possivel confirmar a consulta.");
+    } finally {
+      setConfirmando(false);
+    }
+  }
+
+  const mesFormatado = mesAtual.toLocaleDateString("pt-BR", {
+    month: "long",
+    year: "numeric"
+  });
 
   return (
     <div className="min-h-screen bg-[#E4F2FE] font-sans text-slate-900 p-4 md:p-8">
-
       <style>{`
         .glass-card {
           background: rgba(255,255,255,0.92);
@@ -41,248 +266,286 @@ const ConfirmarConsulta = () => {
           border: 1px solid rgba(135,183,254,0.25);
         }
 
-        .custom-scrollbar::-webkit-scrollbar {
-          width: 4px;
-        }
-
-        .custom-scrollbar::-webkit-scrollbar-track {
-          background: #E4F2FE;
-        }
-
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #E4F2FE; }
         .custom-scrollbar::-webkit-scrollbar-thumb {
           background: #87B7FE;
           border-radius: 999px;
         }
       `}</style>
 
-      {/* Header */}
       <header className="max-w-6xl mx-auto text-center mb-10">
-
         <span className="inline-flex rounded-full border border-[#87B7FE]/30 bg-white px-4 py-1 text-sm font-medium text-[#004AF7]">
           Agendamento
         </span>
 
         <h1 className="mt-4 text-3xl md:text-5xl font-extrabold text-[#132190] tracking-tight">
-          Clínica Geral
+          {nomeEspecialidade(especialidade)}
         </h1>
 
         <p className="mt-3 text-slate-600 text-lg max-w-2xl mx-auto">
-          Escolha seu médico, data e horário para continuar.
+          Escolha seu medico, data e horario para continuar.
         </p>
-
       </header>
 
       <main className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8">
-
-        {/* Coluna esquerda */}
         <div className="space-y-8">
-
-          {/* Local */}
           <section className="glass-card rounded-3xl p-6 shadow-sm">
-
             <h2 className="text-lg font-bold text-[#132190] mb-4 flex items-center gap-2">
               <MapPin className="w-5 h-5 text-[#004AF7]" />
               Local de atendimento
             </h2>
 
             <div className="bg-gradient-to-br from-[#132190] to-[#004AF7] rounded-2xl p-6 text-white relative overflow-hidden">
-
               <div className="relative z-10">
-                <h3 className="text-xl font-bold mb-2">
-                  NAMI - Unifor
-                </h3>
-
+                <h3 className="text-xl font-bold mb-2">{LOCAL_NAMI.nome}</h3>
                 <p className="text-white/85 text-sm leading-relaxed">
-                  Av. Washington Soares, 1321
+                  {LOCAL_NAMI.endereco}
                   <br />
-                  Edson Queiroz, Fortaleza - CE
+                  {LOCAL_NAMI.bairro}
                 </p>
               </div>
-
               <MapPin className="absolute right-[-10px] bottom-[-10px] w-24 h-24 text-white/10" />
-
             </div>
-
           </section>
 
-          {/* Calendário */}
           <section className="glass-card rounded-3xl p-6 shadow-sm">
-
-            <div className="flex justify-between items-center mb-6">
-
+            <div className="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-center mb-6">
               <h2 className="text-lg font-bold text-[#132190] flex items-center gap-2">
                 <Calendar className="w-5 h-5 text-[#004AF7]" />
                 Escolha a data
               </h2>
 
-              <div className="flex items-center gap-4 bg-[#E4F2FE] rounded-full px-4 py-2">
-
-                <ChevronLeft className="h-4 w-4 cursor-pointer text-[#132190]" />
-
-                <span className="text-sm font-bold text-[#132190]">
-                  Abril 2026
+              <div className="flex items-center justify-between gap-4 bg-[#E4F2FE] rounded-full px-4 py-2">
+                <button type="button" onClick={() => alterarMes(-1)} className="rounded-full p-1 text-[#132190] hover:bg-white" aria-label="Mes anterior">
+                  <ChevronLeft className="h-4 w-4" />
+                </button>
+                <span className="min-w-[130px] text-center text-sm font-bold capitalize text-[#132190]">
+                  {mesFormatado}
                 </span>
-
-                <ChevronRight className="h-4 w-4 cursor-pointer text-[#132190]" />
-
+                <button type="button" onClick={() => alterarMes(1)} className="rounded-full p-1 text-[#132190] hover:bg-white" aria-label="Proximo mes">
+                  <ChevronRight className="h-4 w-4" />
+                </button>
               </div>
-
             </div>
 
             <div className="grid grid-cols-7 gap-2 text-center text-[10px] font-bold text-slate-400 mb-4 uppercase">
-              <div>Dom</div>
-              <div>Seg</div>
-              <div>Ter</div>
-              <div>Qua</div>
-              <div>Qui</div>
-              <div>Sex</div>
-              <div>Sáb</div>
+              {DIAS_SEMANA.map((dia) => (
+                <div key={dia}>{dia}</div>
+              ))}
             </div>
 
             <div className="grid grid-cols-7 gap-2">
+              {diasDoMes.map((dia) => {
+                if (dia.tipo === "empty") return <div key={dia.id} />;
 
-              <div></div>
-              <div></div>
-              <div></div>
+                const selecionado = selectedDate && mesmoDia(dia.data, selectedDate);
 
-              {days.map(day => (
-                <button
-                  key={day}
-                  onClick={() => setSelectedDate(day)}
-                  className={`
-                    aspect-square rounded-xl text-sm font-bold transition-all
-                    ${selectedDate === day
-                      ? 'bg-[#132190] text-white'
-                      : 'bg-white text-slate-600 hover:bg-[#E4F2FE]'
-                    }
-                  `}
-                >
-                  {day}
-                </button>
-              ))}
-
+                return (
+                  <button
+                    key={dia.id}
+                    type="button"
+                    onClick={() => dia.disponivel && setSelectedDate(dia.data)}
+                    disabled={!dia.disponivel}
+                    className={`
+                      aspect-square rounded-none border text-sm font-bold transition-all
+                      ${selecionado
+                        ? "border-[#132190] bg-[#132190] text-white shadow-md"
+                        : dia.disponivel
+                          ? "border-[#8FD7A5] bg-[#DDF8E6] text-[#137333] hover:border-[#28A745] hover:bg-[#C8F1D5]"
+                          : "border-slate-100 bg-slate-50 text-slate-300 cursor-not-allowed"
+                      }
+                    `}
+                  >
+                    {dia.dia}
+                  </button>
+                );
+              })}
             </div>
 
+            <div className="mt-4 flex items-center gap-2 text-xs font-semibold text-[#137333]">
+              <span className="h-3 w-3 border border-[#8FD7A5] bg-[#DDF8E6]" />
+              Dias com fundo verde estao disponiveis.
+            </div>
           </section>
-
         </div>
 
-        {/* Coluna direita */}
         <div className="space-y-8">
-
-          {/* Médicos */}
           <section className="glass-card rounded-3xl p-6 shadow-sm">
-
             <h2 className="text-lg font-bold text-[#132190] mb-4 flex items-center gap-2">
               <User className="w-5 h-5 text-[#004AF7]" />
-              Escolha o médico
+              Escolha o medico
             </h2>
 
-            <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+            {carregando && (
+              <div className="flex items-center gap-2 rounded-2xl bg-white p-4 text-sm font-semibold text-slate-500">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Carregando dados do banco...
+              </div>
+            )}
 
-              {doctors.map(doc => (
+            {!carregando && medicos.length === 0 && (
+              <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm font-semibold text-amber-800">
+                Nenhum medico encontrado para esta especialidade.
+              </div>
+            )}
 
-                <button
-                  key={doc.id}
-                  onClick={() => setSelectedDoctor(doc.name)}
-                  className={`
-                    w-full p-4 rounded-2xl border text-left flex justify-between items-center transition-all
-                    ${selectedDoctor === doc.name
-                      ? 'border-[#004AF7] bg-[#E4F2FE]'
-                      : 'border-slate-100 bg-white hover:border-[#87B7FE]'
-                    }
-                  `}
-                >
+            {!carregando && medicos.length > 0 && (
+              <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+                {medicos.map((doc) => {
+                  const doctorId = normalizarId(doc);
+                  const selecionado = selectedDoctorId === doctorId;
 
-                  <div className="flex gap-3 items-center">
+                  return (
+                    <button
+                      key={doctorId}
+                      type="button"
+                      onClick={() => setSelectedDoctorId(doctorId)}
+                      className={`
+                        w-full p-4 rounded-2xl border text-left flex justify-between items-center transition-all
+                        ${selecionado ? "border-[#004AF7] bg-[#E4F2FE]" : "border-slate-100 bg-white hover:border-[#87B7FE]"}
+                      `}
+                    >
+                      <div className="flex gap-3 items-center">
+                        <div className={`p-2 rounded-full ${selecionado ? "bg-[#004AF7] text-white" : "bg-slate-100 text-slate-400"}`}>
+                          <User className="w-5 h-5" />
+                        </div>
+                        <div>
+                          <p className="font-bold text-[#132190]">{doc.name || doc.nome}</p>
+                          <p className="text-xs text-slate-500">{nomeEspecialidade(doc.especialidadeId)}</p>
+                        </div>
+                      </div>
 
-                    <div className={`
-                      p-2 rounded-full
-                      ${selectedDoctor === doc.name
-                        ? 'bg-[#004AF7] text-white'
-                        : 'bg-slate-100 text-slate-400'
-                      }
-                    `}>
-                      <User className="w-5 h-5" />
-                    </div>
-
-                    <div>
-                      <p className="font-bold text-[#132190]">
-                        {doc.name}
-                      </p>
-
-                      <p className="text-xs text-slate-500">
-                        {doc.specialty}
-                      </p>
-                    </div>
-
-                  </div>
-
-                  <div className="flex flex-col items-end gap-2">
-
-                    <span className="text-[10px] font-bold text-slate-400">
-                      {doc.crm}
-                    </span>
-
-                    {selectedDoctor === doc.name && (
-                      <CheckCircle2 className="w-5 h-5 text-[#004AF7]" />
-                    )}
-
-                  </div>
-
-                </button>
-
-              ))}
-
-            </div>
-
+                      <div className="flex flex-col items-end gap-2">
+                        <span className="text-[10px] font-bold text-slate-400">{doc.crm}</span>
+                        {selecionado && <CheckCircle2 className="w-5 h-5 text-[#004AF7]" />}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
           </section>
 
-          {/* Horários */}
           <section className="glass-card rounded-3xl p-6 shadow-sm">
-
             <h2 className="text-lg font-bold text-[#132190] mb-4 flex items-center gap-2">
               <Clock className="w-5 h-5 text-[#004AF7]" />
-              Escolha o horário
+              Escolha o horario
             </h2>
 
-            <div className="grid grid-cols-4 gap-3">
+            {horariosDisponiveis.length === 0 && (
+              <div className="rounded-2xl bg-white p-4 text-sm font-semibold text-slate-500">
+                Selecione um medico e um dia disponivel para ver os horarios.
+              </div>
+            )}
 
-              {times.map(time => (
-
-                <button
-                  key={time}
-                  onClick={() => setSelectedTime(time)}
-                  className={`
-                    py-3 rounded-xl border font-bold text-sm transition-all
-                    ${selectedTime === time
-                      ? 'bg-[#004AF7] border-[#004AF7] text-white'
-                      : 'bg-white border-slate-100 text-slate-600 hover:bg-[#E4F2FE]'
-                    }
-                  `}
-                >
-                  {time}
-                </button>
-
-              ))}
-
-            </div>
-
+            {horariosDisponiveis.length > 0 && (
+              <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
+                {horariosDisponiveis.map((time) => (
+                  <button
+                    key={time}
+                    type="button"
+                    onClick={() => setSelectedTime(time)}
+                    className={`py-3 rounded-xl border font-bold text-sm transition-all ${
+                      selectedTime === time
+                        ? "bg-[#004AF7] border-[#004AF7] text-white"
+                        : "bg-white border-slate-100 text-slate-600 hover:bg-[#E4F2FE]"
+                    }`}
+                  >
+                    {time}
+                  </button>
+                ))}
+              </div>
+            )}
           </section>
 
-          {/* Botão */}
+          {erro && (
+            <div className="flex items-start gap-2 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm font-semibold text-red-700">
+              <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+              {erro}
+            </div>
+          )}
+
           <button
-            onClick={() => navigate('/confirmacao')}
-            className="w-full bg-[#004AF7] hover:bg-[#132190] text-white font-bold py-5 rounded-2xl shadow-lg transition-all flex items-center justify-center gap-2 group"
+            type="button"
+            onClick={confirmarAgendamento}
+            disabled={confirmando || !selectedDoctor || !selectedDate || !selectedTime}
+            className="w-full bg-[#004AF7] hover:bg-[#132190] disabled:cursor-not-allowed disabled:bg-slate-300 text-white font-bold py-5 rounded-2xl shadow-lg transition-all flex items-center justify-center gap-2 group"
           >
-            Confirmar Agendamento
-
-            <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
+            {confirmando ? "Confirmando..." : "Confirmar Agendamento"}
+            {confirmando ? <Loader2 className="h-5 w-5 animate-spin" /> : <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />}
           </button>
-
         </div>
-
       </main>
+
+      {consultaConfirmada && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-lg rounded-3xl bg-white p-6 shadow-2xl">
+            <div className="mb-5 flex items-start justify-between gap-4">
+              <div>
+                <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-[#DDF8E6] text-[#137333]">
+                  <CheckCircle2 className="h-7 w-7" />
+                </div>
+                <h2 className="text-2xl font-extrabold text-[#132190]">Consulta marcada</h2>
+                <p className="mt-1 text-sm text-slate-500">Confira os dados do seu agendamento.</p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setConsultaConfirmada(null)}
+                className="rounded-full p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-700"
+                aria-label="Fechar"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <div className="space-y-3 rounded-2xl border border-[#87B7FE]/25 bg-[#F7FBFF] p-4">
+              <div className="flex gap-3">
+                <MapPin className="mt-1 h-5 w-5 shrink-0 text-[#004AF7]" />
+                <div>
+                  <p className="font-bold text-[#132190]">{consultaConfirmada.local.nome}</p>
+                  <p className="text-sm text-slate-600">
+                    {consultaConfirmada.local.endereco}, {consultaConfirmada.local.bairro}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex gap-3">
+                <Calendar className="mt-1 h-5 w-5 shrink-0 text-[#004AF7]" />
+                <div>
+                  <p className="font-bold text-[#132190]">Data marcada</p>
+                  <p className="text-sm capitalize text-slate-600">{formatarData(consultaConfirmada.data)}</p>
+                </div>
+              </div>
+
+              <div className="flex gap-3">
+                <Clock className="mt-1 h-5 w-5 shrink-0 text-[#004AF7]" />
+                <div>
+                  <p className="font-bold text-[#132190]">Horario</p>
+                  <p className="text-sm text-slate-600">{consultaConfirmada.horario}</p>
+                </div>
+              </div>
+
+              <div className="flex gap-3">
+                <User className="mt-1 h-5 w-5 shrink-0 text-[#004AF7]" />
+                <div>
+                  <p className="font-bold text-[#132190]">Medico</p>
+                  <p className="text-sm text-slate-600">{consultaConfirmada.medico.name || consultaConfirmada.medico.nome}</p>
+                </div>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => navigate("/meus-agendamentos")}
+              className="mt-5 w-full rounded-2xl bg-[#004AF7] py-4 font-bold text-white transition-colors hover:bg-[#132190]"
+            >
+              Ver meus agendamentos
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -102,7 +102,7 @@ function App() {
               <Route path="/retornos/agendar" element={<TelaAgendarRetorno />} />
                {/* EXAMES */}
               <Route path="/exames" element={<ExamesPaciente />} />
-              <Route path="/exames/agendar" element={<AgendarExamePaciente />} />
+              <Route path="/exames/agendar/:exameId" element={<AgendarExamePaciente />} />
               <Route path="/exames/sucesso" element={<ModalSolicitacaoSucesso />} />
             </Route>
 

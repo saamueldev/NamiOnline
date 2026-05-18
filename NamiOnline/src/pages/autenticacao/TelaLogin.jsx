@@ -13,27 +13,28 @@ export default function TelaLogin() {
   const [erro, setErro] = useState('')
   const [loading, setLoading] = useState(false)
 
-  const handleLogin = async (e) => {
+  const handleLogin = (e) => {
     e.preventDefault()
     setErro('')
     setLoading(true)
 
-    try {
+    setTimeout(() => {
       if (!email || !senha) {
         setErro('Por favor, preencha todos os campos')
+        setLoading(false)
         return
       }
 
-      const resultado = await login(email, senha)
+      const resultado = login(email, senha)
 
       if (resultado.sucesso) {
-        navigate(resultado.tipo === 'admin' ? '/admin/dashboard' : '/home')
+        navigate('/telainicial')
+      } else {
+        setErro('Email ou senha inválidos')
       }
-    } catch (error) {
-      setErro(error.response?.data?.error || 'Email/CPF ou senha inválidos')
-    } finally {
+
       setLoading(false)
-    }
+    }, 500)
   }
 
   return (
@@ -108,7 +109,7 @@ export default function TelaLogin() {
             </label>
 
             <Link
-              to="/recuperar-senha"
+              to="/recuperarsenha"
               className="text-[#132190] no-underline hover:text-[#004AF7]"
             >
               Esqueceu a senha?
@@ -134,6 +135,11 @@ export default function TelaLogin() {
             </p>
           </div>
 
+          <div className="mt-[15px] rounded-lg bg-[#f5f5f5] p-[15px]">
+            <p className="mt-[15px] text-center text-xs text-[#888]">
+              <strong>Teste Admin:</strong> admin@nami.com / admin123
+            </p>
+          </div>
         </form>
       </div>
     </div>

@@ -92,7 +92,7 @@ export default function TelaInicial() {
 
           <div className="grid grid-cols-4 gap-5 mt-5">
             <Link
-              to="/agendar/especialidades"
+              to="/especialidades"
               className="bg-white rounded-xl p-[30px] flex flex-col items-center gap-[10px] text-[22px] text-[#004AF7] no-underline shadow-[0_8px_20px_rgba(0,0,0,0.1)] transition duration-200 hover:-translate-y-1"
             >
               <FaCalendarCheck />

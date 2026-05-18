@@ -95,9 +95,9 @@ function App() {
               <Route path="/central-ajuda" element={<CentralAjuda />} />
               {/* CONSULTAS */}
               <Route path="/meus-agendamentos" element={<TelaAgendamentos />} />
-              <Route path="/agendar/especialidades" element={<ConsultaEspecialidade />} />
+              <Route path="/especialidades" element={<ConsultaEspecialidade />} />
               <Route path="/agendar/anexar-guia" element={<AnexarGuiaConsulta />} />
-              <Route path="/agendar/confirmar-data" element={<ConfirmarConsulta />} />
+              <Route path="/agendamento/data" element={<ConfirmarConsulta />} />
               <Route path="/retornos" element={<TelaRetorno />} />
               <Route path="/retornos/agendar" element={<TelaAgendarRetorno />} />
                {/* EXAMES */}

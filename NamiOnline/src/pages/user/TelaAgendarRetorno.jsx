@@ -1,7 +1,7 @@
 import { useState } from 'react'
-<<<<<<< HEAD
+
 import api from '../../services/api'
-=======
+
 import { Link, useNavigate } from 'react-router-dom'
 
 import {
@@ -12,7 +12,7 @@ import {
   FaArrowLeft,
   FaCheckCircle
 } from 'react-icons/fa'
->>>>>>> 155b987 (telas e backend funcionando)
+
 
 export default function TelaAgendarRetorno() {
   const navigate = useNavigate()
@@ -36,7 +36,7 @@ export default function TelaAgendarRetorno() {
     e.preventDefault()
 
     try {
-<<<<<<< HEAD
+      const { medico, especialidade, data, horario, observacoes } = form
 
       const response = await api.post('/retornos', {
         medico,
@@ -47,24 +47,10 @@ export default function TelaAgendarRetorno() {
       })
 
       const dataResponse = response.data
-=======
-      const response = await fetch('http://localhost:3000/retornos', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(form),
-      })
-
-      const data = await response.json()
->>>>>>> 155b987 (telas e backend funcionando)
-
-      console.log(data)
+      console.log(dataResponse)
 
       alert('Retorno agendado com sucesso!')
-
       navigate('/retornos')
-
     } catch (error) {
       console.error(error)
       alert('Erro ao agendar retorno')

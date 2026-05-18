@@ -7,9 +7,22 @@ import {
   ClipboardList,
   Search,
   HeartPulse,
+  Clock3,
+  FileText,
 } from 'lucide-react'
 
 import api from '../../services/api'
+
+const opcoesTempoMedio = [
+  { label: '15 minutos', value: 15 },
+  { label: '20 minutos', value: 20 },
+  { label: '30 minutos', value: 30 },
+  { label: '40 minutos', value: 40 },
+  { label: '45 minutos', value: 45 },
+  { label: '60 minutos', value: 60 },
+  { label: '90 minutos', value: 90 },
+  { label: '120 minutos', value: 120 },
+]
 
 export default function AdminCadastrarTiposExames() {
   const [categoriasExame, setCategoriasExame] = useState([])
@@ -17,6 +30,8 @@ export default function AdminCadastrarTiposExames() {
   const [categoriaExameId, setCategoriaExameId] = useState('')
   const [nome, setNome] = useState('')
   const [descricao, setDescricao] = useState('')
+  const [tempoMedioMinutos, setTempoMedioMinutos] = useState('')
+  const [guiaNecessaria, setGuiaNecessaria] = useState(false)
   const [busca, setBusca] = useState('')
   const [carregando, setCarregando] = useState(false)
 
@@ -43,8 +58,8 @@ export default function AdminCadastrarTiposExames() {
   async function cadastrarTipoExame(event) {
     event.preventDefault()
 
-    if (!categoriaExameId || !nome || !descricao) {
-      alert('Preencha todos os campos.')
+    if (!categoriaExameId || !nome || !descricao || !tempoMedioMinutos) {
+      alert('Preencha todos os campos obrigatórios.')
       return
     }
 
@@ -55,11 +70,15 @@ export default function AdminCadastrarTiposExames() {
         categoriaExameId,
         nome,
         descricao,
+        tempoMedioMinutos: Number(tempoMedioMinutos),
+        guiaNecessaria,
       })
 
       setCategoriaExameId('')
       setNome('')
       setDescricao('')
+      setTempoMedioMinutos('')
+      setGuiaNecessaria(false)
 
       await carregarTiposExame()
 
@@ -101,6 +120,8 @@ export default function AdminCadastrarTiposExames() {
     setCategoriaExameId('')
     setNome('')
     setDescricao('')
+    setTempoMedioMinutos('')
+    setGuiaNecessaria(false)
   }
 
   function buscarNomeCategoria(tipo) {
@@ -119,6 +140,29 @@ export default function AdminCadastrarTiposExames() {
     return categoriaEncontrada?.nome || 'Categoria não informada'
   }
 
+  function formatarTempoMedio(minutos) {
+    if (!minutos) {
+      return 'Tempo não informado'
+    }
+
+    if (minutos < 60) {
+      return `${minutos} minutos`
+    }
+
+    if (minutos === 60) {
+      return '1 hora'
+    }
+
+    const horas = Math.floor(minutos / 60)
+    const minutosRestantes = minutos % 60
+
+    if (minutosRestantes === 0) {
+      return `${horas} horas`
+    }
+
+    return `${horas}h ${minutosRestantes}min`
+  }
+
   useEffect(() => {
     carregarCategoriasExame()
     carregarTiposExame()
@@ -128,12 +172,16 @@ export default function AdminCadastrarTiposExames() {
     const nomeTipo = tipo.nome?.toLowerCase() || ''
     const descricaoTipo = tipo.descricao?.toLowerCase() || ''
     const nomeCategoria = buscarNomeCategoria(tipo).toLowerCase()
+    const tempoMedio = formatarTempoMedio(tipo.tempoMedioMinutos).toLowerCase()
+    const guia = tipo.guiaNecessaria ? 'guia necessária' : 'guia não necessária'
     const termoBusca = busca.toLowerCase()
 
     return (
       nomeTipo.includes(termoBusca) ||
       descricaoTipo.includes(termoBusca) ||
-      nomeCategoria.includes(termoBusca)
+      nomeCategoria.includes(termoBusca) ||
+      tempoMedio.includes(termoBusca) ||
+      guia.includes(termoBusca)
     )
   })
 
@@ -248,6 +296,43 @@ export default function AdminCadastrarTiposExames() {
 
               <div>
                 <label className="mb-2 block text-sm font-semibold text-[#132190]">
+                  Tempo médio do exame
+                </label>
+
+                <select
+                  value={tempoMedioMinutos}
+                  onChange={(event) => setTempoMedioMinutos(event.target.value)}
+                  className="w-full rounded-2xl border border-[#87B7FE]/30 bg-[#F8FBFF] px-4 py-4 text-sm text-slate-700 outline-none transition focus:border-[#004AF7] focus:ring-4 focus:ring-[#004AF7]/10"
+                >
+                  <option value="">Selecione o tempo médio</option>
+
+                  {opcoesTempoMedio.map((opcao) => (
+                    <option key={opcao.value} value={opcao.value}>
+                      {opcao.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="mb-2 block text-sm font-semibold text-[#132190]">
+                  Guia necessária
+                </label>
+
+                <select
+                  value={guiaNecessaria ? 'true' : 'false'}
+                  onChange={(event) =>
+                    setGuiaNecessaria(event.target.value === 'true')
+                  }
+                  className="w-full rounded-2xl border border-[#87B7FE]/30 bg-[#F8FBFF] px-4 py-4 text-sm text-slate-700 outline-none transition focus:border-[#004AF7] focus:ring-4 focus:ring-[#004AF7]/10"
+                >
+                  <option value="false">Não</option>
+                  <option value="true">Sim</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="mb-2 block text-sm font-semibold text-[#132190]">
                   Descrição
                 </label>
 
@@ -335,6 +420,26 @@ export default function AdminCadastrarTiposExames() {
                         <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
                           {tipo.descricao}
                         </p>
+
+                        <div className="mt-4 flex flex-wrap gap-3">
+                          <span className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-2 text-xs font-semibold text-[#132190] shadow-sm">
+                            <Clock3 className="h-4 w-4 text-[#004AF7]" />
+                            {formatarTempoMedio(tipo.tempoMedioMinutos)}
+                          </span>
+
+                          <span
+                            className={`inline-flex items-center gap-2 rounded-full px-3 py-2 text-xs font-semibold shadow-sm ${
+                              tipo.guiaNecessaria
+                                ? 'bg-amber-50 text-amber-700'
+                                : 'bg-green-50 text-green-700'
+                            }`}
+                          >
+                            <FileText className="h-4 w-4" />
+                            {tipo.guiaNecessaria
+                              ? 'Guia necessária'
+                              : 'Guia não necessária'}
+                          </span>
+                        </div>
                       </div>
 
                       <div className="flex shrink-0 gap-3">

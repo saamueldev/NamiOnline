@@ -2,6 +2,8 @@ import { BrowserRouter, Navigate, Outlet, Route, Routes } from "react-router-dom
 import { useContext, useEffect } from "react";
 import { AuthContext, AuthProvider } from './context/AuthContext';
 import LayoutComNavbar from "./layouts/LayoutComNavbar";
+import LayoutComNavbarAdmin from "./layouts/LayoutComNavBarAdmin";
+import LayoutFooter from "./layouts/LayoutFooter";
 
 // --- COMPONENTES DE AUTENTICACAO & ACESSO COMUM ---
 import TelaLogin from './pages/autenticacao/TelaLogin';
@@ -27,6 +29,7 @@ import CentralAjuda from './pages/user/CentralAjuda';
 
 // --- COMPONENTES DO ADMINISTRADOR (ADM) ---
 import TelaInicialAdmin from './pages/adm/TelaInicialAdmin';
+import TelaPerfilAdmin from "./pages/adm/TelaPerfilAdmin";
 import AdicionarMedico from "./pages/adm/AdminAdicionarMedico";
 import CadastrarPaciente from "./pages/adm/AdminCadastrarPaciente"
 import AdicionarEspecialidade from "./pages/adm/CadastroEspecialidades";
@@ -41,7 +44,7 @@ import AprovarGuia from './pages/adm/AprovarGuia';
 import ConsultaDia from "./pages/adm/AdminConsultaDia";
 
 function ProtectedLayout() {
-  const { authLoading, isLoggedIn } = useContext(AuthContext);
+  const { authLoading, isLoggedIn, user } = useContext(AuthContext);
 
   if (authLoading) {
     return null;
@@ -51,8 +54,16 @@ function ProtectedLayout() {
     return <Navigate to="/" replace />;
   }
 
-  return <LayoutComNavbar />;
-}
+  const Layout = user?.tipo === 'admin' ? LayoutComNavbarAdmin : LayoutComNavbar;
+
+  return (
+    <>
+      <Layout />
+      <LayoutFooter />
+    </>
+  );
+};
+
 
 function RoleGuard({ allowedRoles, redirectTo }) {
   const { user } = useContext(AuthContext);
@@ -88,7 +99,7 @@ function App() {
 
           <Route element={<ProtectedLayout />}>
             <Route element={<RoleGuard allowedRoles={['usuario']} redirectTo="/admin/dashboard" />}>
-            {/* USER */}
+              {/* USER */}
               <Route path="/home" element={<TelaInicial />} />
               <Route path="/perfil" element={<TelaPerfil />} />
               <Route path="/perfil/configuracoes" element={<TelaConfiguracaoUsuario />} />
@@ -101,17 +112,18 @@ function App() {
               <Route path="agendamento/data" element={<ConfirmarConsulta />} />
               <Route path="/retornos" element={<TelaRetorno />} />
               <Route path="/retornos/agendar" element={<TelaAgendarRetorno />} />
-               {/* EXAMES */}
+              {/* EXAMES */}
               <Route path="/exames" element={<ExamesPaciente />} />
-              <Route path="/exames/agendar" element={<AgendarExamePaciente />} />
+              <Route path="/exames/agendar/:exameId" element={<AgendarExamePaciente />} />
               <Route path="/exames/sucesso" element={<ModalSolicitacaoSucesso />} />
             </Route>
 
-              {/* ADMIN */}
+            {/* ADMIN */}
 
             <Route element={<RoleGuard allowedRoles={['admin']} redirectTo="/home" />}>
-            
+
               <Route path="/admin/dashboard" element={<TelaInicialAdmin />} />
+              <Route path="/admin/tela-perfil-admin" element={<TelaPerfilAdmin />} />
               <Route path="/admin/cadastrar-medico" element={<AdicionarMedico />} />
               <Route path="/admin/cadastrar-paciente" element={<CadastrarPaciente />} />
               <Route path="/admin/cadastrar-especialidade" element={<AdicionarEspecialidade />} />

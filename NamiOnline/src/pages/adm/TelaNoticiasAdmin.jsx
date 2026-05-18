@@ -160,6 +160,8 @@ export default function AdminNewsCrud() {
     setNews((currentNews) => currentNews.filter((item) => item.id !== id));
   }
 
+  fetch(`${import.meta.env.VITE_API_URL}/usuarios`)
+
   return (
     <div className="min-h-screen bg-slate-100 p-4 text-slate-900 md:p-8">
       <div className="mx-auto max-w-7xl space-y-8">

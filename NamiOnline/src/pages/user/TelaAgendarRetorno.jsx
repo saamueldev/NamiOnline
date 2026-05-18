@@ -1,28 +1,42 @@
-import { Link, useNavigate } from 'react-router-dom'
 import { useState } from 'react'
+
 import api from '../../services/api'
 
-export default function TelaAgendarRetorno() {
+import { Link, useNavigate } from 'react-router-dom'
 
+import {
+  FaCalendarCheck,
+  FaUserMd,
+  FaClock,
+  FaNotesMedical,
+  FaArrowLeft,
+  FaCheckCircle
+} from 'react-icons/fa'
+
+
+export default function TelaAgendarRetorno() {
   const navigate = useNavigate()
 
-  // =========================
-  // STATES
-  // =========================
-  const [especialidade, setEspecialidade] = useState('Cardiologia')
-  const [medico, setMedico] = useState('Dra. Marina Soares')
-  const [data, setData] = useState('')
-  const [horario, setHorario] = useState('')
-  const [observacoes, setObservacoes] = useState('')
+  const [form, setForm] = useState({
+    especialidade: 'Cardiologia',
+    medico: 'Dr. Lucas Mota',
+    data: '',
+    horario: '',
+    observacoes: '',
+  })
 
-  // =========================
-  // AGENDAR RETORNO
-  // =========================
+  const handleChange = (e) => {
+    setForm({
+      ...form,
+      [e.target.name]: e.target.value,
+    })
+  }
+
   const agendarRetorno = async (e) => {
-
     e.preventDefault()
 
     try {
+      const { medico, especialidade, data, horario, observacoes } = form
 
       const response = await api.post('/retornos', {
         medico,
@@ -33,222 +47,169 @@ export default function TelaAgendarRetorno() {
       })
 
       const dataResponse = response.data
-
       console.log(dataResponse)
 
-      alert("Retorno agendado com sucesso!")
-
+      alert('Retorno agendado com sucesso!')
       navigate('/retornos')
-
     } catch (error) {
-
       console.error(error)
-
-      alert("Erro ao agendar retorno")
-
+      alert('Erro ao agendar retorno')
     }
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#004AF7] to-[#132190] px-6 py-10 text-slate-200">
+    <div className="min-h-screen bg-[#F8FAFC] px-5 py-10">
 
-      <div className="mx-auto grid max-w-7xl grid-cols-1 gap-6 lg:grid-cols-[1.6fr_1fr]">
+      <div className="mx-auto max-w-5xl">
 
-        {/* MAIN CARD */}
-        <main className="flex flex-col gap-7 rounded-[28px] border border-slate-400/10 bg-slate-900/90 p-8 shadow-2xl backdrop-blur-xl">
+        {/* HEADER */}
+        <div className="mb-8 flex items-center gap-4">
 
-          {/* TITLE */}
-          <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+          <Link
+            to="/home"
+            className="flex h-11 w-11 items-center justify-center rounded-full bg-[#132190] text-white transition hover:bg-[#004AF7]"
+          >
+            <FaArrowLeft />
+          </Link>
 
-            <div>
-              <span className="inline-flex rounded-full bg-sky-400/20 px-4 py-3 text-sm font-bold uppercase tracking-[0.08em] text-sky-200">
-                Retorno médico
-              </span>
+          <div>
+            <h1 className="text-3xl font-bold text-[#132190]">
+              Agendar Retorno
+            </h1>
 
-              <h1 className="mt-5 text-4xl font-bold leading-tight text-slate-50">
-                Agende seu próximo retorno
-              </h1>
-
-              <p className="mt-3 max-w-2xl text-base leading-relaxed text-slate-300">
-                Organize sua consulta de forma rápida e mantenha seu histórico clínico sempre atualizado.
-              </p>
-            </div>
-
-            <div className="min-w-[220px] lg:text-right">
-              <strong className="mb-2 block text-sm text-blue-300">
-                Disponível em
-              </strong>
-
-              <p className="leading-relaxed text-slate-200">
-                Segunda a sexta • 08:00 - 18:00
-              </p>
-            </div>
-
+            <p className="text-slate-500">
+              Agende seu próximo atendimento
+            </p>
           </div>
 
-          {/* FORM */}
+        </div>
+
+        {/* CARD */}
+        <div className="rounded-[28px] border border-slate-200 bg-white p-8 shadow-xl">
+
           <form
             onSubmit={agendarRetorno}
-            className="flex flex-col gap-6"
+            className="space-y-6"
           >
 
-            <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+            {/* GRID */}
+            <div className="grid gap-5 md:grid-cols-2">
 
               {/* ESPECIALIDADE */}
-              <label className="flex flex-col gap-3 text-sm text-slate-300">
-                Especialidade
+              <div>
+                <label className="mb-2 flex items-center gap-2 font-semibold text-slate-700">
+                  <FaNotesMedical className="text-[#004AF7]" />
+                  Especialidade
+                </label>
 
                 <select
-                  value={especialidade}
-                  onChange={(e) => setEspecialidade(e.target.value)}
-                  className="w-full rounded-2xl border border-slate-400/20 bg-slate-800/80 px-4 py-4 text-white outline-none transition focus:border-sky-400 focus:ring-4 focus:ring-sky-400/10"
+                  name="especialidade"
+                  value={form.especialidade}
+                  onChange={handleChange}
+                  className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none transition focus:border-[#004AF7]"
                 >
                   <option>Cardiologia</option>
                   <option>Dermatologia</option>
                   <option>Ortopedia</option>
                 </select>
-              </label>
+              </div>
 
               {/* MÉDICO */}
-              <label className="flex flex-col gap-3 text-sm text-slate-300">
-                Médico responsável
+              <div>
+                <label className="mb-2 flex items-center gap-2 font-semibold text-slate-700">
+                  <FaUserMd className="text-[#004AF7]" />
+                  Médico
+                </label>
 
                 <select
-                  value={medico}
-                  onChange={(e) => setMedico(e.target.value)}
-                  className="w-full rounded-2xl border border-slate-400/20 bg-slate-800/80 px-4 py-4 text-white outline-none transition focus:border-sky-400 focus:ring-4 focus:ring-sky-400/10"
+                  name="medico"
+                  value={form.medico}
+                  onChange={handleChange}
+                  className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none transition focus:border-[#004AF7]"
                 >
-                  <option>Dra. Marina Soares</option>
                   <option>Dr. Lucas Mota</option>
+                  <option>Dra. Marina Soares</option>
                   <option>Dra. Fernanda Alves</option>
                 </select>
-              </label>
+              </div>
 
               {/* DATA */}
-              <label className="flex flex-col gap-3 text-sm text-slate-300">
-                Data do retorno
+              <div>
+                <label className="mb-2 flex items-center gap-2 font-semibold text-slate-700">
+                  <FaCalendarCheck className="text-[#004AF7]" />
+                  Data
+                </label>
 
                 <input
                   type="date"
-                  value={data}
-                  onChange={(e) => setData(e.target.value)}
-                  className="w-full rounded-2xl border border-slate-400/20 bg-slate-800/80 px-4 py-4 text-white outline-none transition focus:border-sky-400 focus:ring-4 focus:ring-sky-400/10"
+                  name="data"
+                  value={form.data}
+                  onChange={handleChange}
+                  className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none transition focus:border-[#004AF7]"
                 />
-              </label>
+              </div>
 
               {/* HORÁRIO */}
-              <label className="flex flex-col gap-3 text-sm text-slate-300">
-                Horário
+              <div>
+                <label className="mb-2 flex items-center gap-2 font-semibold text-slate-700">
+                  <FaClock className="text-[#004AF7]" />
+                  Horário
+                </label>
 
                 <input
                   type="time"
-                  value={horario}
-                  onChange={(e) => setHorario(e.target.value)}
-                  className="w-full rounded-2xl border border-slate-400/20 bg-slate-800/80 px-4 py-4 text-white outline-none transition focus:border-sky-400 focus:ring-4 focus:ring-sky-400/10"
+                  name="horario"
+                  value={form.horario}
+                  onChange={handleChange}
+                  className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none transition focus:border-[#004AF7]"
                 />
-              </label>
+              </div>
 
             </div>
 
-            {/* OBSERVAÇÕES */}
-            <label className="flex flex-col gap-3 text-sm text-slate-300">
-              Observações adicionais
+            {/* OBS */}
+            <div>
+              <label className="mb-2 flex items-center gap-2 font-semibold text-slate-700">
+                <FaNotesMedical className="text-[#004AF7]" />
+                Observações
+              </label>
 
               <textarea
                 rows="5"
-                value={observacoes}
-                onChange={(e) => setObservacoes(e.target.value)}
-                placeholder="Informe se precisa de instruções especiais"
-                className="min-h-[140px] w-full resize-y rounded-2xl border border-slate-400/20 bg-slate-800/80 px-4 py-4 text-white outline-none transition focus:border-sky-400 focus:ring-4 focus:ring-sky-400/10"
+                name="observacoes"
+                value={form.observacoes}
+                onChange={handleChange}
+                placeholder="Digite observações adicionais..."
+                className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none transition focus:border-[#004AF7]"
               />
-            </label>
+            </div>
 
             {/* BUTTONS */}
             <div className="flex flex-col gap-4 md:flex-row">
 
               <Link
                 to="/home"
-                className="flex min-w-[190px] items-center justify-center rounded-2xl border border-slate-400/20 bg-white/5 px-6 py-4 font-bold text-slate-300 transition hover:-translate-y-1"
+                className="flex items-center justify-center rounded-xl bg-slate-200 px-6 py-4 font-semibold text-slate-700 transition hover:bg-slate-300"
               >
-                Voltar para início
+                Voltar
               </Link>
 
               <button
-              onClick={agendarRetorno}
-              type="submit"
-                className="flex min-w-[190px] items-center justify-center rounded-2xl border border-sky-400/30 bg-gradient-to-r from-sky-400 to-cyan-500 px-6 py-4 font-bold text-white shadow-xl transition hover:-translate-y-1"
+                type="submit"
+                className="flex items-center justify-center gap-3 rounded-xl bg-[#004AF7] px-6 py-4 font-semibold text-white transition hover:bg-[#132190]"
               >
-                Confirmar agendamento
+                <FaCheckCircle />
+                Confirmar Agendamento
               </button>
 
             </div>
 
           </form>
-        </main>
 
-        {/* ASIDE */}
-        <aside className="flex flex-col gap-5 rounded-[28px] border border-slate-400/10 bg-slate-900/90 p-8 shadow-2xl backdrop-blur-xl">
-
-          <div>
-            <h2 className="mb-3 text-2xl font-bold text-slate-50">
-              Por que agendar aqui?
-            </h2>
-
-            <p className="leading-relaxed text-slate-300">
-              Seu próximo retorno fica registrado em seu perfil e você recebe lembrete automaticamente.
-            </p>
-          </div>
-
-          <div className="grid gap-4">
-
-            <div className="rounded-3xl border border-slate-400/10 bg-slate-800/90 p-5">
-              <strong className="mb-2 block text-blue-300">
-                ✔ Agendamento rápido
-              </strong>
-
-              <p className="leading-relaxed text-slate-300">
-                Escolha dia e horário em segundos.
-              </p>
-            </div>
-
-            <div className="rounded-3xl border border-slate-400/10 bg-slate-800/90 p-5">
-              <strong className="mb-2 block text-blue-300">
-                ✔ Atendimento priorizado
-              </strong>
-
-              <p className="leading-relaxed text-slate-300">
-                Mantenha o histórico de consultas alinhado com a equipe.
-              </p>
-            </div>
-
-            <div className="rounded-3xl border border-slate-400/10 bg-slate-800/90 p-5">
-              <strong className="mb-2 block text-blue-300">
-                ✔ Alertas via app
-              </strong>
-
-              <p className="leading-relaxed text-slate-300">
-                Receba aviso de retorno e instruções pré-consulta.
-              </p>
-            </div>
-
-          </div>
-
-          <div className="rounded-3xl border border-sky-400/20 bg-gradient-to-b from-sky-400/10 to-slate-900 p-6">
-
-            <h3 className="mb-3 text-xl font-bold text-slate-50">
-              Importante
-            </h3>
-
-            <p className="leading-relaxed text-slate-300">
-              Leve seus exames mais recentes e medicamentos.
-              Para alterações de horário, contate a central com antecedência.
-            </p>
-
-          </div>
-
-        </aside>
+        </div>
 
       </div>
+
     </div>
   )
 }

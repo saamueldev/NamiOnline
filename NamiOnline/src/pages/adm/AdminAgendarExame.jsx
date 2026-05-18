@@ -9,6 +9,7 @@ import {
   IdCard,
 } from 'lucide-react'
 
+
 export default function AdminAgendarExame() {
   return (
     <div className="min-h-screen bg-[#E4F2FE]">

@@ -9,9 +9,22 @@ import {
   ClipboardList,
   Save,
   X,
+  Clock3,
+  FileText,
 } from 'lucide-react'
 
 import api from '../../services/api'
+
+const opcoesTempoMedio = [
+  { label: '15 minutos', value: 15 },
+  { label: '20 minutos', value: 20 },
+  { label: '30 minutos', value: 30 },
+  { label: '40 minutos', value: 40 },
+  { label: '45 minutos', value: 45 },
+  { label: '60 minutos', value: 60 },
+  { label: '90 minutos', value: 90 },
+  { label: '120 minutos', value: 120 },
+]
 
 export default function AdminEditarExames() {
   const { categoriaId } = useParams()
@@ -26,6 +39,8 @@ export default function AdminEditarExames() {
   const [nomeEditando, setNomeEditando] = useState('')
   const [categoriaEditandoId, setCategoriaEditandoId] = useState('')
   const [descricaoEditando, setDescricaoEditando] = useState('')
+  const [tempoMedioEditando, setTempoMedioEditando] = useState('')
+  const [guiaNecessariaEditando, setGuiaNecessariaEditando] = useState(false)
   const [salvandoEdicao, setSalvandoEdicao] = useState(false)
 
   async function carregarCategoria() {
@@ -100,12 +115,37 @@ export default function AdminEditarExames() {
     return categoriaEncontrada?.nome || nomeCategoria
   }
 
+  function formatarTempoMedio(minutos) {
+    if (!minutos) {
+      return 'Tempo não informado'
+    }
+
+    if (minutos < 60) {
+      return `${minutos} minutos`
+    }
+
+    if (minutos === 60) {
+      return '1 hora'
+    }
+
+    const horas = Math.floor(minutos / 60)
+    const minutosRestantes = minutos % 60
+
+    if (minutosRestantes === 0) {
+      return `${horas} horas`
+    }
+
+    return `${horas}h ${minutosRestantes}min`
+  }
+
   function iniciarEdicaoExame(exame) {
     setExameAbertoId(exame._id)
     setExameEditandoId(exame._id)
     setNomeEditando(exame.nome || '')
     setCategoriaEditandoId(obterCategoriaIdDoExame(exame))
     setDescricaoEditando(exame.descricao || '')
+    setTempoMedioEditando(exame.tempoMedioMinutos ? String(exame.tempoMedioMinutos) : '')
+    setGuiaNecessariaEditando(Boolean(exame.guiaNecessaria))
   }
 
   function cancelarEdicaoExame() {
@@ -113,10 +153,17 @@ export default function AdminEditarExames() {
     setNomeEditando('')
     setCategoriaEditandoId('')
     setDescricaoEditando('')
+    setTempoMedioEditando('')
+    setGuiaNecessariaEditando(false)
   }
 
   async function salvarAlteracoesExame(id) {
-    if (!nomeEditando || !categoriaEditandoId || !descricaoEditando) {
+    if (
+      !nomeEditando ||
+      !categoriaEditandoId ||
+      !descricaoEditando ||
+      !tempoMedioEditando
+    ) {
       alert('Preencha todos os campos antes de salvar.')
       return
     }
@@ -128,6 +175,8 @@ export default function AdminEditarExames() {
         nome: nomeEditando,
         categoriaExameId: categoriaEditandoId,
         descricao: descricaoEditando,
+        tempoMedioMinutos: Number(tempoMedioEditando),
+        guiaNecessaria: guiaNecessariaEditando,
       })
 
       cancelarEdicaoExame()
@@ -290,6 +339,36 @@ export default function AdminEditarExames() {
                         <h3 className="mt-3 text-xl font-bold text-[#132190]">
                           {estaEditando ? nomeEditando || 'Nome do exame' : exame.nome}
                         </h3>
+
+                        <div className="mt-3 flex flex-wrap gap-2">
+                          <span className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1.5 text-xs font-semibold text-[#132190] shadow-sm">
+                            <Clock3 className="h-4 w-4 text-[#004AF7]" />
+                            {estaEditando
+                              ? formatarTempoMedio(Number(tempoMedioEditando))
+                              : formatarTempoMedio(exame.tempoMedioMinutos)}
+                          </span>
+
+                          <span
+                            className={`inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-semibold shadow-sm ${
+                              estaEditando
+                                ? guiaNecessariaEditando
+                                  ? 'bg-amber-50 text-amber-700'
+                                  : 'bg-green-50 text-green-700'
+                                : exame.guiaNecessaria
+                                  ? 'bg-amber-50 text-amber-700'
+                                  : 'bg-green-50 text-green-700'
+                            }`}
+                          >
+                            <FileText className="h-4 w-4" />
+                            {estaEditando
+                              ? guiaNecessariaEditando
+                                ? 'Guia necessária'
+                                : 'Guia não necessária'
+                              : exame.guiaNecessaria
+                                ? 'Guia necessária'
+                                : 'Guia não necessária'}
+                          </span>
+                        </div>
                       </div>
 
                       <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white shadow-sm">
@@ -352,6 +431,59 @@ export default function AdminEditarExames() {
                             ) : (
                               <p className="mt-1 text-base font-semibold text-[#132190]">
                                 {nomeCategoriaExame}
+                              </p>
+                            )}
+                          </div>
+
+                          <div className="rounded-2xl bg-[#F8FBFF] p-4">
+                            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                              Tempo médio
+                            </p>
+
+                            {estaEditando ? (
+                              <select
+                                value={tempoMedioEditando}
+                                onChange={(event) =>
+                                  setTempoMedioEditando(event.target.value)
+                                }
+                                className="mt-2 w-full rounded-2xl border border-[#87B7FE]/30 bg-white px-4 py-3 text-sm font-semibold text-[#132190] outline-none transition focus:border-[#004AF7] focus:ring-4 focus:ring-[#004AF7]/10"
+                              >
+                                <option value="">Selecione o tempo médio</option>
+
+                                {opcoesTempoMedio.map((opcao) => (
+                                  <option key={opcao.value} value={opcao.value}>
+                                    {opcao.label}
+                                  </option>
+                                ))}
+                              </select>
+                            ) : (
+                              <p className="mt-1 text-base font-semibold text-[#132190]">
+                                {formatarTempoMedio(exame.tempoMedioMinutos)}
+                              </p>
+                            )}
+                          </div>
+
+                          <div className="rounded-2xl bg-[#F8FBFF] p-4">
+                            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                              Guia necessária
+                            </p>
+
+                            {estaEditando ? (
+                              <select
+                                value={guiaNecessariaEditando ? 'true' : 'false'}
+                                onChange={(event) =>
+                                  setGuiaNecessariaEditando(
+                                    event.target.value === 'true'
+                                  )
+                                }
+                                className="mt-2 w-full rounded-2xl border border-[#87B7FE]/30 bg-white px-4 py-3 text-sm font-semibold text-[#132190] outline-none transition focus:border-[#004AF7] focus:ring-4 focus:ring-[#004AF7]/10"
+                              >
+                                <option value="false">Não</option>
+                                <option value="true">Sim</option>
+                              </select>
+                            ) : (
+                              <p className="mt-1 text-base font-semibold text-[#132190]">
+                                {exame.guiaNecessaria ? 'Sim' : 'Não'}
                               </p>
                             )}
                           </div>

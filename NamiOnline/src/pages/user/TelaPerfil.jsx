@@ -57,9 +57,9 @@ export default function TelaPerfil() {
   const salvarTema = async () => {
 
     try {
-<<<<<<< HEAD
+
       await api.post('/configuracoes/tema', { tema })
-=======
+
 
       await fetch("http://localhost:3000/configuracoes/tema", {
         method: "POST",
@@ -70,7 +70,7 @@ export default function TelaPerfil() {
           tema,
         }),
       })
->>>>>>> 155b987 (telas e backend funcionando)
+
 
       localStorage.setItem("tema", tema)
 

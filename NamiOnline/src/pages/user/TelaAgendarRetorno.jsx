@@ -1,8 +1,6 @@
-import { useState } from 'react'
-
-import api from '../../services/api'
-
-import { Link, useNavigate } from 'react-router-dom'
+import { useState } from "react";
+import api from "../../services/api";
+import { Link, useNavigate } from "react-router-dom";
 
 import {
   FaCalendarCheck,
@@ -10,13 +8,11 @@ import {
   FaClock,
   FaNotesMedical,
   FaArrowLeft,
-  FaCheckCircle
-} from 'react-icons/fa'
-
+  FaCheckCircle,
+} from "react-icons/fa";
 
 export default function TelaAgendarRetorno() {
   const navigate = useNavigate();
-
   const [loading, setLoading] = useState(false);
 
   const [form, setForm] = useState({
@@ -28,48 +24,28 @@ export default function TelaAgendarRetorno() {
   });
 
   const handleChange = (e) => {
-    setForm({
-      ...form,
+    setForm((prev) => ({
+      ...prev,
       [e.target.name]: e.target.value,
-    });
+    }));
   };
 
   // =========================
-  // AGENDAR RETORNO (MONGO/API)
+  // AGENDAR RETORNO
   // =========================
   const agendarRetorno = async (e) => {
-    e.preventDefault()
+    e.preventDefault();
+
+    setLoading(true);
 
     try {
+      const response = await api.post("/retornos", form);
 
+      console.log("Resposta:", response.data);
 
-      const response = await api.post('/retornos', {
-        medico,
-        especialidade,
-        data,
-        horario,
-        observacoes,
-      })
+      alert("Retorno agendado com sucesso!");
 
-      const dataResponse = response.data
-
-      const response = await fetch('http://localhost:3000/retornos', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(form),
-      })
-
-      const data = await response.json()
-
-
-      console.log(data)
-
-      alert('Retorno agendado com sucesso!')
-
-      navigate('/retornos')
-
+      navigate("/retornos");
     } catch (error) {
       console.error("Erro ao agendar retorno:", error);
       alert("Erro ao agendar retorno");
@@ -80,15 +56,13 @@ export default function TelaAgendarRetorno() {
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] px-5 py-10">
-
       <div className="mx-auto max-w-5xl">
 
         {/* HEADER */}
         <div className="mb-8 flex items-center gap-4">
-
           <Link
             to="/home"
-            className="flex h-11 w-11 items-center justify-center rounded-full bg-[#132190] text-white transition hover:bg-[#004AF7]"
+            className="flex h-11 w-11 items-center justify-center rounded-full bg-[#132190] text-white hover:bg-[#004AF7]"
           >
             <FaArrowLeft />
           </Link>
@@ -101,29 +75,25 @@ export default function TelaAgendarRetorno() {
               Agende seu próximo atendimento
             </p>
           </div>
-
         </div>
 
-        {/* CARD */}
-        <div className="rounded-[28px] border border-slate-200 bg-white p-8 shadow-xl">
-
+        {/* FORM */}
+        <div className="rounded-[28px] border bg-white p-8 shadow-xl">
           <form onSubmit={agendarRetorno} className="space-y-6">
 
-            {/* GRID */}
             <div className="grid gap-5 md:grid-cols-2">
 
               {/* ESPECIALIDADE */}
               <div>
-                <label className="mb-2 flex items-center gap-2 font-semibold text-slate-700">
-                  <FaNotesMedical className="text-[#004AF7]" />
-                  Especialidade
+                <label className="flex items-center gap-2 font-semibold">
+                  <FaNotesMedical /> Especialidade
                 </label>
 
                 <select
                   name="especialidade"
                   value={form.especialidade}
                   onChange={handleChange}
-                  className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-[#004AF7]"
+                  className="w-full rounded-xl border px-4 py-3"
                 >
                   <option>Cardiologia</option>
                   <option>Dermatologia</option>
@@ -133,16 +103,15 @@ export default function TelaAgendarRetorno() {
 
               {/* MÉDICO */}
               <div>
-                <label className="mb-2 flex items-center gap-2 font-semibold text-slate-700">
-                  <FaUserMd className="text-[#004AF7]" />
-                  Médico
+                <label className="flex items-center gap-2 font-semibold">
+                  <FaUserMd /> Médico
                 </label>
 
                 <select
                   name="medico"
                   value={form.medico}
                   onChange={handleChange}
-                  className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-[#004AF7]"
+                  className="w-full rounded-xl border px-4 py-3"
                 >
                   <option>Dr. Lucas Mota</option>
                   <option>Dra. Marina Soares</option>
@@ -152,9 +121,8 @@ export default function TelaAgendarRetorno() {
 
               {/* DATA */}
               <div>
-                <label className="mb-2 flex items-center gap-2 font-semibold text-slate-700">
-                  <FaCalendarCheck className="text-[#004AF7]" />
-                  Data
+                <label className="flex items-center gap-2 font-semibold">
+                  <FaCalendarCheck /> Data
                 </label>
 
                 <input
@@ -162,15 +130,14 @@ export default function TelaAgendarRetorno() {
                   name="data"
                   value={form.data}
                   onChange={handleChange}
-                  className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-[#004AF7]"
+                  className="w-full rounded-xl border px-4 py-3"
                 />
               </div>
 
               {/* HORÁRIO */}
               <div>
-                <label className="mb-2 flex items-center gap-2 font-semibold text-slate-700">
-                  <FaClock className="text-[#004AF7]" />
-                  Horário
+                <label className="flex items-center gap-2 font-semibold">
+                  <FaClock /> Horário
                 </label>
 
                 <input
@@ -178,35 +145,31 @@ export default function TelaAgendarRetorno() {
                   name="horario"
                   value={form.horario}
                   onChange={handleChange}
-                  className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-[#004AF7]"
+                  className="w-full rounded-xl border px-4 py-3"
                 />
               </div>
-
             </div>
 
-            {/* OBSERVAÇÕES */}
+            {/* OBS */}
             <div>
-              <label className="mb-2 flex items-center gap-2 font-semibold text-slate-700">
-                <FaNotesMedical className="text-[#004AF7]" />
-                Observações
+              <label className="flex items-center gap-2 font-semibold">
+                <FaNotesMedical /> Observações
               </label>
 
               <textarea
-                rows="5"
                 name="observacoes"
                 value={form.observacoes}
                 onChange={handleChange}
-                placeholder="Digite observações adicionais..."
-                className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-[#004AF7]"
+                rows={5}
+                className="w-full rounded-xl border px-4 py-3"
               />
             </div>
 
-            {/* BUTTONS */}
-            <div className="flex flex-col gap-4 md:flex-row">
-
+            {/* BOTÕES */}
+            <div className="flex gap-4">
               <Link
                 to="/home"
-                className="flex items-center justify-center rounded-xl bg-slate-200 px-6 py-4 font-semibold text-slate-700 hover:bg-slate-300"
+                className="rounded-xl bg-slate-200 px-6 py-4 font-semibold"
               >
                 Voltar
               </Link>
@@ -214,16 +177,14 @@ export default function TelaAgendarRetorno() {
               <button
                 type="submit"
                 disabled={loading}
-                className="flex items-center justify-center gap-3 rounded-xl bg-[#004AF7] px-6 py-4 font-semibold text-white hover:bg-[#132190] disabled:opacity-60"
+                className="flex items-center gap-2 rounded-xl bg-[#004AF7] px-6 py-4 text-white disabled:opacity-60"
               >
                 <FaCheckCircle />
-                {loading ? "Salvando..." : "Confirmar Agendamento"}
+                {loading ? "Salvando..." : "Confirmar"}
               </button>
-
             </div>
 
           </form>
-
         </div>
 
       </div>

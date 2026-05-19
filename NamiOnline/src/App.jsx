@@ -1,6 +1,7 @@
 import { BrowserRouter, Navigate, Outlet, Route, Routes } from "react-router-dom";
 import { useContext, useEffect } from "react";
 import { AuthContext, AuthProvider } from './context/AuthContext';
+import { ConteudoProvider } from './context/ConteudoContext';
 import LayoutComNavbar from "./layouts/LayoutComNavbar";
 import LayoutComNavbarAdmin from "./layouts/LayoutComNavBarAdmin";
 import LayoutFooter from "./layouts/LayoutFooter";
@@ -45,6 +46,7 @@ import ConsultaDia from "./pages/adm/AdminConsultaDia";
 import TelaconfigAdmin from "./pages/adm/TelaconfigAdmin";
 import TelaChatAdm from "./pages/adm/TelaChatAdm";
 import TelaChat from "./pages/user/TelaChat";
+import AdminAgendarConsulta from "./pages/adm/AdminAgendarConsulta"
 
 function ProtectedLayout() {
   const { authLoading, isLoggedIn, user } = useContext(AuthContext);
@@ -91,7 +93,8 @@ function App() {
 
   return (
     <AuthProvider>
-      <BrowserRouter>
+      <ConteudoProvider>
+        <BrowserRouter>
         <Routes>
           {/* ROTAS PÚBLICAS */}
           <Route path="/" element={<TelaLogin />} />
@@ -136,7 +139,9 @@ function App() {
               <Route path="/admin/exames/agendar" element={<AdminAgendarExame />} />
               <Route path="/admin/categorias-exames/:categoriaId/exames" element={<AdminEditarExames />} />
               <Route path="/admin/exames/cadastrar-categorias-exames" element={<AdminCadastrarCategoriasExames />} />
-              <Route path="/admin/exames/cadastrar-tipos-exames" element={<AdminCadastrarTiposExames />} />
+              <Route path="/admin/exames/cadastrar-tipos-exames" element=
+              {<AdminCadastrarTiposExames />} />
+              <Route path="/admin/consultas/agendar" element={<AdminAgendarConsulta />} />
               {/* NOTIFICAÇÕES */}
               <Route path="/admin/notificacoes" element={<TelaNotificacaoAdmin />} />
               <Route path="/admin/noticias" element={<TelaNoticiasAdmin />} />
@@ -146,7 +151,8 @@ function App() {
 
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
-      </BrowserRouter>
+        </BrowserRouter>
+      </ConteudoProvider>
     </AuthProvider>
   );
 }

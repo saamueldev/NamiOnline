@@ -43,20 +43,12 @@ function nomeEspecialidade(especialidade) {
   return especialidade?.name || especialidade?.nome || "Especialidade";
 }
 
+function especialidadeDoMedico(medico) {
+  return medico?.especialidadeId || medico?.especialidade || medico?.especialidadeID || null;
+}
+
 function nomePaciente(paciente) {
   return paciente?.user?.name || paciente?.user?.nome || "Paciente";
-}
-
-function somenteNumeros(valor) {
-  return String(valor || "").replace(/\D/g, "");
-}
-
-function formatarCpf(valor) {
-  const cpf = somenteNumeros(valor);
-  return cpf
-    .replace(/(\d{3})(\d)/, "$1.$2")
-    .replace(/(\d{3})(\d)/, "$1.$2")
-    .replace(/(\d{3})(\d{1,2})$/, "$1-$2");
 }
 
 function minutosDoHorario(horario) {
@@ -183,10 +175,21 @@ const AdminAgendarConsulta = () => {
   const medicosDaEspecialidade = useMemo(() => {
     if (!selectedEspecialidadeId) return [];
 
+    const nomeSelecionado = nomeEspecialidade(especialidadeSelecionada).toLowerCase();
+
     return medicos.filter(
-      (medico) => normalizarId(medico.especialidadeId) === selectedEspecialidadeId
+      (medico) => {
+        const especialidadeMedico = especialidadeDoMedico(medico);
+        const medicoEspecialidadeId = normalizarId(especialidadeMedico);
+        const medicoEspecialidadeNome = nomeEspecialidade(especialidadeMedico).toLowerCase();
+
+        return (
+          medicoEspecialidadeId === selectedEspecialidadeId ||
+          medicoEspecialidadeNome === nomeSelecionado
+        );
+      }
     );
-  }, [medicos, selectedEspecialidadeId]);
+  }, [especialidadeSelecionada, medicos, selectedEspecialidadeId]);
 
   const selectedDoctor = useMemo(
     () => medicosDaEspecialidade.find((medico) => normalizarId(medico) === selectedDoctorId),
@@ -415,7 +418,7 @@ async function buscarPaciente(event) {
             <input
               type="text"
               value={cpf}
-              onChange={(event) => setCpf(formatarCpf(event.target.value))}
+              onChange={(event) => setCpf(event.target.value)}
               placeholder="Digite o CPF do paciente"
               className="h-12 flex-1 rounded-xl border border-[#87B7FE]/30 bg-white px-4 text-slate-700 outline-none placeholder:text-slate-400 focus:border-[#004AF7] focus:ring-2 focus:ring-[#004AF7]/10"
             />
@@ -439,7 +442,7 @@ async function buscarPaciente(event) {
                 <div>
                   <p className="font-bold text-[#132190]">{nomePaciente(paciente)}</p>
                   <p className="text-sm text-slate-600">
-                    CPF: {formatarCpf(paciente.user?.cpf)} | Prontuário: {paciente.prontuario}
+                    CPF: {paciente.user?.cpf || "Não informado"} | Prontuário: {paciente.prontuario}
                   </p>
                 </div>
               </div>
@@ -594,7 +597,7 @@ async function buscarPaciente(event) {
                           </div>
                           <div>
                             <p className="font-bold text-[#132190]">{doc.name || doc.nome}</p>
-                            <p className="text-xs text-slate-500">{nomeEspecialidade(doc.especialidadeId)}</p>
+                            <p className="text-xs text-slate-500">{nomeEspecialidade(especialidadeDoMedico(doc))}</p>
                           </div>
                         </div>
 

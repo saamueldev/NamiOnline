@@ -43,6 +43,10 @@ function nomeEspecialidade(especialidade) {
   return especialidade?.name || especialidade?.nome || "Especialidade";
 }
 
+function especialidadeDoMedico(medico) {
+  return medico?.especialidadeId || medico?.especialidade || medico?.especialidadeID || null;
+}
+
 function minutosDoHorario(horario) {
   const [hora, minuto] = horario.split(":").map(Number);
   return hora * 60 + minuto;
@@ -133,15 +137,29 @@ const ConfirmarConsulta = () => {
         setCarregando(true);
         setErro("");
 
-        const [medicosResponse, horariosResponse, consultasResponse] = await Promise.all([
+        const [medicosResponse, horariosResponse] = await Promise.all([
           api.get("/medicos"),
-          api.get("/horarios-fixos"),
-          api.get("/consultas")
+          api.get("/horarios-fixos")
         ]);
 
+        const consultasResponse = await api.get("/consultas").catch((error) => {
+          console.warn("Nao foi possivel carregar consultas ocupadas:", error);
+          return { data: [] };
+        });
+
         const medicosApi = Array.isArray(medicosResponse.data) ? medicosResponse.data : [];
+        const nomeEspecialidadeSelecionada = nomeEspecialidade(especialidade).toLowerCase();
         const medicosFiltrados = especialidadeId
-          ? medicosApi.filter((medico) => normalizarId(medico.especialidadeId) === especialidadeId)
+          ? medicosApi.filter((medico) => {
+              const especialidadeMedico = especialidadeDoMedico(medico);
+              const medicoEspecialidadeId = normalizarId(especialidadeMedico);
+              const medicoEspecialidadeNome = nomeEspecialidade(especialidadeMedico).toLowerCase();
+
+              return (
+                medicoEspecialidadeId === especialidadeId ||
+                medicoEspecialidadeNome === nomeEspecialidadeSelecionada
+              );
+            })
           : medicosApi;
 
         setMedicos(medicosFiltrados);
@@ -152,7 +170,11 @@ const ConfirmarConsulta = () => {
         console.error("Erro ao carregar agendamento:", error);
         setMedicos([]);
         setHorariosFixos({});
-        setErro("Nao foi possivel carregar medicos e horarios do servidor.");
+        setErro(
+          error.response?.status === 403
+            ? "Seu usuario nao tem permissao para listar medicos. Reinicie a API para aplicar a liberacao da rota /medicos."
+            : "Nao foi possivel carregar medicos e horarios do servidor."
+        );
       } finally {
         setCarregando(false);
       }
@@ -277,7 +299,7 @@ const ConfirmarConsulta = () => {
 
       const response = await api.post("/consultas", {
         medicoId: normalizarId(selectedDoctor),
-        especialidadeId: especialidadeId || normalizarId(selectedDoctor.especialidadeId),
+        especialidadeId: especialidadeId || normalizarId(especialidadeDoMedico(selectedDoctor)),
         guiaId: normalizarId(guia) || null,
         dataConsulta: dataConsulta.toISOString(),
         tipo: "CONSULTA"
@@ -289,7 +311,7 @@ const ConfirmarConsulta = () => {
         data: selectedDate,
         horario: selectedTime,
         medico: selectedDoctor,
-        especialidade: especialidade || selectedDoctor.especialidadeId
+        especialidade: especialidade || especialidadeDoMedico(selectedDoctor)
       });
     } catch (error) {
       console.error("Erro ao confirmar consulta:", error);
@@ -459,7 +481,7 @@ const ConfirmarConsulta = () => {
                         </div>
                         <div>
                           <p className="font-bold text-[#132190]">{doc.name || doc.nome}</p>
-                          <p className="text-xs text-slate-500">{nomeEspecialidade(doc.especialidadeId)}</p>
+                          <p className="text-xs text-slate-500">{nomeEspecialidade(especialidadeDoMedico(doc))}</p>
                         </div>
                       </div>
 

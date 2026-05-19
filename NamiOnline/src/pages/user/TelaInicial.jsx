@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   FaCalendarCheck,
@@ -6,7 +6,9 @@ import {
   FaHistory,
   FaNotesMedical,
 } from "react-icons/fa";
+import { AuthContext } from "../../context/AuthContext";
 import { useConteudo } from "../../context/ConteudoContext";
+import api from "../../services/api";
 
 function formatarData(data) {
   if (!data) return "-";
@@ -18,9 +20,80 @@ function formatarData(data) {
   }).format(new Date(`${data}T00:00:00`));
 }
 
+function formatarDataHora(data) {
+  if (!data) return "-";
+
+  const dataObj = new Date(data);
+  if (Number.isNaN(dataObj.getTime())) return "-";
+
+  return dataObj.toLocaleDateString("pt-BR", {
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+function formatarHora(data) {
+  if (!data) return "-";
+
+  const dataObj = new Date(data);
+  if (Number.isNaN(dataObj.getTime())) return "-";
+
+  return dataObj.toLocaleTimeString("pt-BR", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+function criarDataExame(data, horario) {
+  if (!data) return null;
+  const base = typeof data === "string" && /^\d{4}-\d{2}-\d{2}$/.test(data)
+    ? `${data}T${horario || "00:00"}:00`
+    : data;
+  const dataObj = new Date(base);
+  return Number.isNaN(dataObj.getTime()) ? null : dataObj;
+}
+
+function normalizarId(valor) {
+  if (!valor) return "";
+  if (typeof valor === "string") return valor;
+  return valor._id || valor.id || "";
+}
+
+function consultaPertenceAoUsuario(consulta, usuarioId) {
+  return normalizarId(consulta?.pacienteId?.user) === usuarioId;
+}
+
+function nomePessoa(pessoa) {
+  return pessoa?.name || pessoa?.nome || "Nao informado";
+}
+
+function nomeEspecialidade(especialidade) {
+  return especialidade?.name || especialidade?.nome || "Nao informado";
+}
+
+function nomeExame(exame) {
+  return exame?.tipoExameId?.nome || "Exame agendado";
+}
+
+function categoriaExame(exame) {
+  return exame?.tipoExameId?.categoriaExameId?.nome || "Exames";
+}
+
+function texto(valor) {
+  return valor || "Nao informado";
+}
+
 export default function TelaInicial() {
   const { noticias, eventos, loadingConteudo, conteudoError } = useConteudo();
+  const { user } = useContext(AuthContext);
   const [index, setIndex] = useState(0);
+  const [consultasUsuario, setConsultasUsuario] = useState([]);
+  const [loadingConsulta, setLoadingConsulta] = useState(true);
+  const [erroConsulta, setErroConsulta] = useState("");
+  const [mostrarDetalhesConsulta, setMostrarDetalhesConsulta] = useState(false);
 
   const noticiasOrdenadas = useMemo(() => {
     return [...noticias].sort(
@@ -48,7 +121,66 @@ export default function TelaInicial() {
     return () => clearInterval(interval);
   }, [noticiasOrdenadas.length]);
 
+  useEffect(() => {
+    async function carregarDadosDoUsuario() {
+      if (!user?.id) {
+        setLoadingConsulta(false);
+        setErroConsulta("Nao foi possivel identificar o usuario logado.");
+        return;
+      }
+
+      try {
+        setLoadingConsulta(true);
+        setErroConsulta("");
+
+        const [consultasResponse, examesResponse] = await Promise.allSettled([
+          api.get("/consultas"),
+          api.get("/agendamentos-exames/meus"),
+        ]);
+
+        const consultas =
+          consultasResponse.status === "fulfilled" && Array.isArray(consultasResponse.value.data)
+            ? consultasResponse.value.data
+                .filter((consulta) => consultaPertenceAoUsuario(consulta, user.id))
+                .filter((consulta) => !["CANCELADO", "CONCLUIDO"].includes(String(consulta.status || "").toUpperCase()))
+                .map((consulta) => ({
+                  ...consulta,
+                  tipoAgendamento: "CONSULTA",
+                  dataAgendamento: new Date(consulta.dataConsulta),
+                }))
+            : [];
+
+        const exames =
+          examesResponse.status === "fulfilled" && Array.isArray(examesResponse.value.data)
+            ? examesResponse.value.data
+                .filter((exame) => !["CANCELADO", "REALIZADO", "CONCLUIDO"].includes(String(exame.status || "").toUpperCase()))
+                .map((exame) => ({
+                  ...exame,
+                  tipoAgendamento: "EXAME",
+                  dataAgendamento: criarDataExame(exame.data, exame.horario),
+                }))
+            : [];
+
+        setConsultasUsuario(
+          [...consultas, ...exames]
+            .filter((item) => item.dataAgendamento)
+            .sort((a, b) => a.dataAgendamento - b.dataAgendamento)
+        );
+      } catch (error) {
+        console.error("Erro ao carregar dados do usuario:", error);
+        setErroConsulta("Nao foi possivel carregar seu proximo atendimento.");
+      } finally {
+        setLoadingConsulta(false);
+      }
+    }
+
+    carregarDadosDoUsuario();
+  }, [user?.id]);
+
   const noticiaEmDestaque = noticiasOrdenadas[index];
+  const proximaConsulta = consultasUsuario.find(
+    (consulta) => consulta.dataAgendamento.getTime() >= Date.now()
+  ) || consultasUsuario[0];
 
   return (
     <div className="min-h-screen bg-[#f5f7fa]">
@@ -150,16 +282,40 @@ export default function TelaInicial() {
         <section className="grid gap-[25px] lg:grid-cols-2">
           <div className="rounded-xl bg-white p-[25px] shadow-[0_8px_20px_rgba(0,0,0,0.1)]">
             <h3 className="mb-[15px] flex items-center gap-[10px] text-[22px] font-semibold text-[#132190]">
-              <span>Proxima consulta</span>
+              <span>Proximo atendimento</span>
             </h3>
-            <p>
-              <strong>Clinico Geral</strong>
-            </p>
-            <p>Dr. Joao Silva</p>
-            <p>15 Maio - 09:30</p>
-            <Link className="mt-[8px] inline-flex rounded-md bg-[#004AF7] px-[20px] py-1 text-white" to="/ver-detalhes">
-              Ver detalhes
-            </Link>
+            {loadingConsulta ? (
+              <p className="text-sm font-semibold text-slate-600">Carregando atendimento...</p>
+            ) : proximaConsulta ? (
+              <>
+                <p>
+                  <strong>
+                    {proximaConsulta.tipoAgendamento === "EXAME"
+                      ? nomeExame(proximaConsulta)
+                      : nomeEspecialidade(proximaConsulta.especialidadeId)}
+                  </strong>
+                </p>
+                <p>
+                  {proximaConsulta.tipoAgendamento === "EXAME"
+                    ? "Equipe NAMI"
+                    : nomePessoa(proximaConsulta.medicoId)}
+                </p>
+                <p>
+                  {formatarDataHora(proximaConsulta.dataAgendamento)}
+                </p>
+                <button
+                  type="button"
+                  className="mt-[8px] inline-flex rounded-md bg-[#004AF7] px-[20px] py-1 text-white"
+                  onClick={() => setMostrarDetalhesConsulta(true)}
+                >
+                  Ver detalhes
+                </button>
+              </>
+            ) : (
+              <p className="text-sm font-semibold text-slate-600">
+                {erroConsulta || "Nenhum atendimento agendado no momento."}
+              </p>
+            )}
           </div>
 
           <div className="rounded-xl bg-white p-[25px] shadow-[0_8px_20px_rgba(0,0,0,0.1)]">
@@ -196,6 +352,55 @@ export default function TelaInicial() {
           </div>
         </section>
       </main>
+
+      {mostrarDetalhesConsulta && proximaConsulta && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 p-4">
+          <div className="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-xl bg-white p-6 shadow-2xl">
+            <div className="flex items-start justify-between gap-4 border-b border-slate-200 pb-4">
+              <div>
+                <h2 className="text-2xl font-bold text-[#132190]">
+                  Detalhes da consulta
+                </h2>
+                <p className="mt-1 text-sm text-slate-600">
+                  Todas as informacoes disponiveis para o usuario logado.
+                </p>
+              </div>
+              <button
+                type="button"
+                className="rounded-md bg-slate-100 px-3 py-1 text-sm font-bold text-slate-700"
+                onClick={() => setMostrarDetalhesConsulta(false)}
+              >
+                Fechar
+              </button>
+            </div>
+
+            <div className="mt-5">
+              <DetalheGrupo
+                titulo="Consulta"
+                itens={[
+                  [
+                    "Especialidade",
+                    proximaConsulta.tipoAgendamento === "EXAME"
+                      ? categoriaExame(proximaConsulta)
+                      : nomeEspecialidade(proximaConsulta.especialidadeId),
+                  ],
+                  [
+                    "Medico",
+                    proximaConsulta.tipoAgendamento === "EXAME"
+                      ? "Equipe NAMI"
+                      : nomePessoa(proximaConsulta.medicoId),
+                  ],
+                  ["CRM", proximaConsulta.tipoAgendamento === "EXAME" ? "Nao informado" : texto(proximaConsulta.medicoId?.crm)],
+                  ["Data e horario", formatarDataHora(proximaConsulta.dataAgendamento)],
+                  ["Horario", proximaConsulta.tipoAgendamento === "EXAME" ? texto(proximaConsulta.horario) : formatarHora(proximaConsulta.dataAgendamento)],
+                  ["Tipo", texto(proximaConsulta.tipo || proximaConsulta.tipoAgendamento)],
+                  ["Status", texto(proximaConsulta.status)],
+                ]}
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -219,5 +424,23 @@ function ImagePlaceholder({ className = "", compact = false }) {
         Sem imagem
       </span>
     </div>
+  );
+}
+
+function DetalheGrupo({ titulo, itens }) {
+  return (
+    <section className="rounded-lg border border-slate-200 bg-[#F8FBFF] p-4">
+      <h3 className="mb-3 text-lg font-bold text-[#132190]">{titulo}</h3>
+      <dl className="space-y-3">
+        {itens.map(([label, valor]) => (
+          <div key={label}>
+            <dt className="text-xs font-bold uppercase text-slate-500">{label}</dt>
+            <dd className="mt-1 break-words text-sm font-semibold text-slate-800">
+              {valor}
+            </dd>
+          </div>
+        ))}
+      </dl>
+    </section>
   );
 }

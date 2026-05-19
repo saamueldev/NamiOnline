@@ -15,6 +15,10 @@ import {
 
 import api from '../../services/api'
 
+function garantirArray(valor) {
+  return Array.isArray(valor) ? valor : []
+}
+
 const opcoesTempoMedio = [
   { label: '15 minutos', value: 15 },
   { label: '20 minutos', value: 20 },
@@ -56,7 +60,7 @@ export default function AdminEditarExames() {
   async function carregarCategoriasExame() {
     try {
       const resposta = await api.get('/categorias-exames')
-      setCategoriasExame(resposta.data)
+      setCategoriasExame(garantirArray(resposta.data))
     } catch (error) {
       console.error('Erro ao carregar categorias de exame:', error)
       alert('Erro ao carregar categorias de exame.')
@@ -66,10 +70,11 @@ export default function AdminEditarExames() {
   async function carregarExamesCategoria() {
     try {
       const resposta = await api.get(`/tipos-exames?categoriaExameId=${categoriaId}`)
-      setExamesCategoria(resposta.data)
+      const exames = garantirArray(resposta.data)
+      setExamesCategoria(exames)
 
-      if (resposta.data.length > 0 && !exameAbertoId) {
-        setExameAbertoId(resposta.data[0]._id)
+      if (exames.length > 0 && !exameAbertoId) {
+        setExameAbertoId(exames[0]._id)
       }
     } catch (error) {
       console.error('Erro ao carregar exames da categoria:', error)
@@ -86,6 +91,8 @@ export default function AdminEditarExames() {
         carregarCategoriasExame(),
         carregarExamesCategoria(),
       ])
+    } catch (error) {
+      console.error('Erro ao carregar dados da tela de exames:', error)
     } finally {
       setCarregando(false)
     }

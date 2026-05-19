@@ -42,7 +42,7 @@ export default function TelaInicialADM() {
               to="/admin/consultas/agendar"
               className="no-underline px-[14px] py-3 rounded-lg text-[#333] font-medium transition duration-200 hover:bg-[#004AF7] hover:text-white"
             >
-              Marcar Consulta
+              Consultas
             </Link>
 
             <Link
@@ -52,12 +52,6 @@ export default function TelaInicialADM() {
               Exames
             </Link>
 
-            <Link
-              to="/admin/consultas/agendar"
-              className="no-underline px-[14px] py-3 rounded-lg text-[#333] font-medium transition duration-200 hover:bg-[#004AF7] hover:text-white"
-            >
-              Agendar Consulta
-            </Link>
 
             <Link
               to="/admin/cadastrar-especialidade"

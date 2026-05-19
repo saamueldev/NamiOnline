@@ -1,7 +1,7 @@
 import { BrowserRouter, Navigate, Outlet, Route, Routes } from "react-router-dom";
 import { useContext, useEffect } from "react";
 import { AuthContext, AuthProvider } from './context/AuthContext';
-import { ConteudoProvider } from "./context/ConteudoContext";
+import { ConteudoProvider } from './context/ConteudoContext';
 import LayoutComNavbar from "./layouts/LayoutComNavbar";
 import LayoutComNavbarAdmin from "./layouts/LayoutComNavBarAdmin";
 import LayoutFooter from "./layouts/LayoutFooter";
@@ -45,6 +45,8 @@ import TelaEventosAdmin from './pages/adm/TelaEventosAdmin';
 import AprovarGuia from './pages/adm/AprovarGuia';
 import ConsultaDia from "./pages/adm/AdminConsultaDia";
 import TelaconfigAdmin from "./pages/adm/TelaconfigAdmin";
+import TelaChatAdm from "./pages/adm/TelaChatAdm";
+import AdminAgendarConsulta from "./pages/adm/AdminAgendarConsulta"
 
 function ProtectedLayout() {
   const { authLoading, isLoggedIn, user } = useContext(AuthContext);
@@ -93,7 +95,7 @@ function App() {
     <AuthProvider>
       <ConteudoProvider>
         <BrowserRouter>
-          <Routes>
+        <Routes>
           {/* ROTAS PÚBLICAS */}
           <Route path="/" element={<TelaLogin />} />
           <Route path="/cadastro" element={<TelaCadastro />} />
@@ -109,7 +111,6 @@ function App() {
               <Route path="/perfil/configuracoes" element={<TelaConfiguracaoUsuario />} />
               <Route path="/notificacoes" element={<TelaNotificacoes />} />
               <Route path="/central-ajuda" element={<CentralAjuda />} />
-            
               {/* CONSULTAS */}
               <Route path="/meus-agendamentos" element={<TelaAgendamentos />} />
               <Route path="/especialidades" element={<ConsultaEspecialidade />} />
@@ -134,24 +135,24 @@ function App() {
               <Route path="/admin/cadastrar-especialidade" element={<AdicionarEspecialidade />} />
               <Route path="/admin/aprovar-guias" element={<AprovarGuia />} />
               <Route path="/admin/consultas-dia" element={<ConsultaDia />} />
-              <Route path="/admin/configuracoes" element={<TelaconfigAdmin />} />
-
               {/* Gestão de Exames */}
               <Route path="/admin/exames/selecionar" element={<AdminSelecionarExame />} />
+              <Route path="/admin/exames/agendar" element={<Navigate to="/admin/exames/selecionar" replace />} />
               <Route path="/admin/exames/agendar/:exameId" element={<AdminAgendarExame />} />
               <Route path="/admin/categorias-exames/:categoriaId/exames" element={<AdminEditarExames />} />
               <Route path="/admin/exames/cadastrar-categorias-exames" element={<AdminCadastrarCategoriasExames />} />
-              <Route path="/admin/exames/cadastrar-tipos-exames" element={<AdminCadastrarTiposExames />} />
+              <Route path="/admin/exames/cadastrar-tipos-exames" element=
+              {<AdminCadastrarTiposExames />} />
+              <Route path="/admin/consultas/agendar" element={<AdminAgendarConsulta />} />
               {/* NOTIFICAÇÕES */}
               <Route path="/admin/notificacoes" element={<TelaNotificacaoAdmin />} />
               <Route path="/admin/noticias" element={<TelaNoticiasAdmin />} />
               <Route path="/admin/eventos" element={<TelaEventosAdmin />} />
-              
             </Route>
           </Route>
 
           <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
+        </Routes>
         </BrowserRouter>
       </ConteudoProvider>
     </AuthProvider>

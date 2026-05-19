@@ -10,6 +10,7 @@ import {
   Clock,
   Loader2,
   MapPin,
+  Stethoscope,
   User,
   X
 } from "lucide-react";
@@ -94,6 +95,11 @@ function formatarData(data) {
   });
 }
 
+function horarioDaConsulta(consulta) {
+  const dataConsulta = new Date(consulta.dataConsulta);
+  return formatarHorario(dataConsulta.getHours() * 60 + dataConsulta.getMinutes());
+}
+
 const ConfirmarConsulta = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -112,6 +118,7 @@ const ConfirmarConsulta = () => {
   const [mesAtual, setMesAtual] = useState(() => new Date(hoje.getFullYear(), hoje.getMonth(), 1));
   const [horariosFixos, setHorariosFixos] = useState({});
   const [medicos, setMedicos] = useState([]);
+  const [consultas, setConsultas] = useState([]);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState("");
   const [selectedDoctorId, setSelectedDoctorId] = useState("");
@@ -126,9 +133,10 @@ const ConfirmarConsulta = () => {
         setCarregando(true);
         setErro("");
 
-        const [medicosResponse, horariosResponse] = await Promise.all([
+        const [medicosResponse, horariosResponse, consultasResponse] = await Promise.all([
           api.get("/medicos"),
-          api.get("/horarios-fixos")
+          api.get("/horarios-fixos"),
+          api.get("/consultas")
         ]);
 
         const medicosApi = Array.isArray(medicosResponse.data) ? medicosResponse.data : [];
@@ -138,6 +146,7 @@ const ConfirmarConsulta = () => {
 
         setMedicos(medicosFiltrados);
         setHorariosFixos(horariosResponse.data || {});
+        setConsultas(Array.isArray(consultasResponse.data) ? consultasResponse.data : []);
         setSelectedDoctorId(normalizarId(medicosFiltrados[0]));
       } catch (error) {
         console.error("Erro ao carregar agendamento:", error);
@@ -157,6 +166,24 @@ const ConfirmarConsulta = () => {
     [medicos, selectedDoctorId]
   );
 
+  const horariosOcupados = useMemo(() => {
+    if (!selectedDoctor || !selectedDate) return new Set();
+
+    return new Set(
+      consultas
+        .filter((consulta) => {
+          const dataConsulta = new Date(consulta.dataConsulta);
+
+          return (
+            normalizarId(consulta.medicoId) === normalizarId(selectedDoctor) &&
+            consulta.status !== "CANCELADO" &&
+            mesmoDia(dataConsulta, selectedDate)
+          );
+        })
+        .map(horarioDaConsulta)
+    );
+  }, [consultas, selectedDate, selectedDoctor]);
+
   const diasDoMes = useMemo(() => {
     const ano = mesAtual.getFullYear();
     const mes = mesAtual.getMonth();
@@ -173,7 +200,23 @@ const ConfirmarConsulta = () => {
       data.setHours(0, 0, 0, 0);
 
       const horarios = gerarHorariosDoDia(data, horariosFixos, duracaoConsulta);
-      const disponivel = data >= hoje && horarios.length > 0 && medicos.length > 0;
+      const horariosLivres = selectedDoctor
+        ? horarios.filter((horario) => {
+            const ocupado = consultas.some((consulta) => {
+              const dataConsulta = new Date(consulta.dataConsulta);
+
+              return (
+                normalizarId(consulta.medicoId) === normalizarId(selectedDoctor) &&
+                consulta.status !== "CANCELADO" &&
+                mesmoDia(dataConsulta, data) &&
+                horarioDaConsulta(consulta) === horario
+              );
+            });
+
+            return !ocupado;
+          })
+        : horarios;
+      const disponivel = data >= hoje && horariosLivres.length > 0 && medicos.length > 0;
 
       return {
         tipo: "day",
@@ -185,12 +228,14 @@ const ConfirmarConsulta = () => {
     });
 
     return [...espacosIniciais, ...dias];
-  }, [duracaoConsulta, hoje, horariosFixos, medicos.length, mesAtual]);
+  }, [consultas, duracaoConsulta, hoje, horariosFixos, medicos.length, mesAtual, selectedDoctor]);
 
   const horariosDisponiveis = useMemo(() => {
     if (!selectedDate || !selectedDoctor) return [];
-    return gerarHorariosDoDia(selectedDate, horariosFixos, duracaoConsulta);
-  }, [duracaoConsulta, horariosFixos, selectedDate, selectedDoctor]);
+    return gerarHorariosDoDia(selectedDate, horariosFixos, duracaoConsulta).filter(
+      (horario) => !horariosOcupados.has(horario)
+    );
+  }, [duracaoConsulta, horariosFixos, horariosOcupados, selectedDate, selectedDoctor]);
 
   useEffect(() => {
     const dataAindaExiste =
@@ -230,7 +275,7 @@ const ConfirmarConsulta = () => {
 
       const dataConsulta = criarDataConsulta(selectedDate, selectedTime);
 
-      await api.post("/consultas", {
+      const response = await api.post("/consultas", {
         medicoId: normalizarId(selectedDoctor),
         especialidadeId: especialidadeId || normalizarId(selectedDoctor.especialidadeId),
         guiaId: normalizarId(guia) || null,
@@ -238,11 +283,13 @@ const ConfirmarConsulta = () => {
         tipo: "CONSULTA"
       });
 
+      setConsultas((consultasAtuais) => [...consultasAtuais, response.data]);
       setConsultaConfirmada({
         local: LOCAL_NAMI,
         data: selectedDate,
         horario: selectedTime,
-        medico: selectedDoctor
+        medico: selectedDoctor,
+        especialidade: especialidade || selectedDoctor.especialidadeId
       });
     } catch (error) {
       console.error("Erro ao confirmar consulta:", error);
@@ -516,6 +563,14 @@ const ConfirmarConsulta = () => {
                 <div>
                   <p className="font-bold text-[#132190]">Data marcada</p>
                   <p className="text-sm capitalize text-slate-600">{formatarData(consultaConfirmada.data)}</p>
+                </div>
+              </div>
+
+              <div className="flex gap-3">
+                <Stethoscope className="mt-1 h-5 w-5 shrink-0 text-[#004AF7]" />
+                <div>
+                  <p className="font-bold text-[#132190]">Especialidade</p>
+                  <p className="text-sm text-slate-600">{nomeEspecialidade(consultaConfirmada.especialidade)}</p>
                 </div>
               </div>
 

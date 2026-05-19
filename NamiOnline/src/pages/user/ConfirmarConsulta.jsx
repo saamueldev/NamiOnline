@@ -112,6 +112,7 @@ const ConfirmarConsulta = () => {
   const guia = location.state?.guia || location.state?.guiaId || null;
   const especialidadeId = normalizarId(especialidade);
   const duracaoConsulta = Number(especialidade?.duracaoConsulta) || 30;
+  const consultaRequerGuia = Boolean(especialidade?.requerGuia);
 
   const hoje = useMemo(() => {
     const data = new Date();
@@ -296,13 +297,15 @@ const ConfirmarConsulta = () => {
       setErro("");
 
       const dataConsulta = criarDataConsulta(selectedDate, selectedTime);
+      const statusConsulta = consultaRequerGuia ? "PENDENTE" : "AGENDADO";
 
       const response = await api.post("/consultas", {
         medicoId: normalizarId(selectedDoctor),
         especialidadeId: especialidadeId || normalizarId(especialidadeDoMedico(selectedDoctor)),
         guiaId: normalizarId(guia) || null,
         dataConsulta: dataConsulta.toISOString(),
-        tipo: "CONSULTA"
+        tipo: "CONSULTA",
+        status: statusConsulta
       });
 
       setConsultas((consultasAtuais) => [...consultasAtuais, response.data]);
@@ -311,7 +314,8 @@ const ConfirmarConsulta = () => {
         data: selectedDate,
         horario: selectedTime,
         medico: selectedDoctor,
-        especialidade: especialidade || especialidadeDoMedico(selectedDoctor)
+        especialidade: especialidade || especialidadeDoMedico(selectedDoctor),
+        status: statusConsulta
       });
     } catch (error) {
       console.error("Erro ao confirmar consulta:", error);

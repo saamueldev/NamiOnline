@@ -16,6 +16,10 @@ import {
 
 import api from '../../services/api'
 
+function garantirArray(valor) {
+  return Array.isArray(valor) ? valor : []
+}
+
 const nomesMeses = [
   'Janeiro',
   'Fevereiro',
@@ -72,7 +76,7 @@ function ModalAgendamentoAdminSucesso({
 
           <p className="mt-4 max-w-md text-[15px] leading-7 text-slate-600">
             O exame foi agendado para o paciente informado. O agendamento foi
-            registrado com status pendente.
+            registrado com o status adequado conforme a necessidade de guia.
           </p>
         </div>
 
@@ -179,6 +183,12 @@ export default function AdminAgendarExame() {
   const [agendamentoCriado, setAgendamentoCriado] = useState(null)
 
   async function carregarExame() {
+    if (!exameId || exameId === 'undefined') {
+      setExame(null)
+      setCarregandoExame(false)
+      return
+    }
+
     try {
       setCarregandoExame(true)
 
@@ -255,6 +265,8 @@ export default function AdminAgendarExame() {
   }
 
   async function carregarDisponibilidadeMensal(dataMes = mesAtual) {
+    if (!exameId || exameId === 'undefined') return
+
     try {
       setCarregandoDisponibilidade(true)
 
@@ -265,9 +277,9 @@ export default function AdminAgendarExame() {
         },
       })
 
-      setDiasDisponiveis(resposta.data.diasDisponiveis || [])
-      setDiasLotados(resposta.data.diasLotados || [])
-      setDiasPassados(resposta.data.diasPassados || [])
+      setDiasDisponiveis(garantirArray(resposta.data?.diasDisponiveis))
+      setDiasLotados(garantirArray(resposta.data?.diasLotados))
+      setDiasPassados(garantirArray(resposta.data?.diasPassados))
     } catch (error) {
       console.error('Erro ao carregar disponibilidade mensal:', error)
 
@@ -298,8 +310,8 @@ export default function AdminAgendarExame() {
         },
       })
 
-      setHorariosDisponiveis(resposta.data.horariosDisponiveis || [])
-      setHorariosOcupados(resposta.data.horariosOcupados || [])
+      setHorariosDisponiveis(garantirArray(resposta.data?.horariosDisponiveis))
+      setHorariosOcupados(garantirArray(resposta.data?.horariosOcupados))
     } catch (error) {
       console.error('Erro ao carregar horários:', error)
 

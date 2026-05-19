@@ -13,6 +13,10 @@ import {
 
 import api from '../../services/api'
 
+function garantirArray(valor) {
+  return Array.isArray(valor) ? valor : []
+}
+
 const nomesMeses = [
   'Janeiro',
   'Fevereiro',
@@ -177,6 +181,12 @@ export default function AgendarExame() {
   const [guiaArquivo, setGuiaArquivo] = useState(null)
 
   async function carregarExameSelecionado() {
+    if (!exameId || exameId === 'undefined') {
+      setExame(null)
+      setCarregando(false)
+      return
+    }
+
     try {
       setCarregando(true)
 
@@ -198,6 +208,8 @@ export default function AgendarExame() {
   }
 
   async function carregarDisponibilidadeMensal(dataMes = mesAtual) {
+    if (!exameId || exameId === 'undefined') return
+
     try {
       setCarregandoDisponibilidade(true)
 
@@ -208,9 +220,9 @@ export default function AgendarExame() {
         },
       })
 
-      setDiasDisponiveis(resposta.data.diasDisponiveis || [])
-      setDiasLotados(resposta.data.diasLotados || [])
-      setDiasPassados(resposta.data.diasPassados || [])
+      setDiasDisponiveis(garantirArray(resposta.data?.diasDisponiveis))
+      setDiasLotados(garantirArray(resposta.data?.diasLotados))
+      setDiasPassados(garantirArray(resposta.data?.diasPassados))
     } catch (error) {
       console.error('Erro ao carregar disponibilidade mensal:', error)
 
@@ -239,8 +251,8 @@ export default function AgendarExame() {
         },
       })
 
-      setHorariosDisponiveis(resposta.data.horariosDisponiveis || [])
-      setHorariosOcupados(resposta.data.horariosOcupados || [])
+      setHorariosDisponiveis(garantirArray(resposta.data?.horariosDisponiveis))
+      setHorariosOcupados(garantirArray(resposta.data?.horariosOcupados))
     } catch (error) {
       console.error('Erro ao carregar horários disponíveis:', error)
 

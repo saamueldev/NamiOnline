@@ -17,6 +17,10 @@ import {
 
 import api from '../../services/api'
 
+function garantirArray(valor) {
+  return Array.isArray(valor) ? valor : []
+}
+
 const iconesCategorias = {
   Laboratoriais: FlaskConical,
   Cardiológicos: HeartPulse,
@@ -36,34 +40,40 @@ export default function AdminSelecionarExame() {
   const [exameDetalhado, setExameDetalhado] = useState(null)
   const [carregando, setCarregando] = useState(true)
   const [mostrarSugestoes, setMostrarSugestoes] = useState(false)
+  const [erro, setErro] = useState('')
 
   const examesDisponiveisRef = useRef(null)
 
   async function carregarCategorias() {
     try {
       const resposta = await api.get('/categorias-exames')
-      setCategorias(resposta.data)
+      setCategorias(garantirArray(resposta.data))
     } catch (error) {
       console.error('Erro ao carregar categorias:', error)
-      alert('Erro ao carregar categorias de exames.')
+      setCategorias([])
+      setErro('Nao foi possivel carregar as categorias de exames.')
     }
   }
 
   async function carregarExames() {
     try {
       const resposta = await api.get('/tipos-exames')
-      setExames(resposta.data)
+      setExames(garantirArray(resposta.data))
     } catch (error) {
       console.error('Erro ao carregar exames:', error)
-      alert('Erro ao carregar exames disponíveis.')
+      setExames([])
+      setErro('Nao foi possivel carregar os exames disponiveis.')
     }
   }
 
   async function carregarDados() {
     try {
       setCarregando(true)
+      setErro('')
 
       await Promise.all([carregarCategorias(), carregarExames()])
+    } catch (error) {
+      console.error('Erro ao carregar dados de exames:', error)
     } finally {
       setCarregando(false)
     }
@@ -283,6 +293,12 @@ export default function AdminSelecionarExame() {
       </section>
 
       <main className="mx-auto max-w-7xl px-6 py-10 md:px-10">
+        {erro && (
+          <div className="mb-6 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm font-semibold text-amber-800">
+            {erro}
+          </div>
+        )}
+
         <section>
           <div className="mb-5 flex items-center justify-between gap-4">
             <div>

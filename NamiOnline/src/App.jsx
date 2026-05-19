@@ -1,6 +1,7 @@
 import { BrowserRouter, Navigate, Outlet, Route, Routes } from "react-router-dom";
 import { useContext, useEffect } from "react";
 import { AuthContext, AuthProvider } from './context/AuthContext';
+import { ConteudoProvider } from "./context/ConteudoContext";
 import LayoutComNavbar from "./layouts/LayoutComNavbar";
 import LayoutComNavbarAdmin from "./layouts/LayoutComNavBarAdmin";
 import LayoutFooter from "./layouts/LayoutFooter";
@@ -89,8 +90,9 @@ function App() {
 
   return (
     <AuthProvider>
-      <BrowserRouter>
-        <Routes>
+      <ConteudoProvider>
+        <BrowserRouter>
+          <Routes>
           {/* ROTAS PÚBLICAS */}
           <Route path="/" element={<TelaLogin />} />
           <Route path="/cadastro" element={<TelaCadastro />} />
@@ -144,8 +146,9 @@ function App() {
           </Route>
 
           <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </BrowserRouter>
+          </Routes>
+        </BrowserRouter>
+      </ConteudoProvider>
     </AuthProvider>
   );
 }

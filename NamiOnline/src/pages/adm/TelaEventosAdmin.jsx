@@ -1,8 +1,6 @@
 import React, { useMemo, useState } from "react";
-import { useNavigate, Link } from 'react-router-dom'
 import {
   AlertCircle,
-  CalendarCheck,
   CalendarDays,
   Clock,
   Edit,
@@ -10,69 +8,47 @@ import {
   MapPin,
   Plus,
   Save,
-  Search,
   Trash2,
-  Users,
   X,
 } from "lucide-react";
-
-const initialEvents = [
-  {
-    id: 1,
-    title: "Mutirão de consultas cardiológicas",
-    status: "Publicado",
-    date: "2026-05-10",
-    time: "08:00",
-    location: "Ambulatório Central - Ala B",
-    summary: "Atendimento especial para pacientes na fila de cardiologia.",
-    description:
-      "Evento voltado para otimizar a marcação e realização de consultas cardiológicas. Os pacientes previamente cadastrados serão chamados conforme prioridade clínica e disponibilidade médica.",
-  },
-  {
-    id: 2,
-    title: "Campanha de atualização cadastral",
-    status: "Publicado",
-    date: "2026-05-20",
-    time: "09:00",
-    location: "Recepção Principal",
-    summary: "Ação para atualizar dados dos pacientes no sistema hospitalar.",
-    description:
-      "Durante a campanha, pacientes poderão atualizar telefone, e-mail, endereço e documentos para melhorar a comunicação sobre consultas, exames e retornos médicos.",
-  },
-];
+import { getApiErrorMessage, useConteudo } from "../../context/ConteudoContext";
 
 const emptyForm = {
   title: "",
   date: new Date().toISOString().slice(0, 10),
   time: "08:00",
   location: "",
-  summary: "",
   description: "",
 };
 
 export default function AdminEventsCrud() {
-  const [events, setEvents] = useState(initialEvents);
-  const [search, setSearch] = useState("");
+  const {
+    eventos: events,
+    loadingConteudo,
+    conteudoError,
+    criarEvento,
+    atualizarEvento,
+    excluirEvento,
+  } = useConteudo();
+  const [search] = useState("");
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isViewOpen, setIsViewOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState(emptyForm);
+  const [formError, setFormError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const filteredEvents = useMemo(() => {
     const normalizedSearch = search.toLowerCase().trim();
-
     if (!normalizedSearch) return events;
 
-    return events.filter((item) => {
-      return (
-        item.title.toLowerCase().includes(normalizedSearch) ||
-        item.type.toLowerCase().includes(normalizedSearch) ||
-        item.status.toLowerCase().includes(normalizedSearch) ||
-        item.location.toLowerCase().includes(normalizedSearch) ||
-        item.organizer.toLowerCase().includes(normalizedSearch)
-      );
-    });
+    return events.filter((item) =>
+      [item.title, item.status, item.location, item.description]
+        .join(" ")
+        .toLowerCase()
+        .includes(normalizedSearch)
+    );
   }, [events, search]);
 
   const publishedCount = events.filter((item) => item.status === "Publicado").length;
@@ -82,9 +58,11 @@ export default function AdminEventsCrud() {
     setForm((currentForm) => ({ ...currentForm, [name]: value }));
   }
 
+
   function openCreateForm() {
     setEditingId(null);
     setForm(emptyForm);
+    setFormError("");
     setIsFormOpen(true);
   }
 
@@ -92,13 +70,12 @@ export default function AdminEventsCrud() {
     setEditingId(item.id);
     setForm({
       title: item.title,
-      status: item.status,
       date: item.date,
       time: item.time,
       location: item.location,
-      summary: item.summary,
       description: item.description,
     });
+    setFormError("");
     setIsFormOpen(true);
   }
 
@@ -111,6 +88,7 @@ export default function AdminEventsCrud() {
     setIsFormOpen(false);
     setEditingId(null);
     setForm(emptyForm);
+    setFormError("");
   }
 
   function closeViewModal() {
@@ -118,121 +96,114 @@ export default function AdminEventsCrud() {
     setSelectedEvent(null);
   }
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault();
 
     const payload = {
       ...form,
       title: form.title.trim(),
       location: form.location.trim(),
-      organizer: form.organizer.trim(),
-      summary: form.summary.trim(),
       description: form.description.trim(),
     };
 
-    if (
-      !payload.title ||
-      !payload.location ||
-      !payload.organizer ||
-      !payload.summary ||
-      !payload.description ||
-      !payload.capacity
-    ) {
+    if (!payload.title || !payload.date || !payload.time || !payload.location || !payload.description) {
+      setFormError("Preencha todos os campos obrigatorios.");
       return;
     }
 
-    if (editingId) {
-      setEvents((currentEvents) =>
-        currentEvents.map((item) =>
-          item.id === editingId ? { ...item, ...payload } : item
-        )
-      );
-    } else {
-      const newEvent = {
-        id: Date.now(),
-        ...payload,
-      };
-      setEvents((currentEvents) => [newEvent, ...currentEvents]);
-    }
+    try {
+      setIsSubmitting(true);
+      setFormError("");
 
-    closeFormModal();
+      if (editingId) {
+        await atualizarEvento(editingId, payload);
+      } else {
+        await criarEvento(payload);
+      }
+
+      closeFormModal();
+    } catch (error) {
+      setFormError(
+        getApiErrorMessage(error, "Nao foi possivel salvar o evento.")
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
-  function handleDelete(id) {
+  async function handleDelete(id) {
     const shouldDelete = window.confirm(
-      "Tem certeza que deseja apagar este evento? Esta ação não poderá ser desfeita."
+      "Tem certeza que deseja apagar este evento? Esta acao nao podera ser desfeita."
     );
 
     if (!shouldDelete) return;
 
-    setEvents((currentEvents) => currentEvents.filter((item) => item.id !== id));
+    try {
+      await excluirEvento(id);
+    } catch (error) {
+      window.alert(
+        getApiErrorMessage(error, "Nao foi possivel excluir o evento.")
+      );
+    }
   }
 
   return (
     <div className="min-h-screen bg-slate-100 p-4 text-slate-900 md:p-8">
       <div className="mx-auto max-w-7xl space-y-8">
         <header className="overflow-hidden rounded-3xl bg-gradient-to-r from-blue-700 via-blue-600 to-cyan-500 p-6 text-white shadow-xl md:p-8">
-          <div className="flex flex-col justify-between gap-6 md:flex-row md:items-center">
-            <div>
-              <h1 className="text-3xl font-bold tracking-tight md:text-4xl">
-                Gerenciar Eventos
-              </h1>
-            </div>
-            <div className="relative w-full md:max-w-sm">
-            </div>
-          </div>
+          <h1 className="text-3xl font-bold tracking-tight md:text-4xl">
+            Gerenciar Eventos
+          </h1>
         </header>
 
         <section className="grid gap-4 md:grid-cols-3">
           <DashboardCard
             title="Total de eventos"
-            value={events.length}
+            value={loadingConteudo ? "..." : events.length}
             description="Eventos cadastrados"
           />
           <DashboardCard
             title="Publicados"
-            value={publishedCount}
-            description="Visíveis no portal"
+            value={loadingConteudo ? "..." : publishedCount}
+            description="Visiveis no portal"
           />
-
-           <button
-              onClick={openCreateForm}
-              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white px-5 py-3 font-semibold text-blue-700 shadow-lg transition hover:bg-blue-50"
-            >
-              <Plus size={20} />
-              Novo evento
-            </button>
+          <button
+            onClick={openCreateForm}
+            className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white px-5 py-3 font-semibold text-blue-700 shadow-lg transition hover:bg-blue-50"
+          >
+            <Plus size={20} />
+            Novo evento
+          </button>
         </section>
 
         <main className="min-h-[55vh] rounded-3xl bg-white p-6 shadow-lg md:p-8">
-          <div className="mb-8 flex flex-col justify-between gap-6 md:flex-row md:items-center">
-            <div>
-              <h2 className="text-xl font-bold text-slate-900">Eventos cadastrados</h2>
-              <p className="text-sm text-slate-500">
-                Visualize, edite, exclua ou publique eventos do sistema hospitalar.
-              </p>
-            </div>
+          <div className="mb-8">
+            <h2 className="text-xl font-bold text-slate-900">Eventos cadastrados</h2>
+            <p className="text-sm text-slate-500">
+              Visualize, edite ou exclua eventos do sistema hospitalar.
+            </p>
           </div>
 
           <div className="overflow-hidden rounded-2xl border border-slate-200">
             <div className="hidden grid-cols-12 bg-slate-50 px-6 py-4 text-xs font-bold uppercase tracking-wide text-slate-500 md:grid">
-              <span className="col-span-3">Evento</span>
+              <span className="col-span-4">Evento</span>
               <span className="col-span-2">Status</span>
-              <span className="col-span-2">Data/Hora</span>
-              <span className="col-span-1">Vagas</span>
-              <span className="col-span-2 text-right">Ações</span>
+              <span className="col-span-3">Data/Hora</span>
+              <span className="col-span-3 text-right">Acoes</span>
             </div>
 
-            {filteredEvents.length > 0 ? (
+            {conteudoError ? (
+              <EmptyState text={conteudoError} danger />
+            ) : filteredEvents.length > 0 ? (
               filteredEvents.map((item) => (
                 <article
                   key={item.id}
                   className="grid gap-5 border-t border-slate-200 px-6 py-6 transition hover:bg-blue-50/40 md:grid-cols-12 md:items-center"
                 >
-                  <div className="md:col-span-3">
+                  <div className="md:col-span-4">
                     <h3 className="font-semibold text-slate-900">{item.title}</h3>
                     <p className="mt-1 line-clamp-1 text-sm text-slate-500">
-                      {item.summary}
+                      {item.description}
                     </p>
                     <p className="mt-2 flex items-center gap-1 text-xs text-slate-400">
                       <MapPin size={14} />
@@ -240,12 +211,11 @@ export default function AdminEventsCrud() {
                     </p>
                   </div>
 
-
                   <div className="md:col-span-2">
                     <StatusBadge status={item.status} />
                   </div>
 
-                  <div className="space-y-1 text-sm text-slate-500 md:col-span-2">
+                  <div className="space-y-1 text-sm text-slate-500 md:col-span-3">
                     <div className="flex items-center gap-2">
                       <CalendarDays size={16} />
                       {formatDate(item.date)}
@@ -256,123 +226,40 @@ export default function AdminEventsCrud() {
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2 text-sm font-semibold text-slate-600 md:col-span-1">
-                    <Users size={16} />
-                    {item.capacity}
-                  </div>
-
-                  <div className="flex justify-start gap-2 md:col-span-2 md:justify-end">
-                    <ActionButton
-                      label="Visualizar"
-                      icon={<Eye size={17} />}
-                      onClick={() => openViewModal(item)}
-                    />
-                    <ActionButton
-                      label="Editar"
-                      icon={<Edit size={17} />}
-                      onClick={() => openEditForm(item)}
-                    />
-                    <ActionButton
-                      label="Apagar"
-                      icon={<Trash2 size={17} />}
-                      danger
-                      onClick={() => handleDelete(item.id)}
-                    />
+                  <div className="flex justify-start gap-2 md:col-span-3 md:justify-end">
+                    <ActionButton label="Visualizar" icon={<Eye size={17} />} onClick={() => openViewModal(item)} />
+                    <ActionButton label="Editar" icon={<Edit size={17} />} onClick={() => openEditForm(item)} />
+                    <ActionButton label="Apagar" icon={<Trash2 size={17} />} danger onClick={() => handleDelete(item.id)} />
                   </div>
                 </article>
               ))
             ) : (
-              <div className="flex flex-col items-center justify-center gap-3 border-t border-slate-200 p-10 text-center">
-                <AlertCircle className="text-blue-600" size={36} />
-                <div>
-                  <h3 className="font-semibold text-slate-800">
-                    Nenhum evento encontrado
-                  </h3>
-                  <p className="text-sm text-slate-500">
-                    Tente buscar por outro termo ou cadastre um novo evento.
-                  </p>
-                </div>
-              </div>
+              <EmptyState text="Nenhum evento encontrado." />
             )}
           </div>
         </main>
       </div>
 
       {isFormOpen && (
-        <Modal onClose={closeFormModal}>
+        <Modal>
           <form onSubmit={handleSubmit} className="space-y-5">
             <ModalHeader
               title={editingId ? "Editar evento" : "Criar evento"}
-              subtitle="Preencha as informações do evento que será exibido no sistema hospitalar."
+              subtitle="Preencha as informacoes do evento que sera exibido no sistema hospitalar."
               onClose={closeFormModal}
             />
-
             <div className="grid gap-4 md:grid-cols-2">
-              <Input
-                label="Título"
-                name="title"
-                value={form.title}
-                onChange={handleChange}
-                placeholder="Digite o nome do evento"
-                required
-              />
-
-              <Select
-                label="Status"
-                name="status"
-                value={form.status}
-                onChange={handleChange}
-                options={["Publicado", "Rascunho"]}
-              />
-
-              <Input
-                label="Data"
-                name="date"
-                type="date"
-                value={form.date}
-                onChange={handleChange}
-                required
-              />
-
-              <Input
-                label="Horário"
-                name="time"
-                type="time"
-                value={form.time}
-                onChange={handleChange}
-                required
-              />
-
-              <Input
-                label="Local"
-                name="location"
-                value={form.location}
-                onChange={handleChange}
-                placeholder="Ex: Ambulatório Central"
-                required
-              />
+              <Input label="Titulo" name="title" value={form.title} onChange={handleChange} required />
+              <Input label="Data" name="date" type="date" value={form.date} onChange={handleChange} required />
+              <Input label="Horario" name="time" type="time" value={form.time} onChange={handleChange} required />
+              <Input label="Local" name="location" value={form.location} onChange={handleChange} required />
             </div>
-
-            <Textarea
-              label="Resumo"
-              name="summary"
-              value={form.summary}
-              onChange={handleChange}
-              placeholder="Escreva um resumo curto do evento"
-              rows={3}
-              required
-            />
-
-            <Textarea
-              label="Descrição"
-              name="description"
-              value={form.description}
-              onChange={handleChange}
-              placeholder="Digite a descrição completa do evento"
-              rows={7}
-              required
-            />
-
+            <Textarea label="Descricao" name="description" value={form.description} onChange={handleChange} rows={7} required />
+            {formError && (
+              <p className="rounded-2xl bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">
+                {formError}
+              </p>
+            )}
             <div className="flex flex-col-reverse gap-3 border-t border-slate-200 pt-5 sm:flex-row sm:justify-end">
               <button
                 type="button"
@@ -383,10 +270,11 @@ export default function AdminEventsCrud() {
               </button>
               <button
                 type="submit"
-                className="inline-flex items-center justify-center gap-2 rounded-2xl bg-blue-600 px-5 py-3 font-semibold text-white shadow-lg shadow-blue-200 transition hover:bg-blue-700"
+                disabled={isSubmitting}
+                className="inline-flex items-center justify-center gap-2 rounded-2xl bg-blue-600 px-5 py-3 font-semibold text-white shadow-lg shadow-blue-200 transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-70"
               >
                 <Save size={18} />
-                {editingId ? "Salvar alterações" : "Cadastrar evento"}
+                {isSubmitting ? "Salvando..." : editingId ? "Salvar alteracoes" : "Cadastrar evento"}
               </button>
             </div>
           </form>
@@ -394,43 +282,21 @@ export default function AdminEventsCrud() {
       )}
 
       {isViewOpen && selectedEvent && (
-        <Modal onClose={closeViewModal}>
-          <ModalHeader
-            title="Visualizar evento"
-            subtitle="Prévia do evento cadastrado no sistema."
-            onClose={closeViewModal}
-          />
-
+        <Modal>
+          <ModalHeader title="Visualizar evento" subtitle="Previa do evento cadastrado no sistema." onClose={closeViewModal} />
           <article className="space-y-5">
             <div className="rounded-3xl bg-gradient-to-r from-blue-700 to-cyan-500 p-6 text-white">
-              <div className="mb-4 flex flex-wrap gap-2">
-                <span className="rounded-full bg-white/20 px-3 py-1 text-xs font-semibold">
-                  {selectedEvent.type}
-                </span>
-                <span className="rounded-full bg-white/20 px-3 py-1 text-xs font-semibold">
-                  {selectedEvent.status}
-                </span>
-              </div>
+              <span className="mb-4 inline-flex rounded-full bg-white/20 px-3 py-1 text-xs font-semibold">
+                {selectedEvent.status}
+              </span>
               <h2 className="text-2xl font-bold">{selectedEvent.title}</h2>
-              <p className="mt-3 text-blue-50">{selectedEvent.summary}</p>
             </div>
-
             <div className="grid gap-4 rounded-2xl bg-slate-50 p-5 text-sm text-slate-600 md:grid-cols-2">
               <InfoItem icon={<CalendarDays size={17} />} label="Data" value={formatDate(selectedEvent.date)} />
-              <InfoItem icon={<Clock size={17} />} label="Horário" value={selectedEvent.time} />
+              <InfoItem icon={<Clock size={17} />} label="Horario" value={selectedEvent.time} />
               <InfoItem icon={<MapPin size={17} />} label="Local" value={selectedEvent.location} />
             </div>
-
             <p className="leading-7 text-slate-700">{selectedEvent.description}</p>
-
-            <div className="flex justify-end border-t border-slate-200 pt-5">
-              <button
-                onClick={closeViewModal}
-                className="rounded-2xl bg-blue-600 px-5 py-3 font-semibold text-white transition hover:bg-blue-700"
-              >
-                Fechar
-              </button>
-            </div>
           </article>
         </Modal>
       )}
@@ -449,16 +315,8 @@ function DashboardCard({ title, value, description }) {
 }
 
 function StatusBadge({ status }) {
-  const isPublished = status === "Publicado";
-
   return (
-    <span
-      className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${
-        isPublished
-          ? "bg-emerald-100 text-emerald-700"
-          : "bg-amber-100 text-amber-700"
-      }`}
-    >
+    <span className="inline-flex rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700">
       {status}
     </span>
   );
@@ -470,15 +328,20 @@ function ActionButton({ label, icon, onClick, danger = false }) {
       type="button"
       title={label}
       onClick={onClick}
-      className={`inline-flex h-10 w-10 items-center justify-center rounded-xl transition ${
-        danger
-          ? "bg-red-50 text-red-600 hover:bg-red-100"
-          : "bg-blue-50 text-blue-700 hover:bg-blue-100"
-      }`}
+      className={`inline-flex h-10 w-10 items-center justify-center rounded-xl transition ${danger ? "bg-red-50 text-red-600 hover:bg-red-100" : "bg-blue-50 text-blue-700 hover:bg-blue-100"}`}
     >
       {icon}
       <span className="sr-only">{label}</span>
     </button>
+  );
+}
+
+function EmptyState({ text, danger = false }) {
+  return (
+    <div className="flex flex-col items-center justify-center gap-3 border-t border-slate-200 p-10 text-center">
+      <AlertCircle className={danger ? "text-red-600" : "text-blue-600"} size={36} />
+      <p className={`text-sm font-semibold ${danger ? "text-red-700" : "text-slate-600"}`}>{text}</p>
+    </div>
   );
 }
 
@@ -522,24 +385,6 @@ function Input({ label, ...props }) {
   );
 }
 
-function Select({ label, options, ...props }) {
-  return (
-    <label className="block space-y-2">
-      <span className="text-sm font-semibold text-slate-700">{label}</span>
-      <select
-        {...props}
-        className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
-      >
-        {options.map((option) => (
-          <option key={option} value={option}>
-            {option}
-          </option>
-        ))}
-      </select>
-    </label>
-  );
-}
-
 function Textarea({ label, ...props }) {
   return (
     <label className="block space-y-2">
@@ -551,6 +396,7 @@ function Textarea({ label, ...props }) {
     </label>
   );
 }
+
 
 function InfoItem({ icon, label, value }) {
   return (
@@ -567,10 +413,11 @@ function InfoItem({ icon, label, value }) {
 }
 
 function formatDate(date) {
+  if (!date) return "-";
+
   return new Intl.DateTimeFormat("pt-BR", {
     day: "2-digit",
     month: "2-digit",
     year: "numeric",
   }).format(new Date(`${date}T00:00:00`));
 }
-

@@ -10,6 +10,7 @@ export default function TelaLogin() {
 
   const [email, setEmail] = useState('')
   const [senha, setSenha] = useState('')
+  const [lembrarMe, setLembrarMe] = useState(false)
   const [erro, setErro] = useState('')
   const [loading, setLoading] = useState(false)
 
@@ -25,7 +26,7 @@ export default function TelaLogin() {
     setLoading(true)
 
     try {
-      const resultado = await login(email.trim(), senha)
+      const resultado = await login(email.trim(), senha, lembrarMe)
 
       if (resultado.tipo === 'admin') {
         navigate('/admin/dashboard')
@@ -106,7 +107,12 @@ export default function TelaLogin() {
 
           <div className="mb-5 flex flex-wrap justify-between gap-2 text-sm font-normal text-[#32324f]">
             <label className="cursor-pointer">
-              <input type="checkbox" className="mr-1" />
+              <input
+                type="checkbox"
+                checked={lembrarMe}
+                onChange={(e) => setLembrarMe(e.target.checked)}
+                className="mr-1"
+              />
               Lembre-me
             </label>
 

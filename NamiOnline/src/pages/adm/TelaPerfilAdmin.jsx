@@ -1,5 +1,6 @@
-import { useState, useContext, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useState, useContext, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+
 import {
   FaArrowLeft,
   FaBell,
@@ -7,416 +8,309 @@ import {
   FaEye,
   FaQuestionCircle,
   FaSignOutAlt,
-  FaCamera,
-  FaCog,
-  FaUserShield,
-  FaEnvelope,
-  FaMoon,
   FaCalendarCheck,
-  FaUserCog,
+  FaCog,
   FaCheckCircle,
+  FaMoon,
   FaSun,
-  FaSave
-} from 'react-icons/fa'
+  FaSave,
+  FaEnvelope,
+} from "react-icons/fa";
 
-import { AuthContext } from '../../context/AuthContext'
-import api from '../../services/api'
+import { AuthContext } from "../../context/AuthContext";
+import api from "../../services/api";
 
-export default function TelaPerfil() {
-  const navigate = useNavigate()
-  const { user, logout, isAdmin } = useContext(AuthContext)
-  const [notificacoes, setNotificacoes] = useState(true)
+export default function TelaPerfilAdmin() {
+  const navigate = useNavigate();
+  const { user, logout, isAdmin } = useContext(AuthContext);
 
-  // =========================
-  // TEMA
-  // =========================
-  const [tema, setTema] = useState(
-    localStorage.getItem('tema') || 'claro'
-  )
+  const [notificacoes, setNotificacoes] = useState(true);
+  const [tema, setTema] = useState(localStorage.getItem("tema") || "claro");
+
+  const dark = tema === "escuro";
 
   // =========================
-  // APLICA O TEMA AO ENTRAR
+  // APLICAR TEMA GLOBAL
   // =========================
   useEffect(() => {
-    const temaSalvo = localStorage.getItem('tema') || 'claro'
-
-    setTema(temaSalvo)
-
-    if (temaSalvo === 'escuro') {
-      document.body.classList.add('dark')
-    } else {
-      document.body.classList.remove('dark')
-    }
-  }, [])
+    document.documentElement.classList.toggle("dark", dark);
+    document.body.classList.toggle("dark", dark);
+  }, [dark]);
 
   // =========================
   // SALVAR TEMA
   // =========================
   const salvarTema = async () => {
     try {
-      await api.post('/configuracoes/tema', { tema })
+      await api.post("/configuracoes/tema", { tema });
 
-      // SALVA LOCALMENTE
-      localStorage.setItem("tema", tema)
+      localStorage.setItem("tema", tema);
 
-      // ALTERA O BODY
-      if (tema === "escuro") {
-        document.body.classList.add("dark")
-      } else {
-        document.body.classList.remove("dark")
-      }
+      document.documentElement.classList.toggle("dark", dark);
+      document.body.classList.toggle("dark", dark);
 
-      alert("Tema salvo com sucesso!")
-
+      alert("Tema salvo com sucesso!");
     } catch (error) {
-      console.error(error)
-      alert("Erro ao salvar tema")
+      console.error(error);
+      alert("Erro ao salvar tema");
     }
-  }
+  };
 
   // =========================
   // LOGOUT
   // =========================
   const handleLogout = () => {
-    logout()
-    navigate('/')
-  }
-
-  const dark = tema === 'escuro'
+    logout();
+    navigate("/");
+  };
 
   return (
     <div
-      className={`min-h-screen px-5 py-10 font-sans transition-all duration-300 ${
-        dark
-          ? 'bg-[#0F172A] text-white'
-          : 'bg-[#F8FAFC] text-slate-800'
+      className={`min-h-screen px-5 py-10 transition-all duration-300 ${
+        dark ? "bg-[#0F172A] text-white" : "bg-[#F8FAFC] text-slate-800"
       }`}
     >
       <div className="mx-auto max-w-5xl">
 
         {/* HEADER */}
         <div className="mb-10 flex items-center gap-4">
-
           <button
-            onClick={() => navigate('/admin/dashboard')}
-            className="flex h-10 w-10 items-center justify-center rounded-full bg-[#132190] text-xl text-white transition hover:bg-[#004AF7]"
+            onClick={() => navigate("/home")}
+            className="flex h-10 w-10 items-center justify-center rounded-full bg-[#132190] text-white"
           >
             <FaArrowLeft />
           </button>
 
-          <h1
-            className={`text-3xl font-bold ${
-              dark ? 'text-white' : 'text-[#132190]'
-            }`}
-          >
-            Meu Perfil
-          </h1>
+          <h1 className="text-3xl font-bold">Meu Perfil</h1>
         </div>
 
-        {/* AVATAR */}
+        {/* USER CARD */}
         <div
-          className={`mb-8 rounded-[24px] p-10 text-center shadow-xl border transition-all ${
+          className={`mb-8 rounded-3xl border p-10 text-center shadow-xl transition ${
             dark
-              ? 'bg-[#1E293B] border-[#334155]'
-              : 'bg-white border-slate-200'
+              ? "bg-[#1E293B] border-slate-700"
+              : "bg-white border-slate-200"
           }`}
         >
-          <div>
-            <h2
-              className={`mb-3 text-2xl font-semibold ${
-                dark ? 'text-white' : 'text-slate-800'
+          <h2 className="text-3xl font-bold">
+            {user?.nome || "Usuário"}
+          </h2>
+
+          <p className="mt-2 opacity-70">
+            Bem-vindo ao Nami Online
+          </p>
+
+          <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-green-100 px-4 py-2 text-green-700">
+            <FaCheckCircle />
+            {isAdmin() ? "Administrador" : "Conta ativa"}
+          </div>
+        </div>
+
+        {/* NOTIFICAÇÕES */}
+        <div
+          className={`mb-6 overflow-hidden rounded-3xl border shadow-xl transition ${
+            dark
+              ? "bg-[#1E293B] border-slate-700"
+              : "bg-white border-slate-200"
+          }`}
+        >
+          <div className="flex items-center gap-3 bg-gradient-to-r from-[#004AF7] to-[#132190] px-6 py-5 text-white">
+            <FaBell />
+            Notificações
+          </div>
+
+          <div className="flex items-center justify-between p-6">
+            <div>
+              <h3 className="font-semibold">Notificações do App</h3>
+              <p className="text-sm opacity-70">
+                Receba avisos de consultas e retornos
+              </p>
+            </div>
+
+            <button
+              onClick={() => setNotificacoes(!notificacoes)}
+              className={`relative h-8 w-14 rounded-full transition ${
+                notificacoes ? "bg-[#132190]" : "bg-gray-400"
               }`}
             >
-              {user?.nome || 'Usuário Nami'}
-            </h2>
-
-            <div className="inline-flex items-center gap-2 rounded-full bg-green-100 px-4 py-2 text-sm font-semibold text-green-700">
-              <FaCheckCircle />
-              {isAdmin() ? 'Administrador' : 'Conta ativa'}
-            </div>
+              <span
+                className={`absolute top-1 h-6 w-6 rounded-full bg-white transition ${
+                  notificacoes ? "left-7" : "left-1"
+                }`}
+              />
+            </button>
           </div>
         </div>
 
-        {/* SECTIONS */}
-        <div className="grid gap-6">
-
-          {/* NOTIFICAÇÕES */}
-          <div
-            className={`overflow-hidden rounded-[24px] shadow-xl border ${
-              dark
-                ? 'bg-[#1E293B] border-[#334155]'
-                : 'bg-white border-slate-200'
-            }`}
-          >
-            <div className="flex items-center gap-3 bg-gradient-to-r from-[#004AF7] to-[#132190] px-6 py-5 text-lg font-semibold text-white">
-              <FaBell />
-              Notificações
-            </div>
-
-            <div className="p-6">
-
-              <div className="flex flex-col justify-between gap-4 py-5 md:flex-row md:items-center">
-
-                <div className="flex items-center gap-4">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-100 text-xl text-[#004AF7]">
-                    <FaBell />
-                  </div>
-
-                  <div>
-                    <h3 className="font-semibold">
-                      Notificações do App
-                    </h3>
-
-                    <p
-                      className={`text-sm ${
-                        dark ? 'text-slate-300' : 'text-slate-500'
-                      }`}
-                    >
-                      Receba avisos de consultas e retornos
-                    </p>
-                  </div>
-                </div>
-
-                <button
-                  onClick={() => setNotificacoes(!notificacoes)}
-                  className={`relative h-8 w-14 rounded-full transition ${
-                    notificacoes ? 'bg-[#132190]' : 'bg-slate-400'
-                  }`}
-                >
-                  <span
-                    className={`absolute top-1 h-6 w-6 rounded-full bg-white transition ${
-                      notificacoes ? 'left-7' : 'left-1'
-                    }`}
-                  />
-                </button>
-              </div>
-
-            </div>
-          </div>
-
-          {/* PREFERÊNCIAS */}
-          <div
-            className={`overflow-hidden rounded-[24px] shadow-xl border ${
-              dark
-                ? 'bg-[#1E293B] border-[#334155]'
-                : 'bg-white border-slate-200'
-            }`}
-          >
-            <div className="flex items-center gap-3 bg-gradient-to-r from-[#004AF7] to-[#132190] px-6 py-5 text-lg font-semibold text-white">
-              <FaEye />
-              Preferências
-            </div>
-
-            <div className="p-6">
-
-              <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
-
-                <div className="flex items-center gap-4">
-
-                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-100 text-[#004AF7]">
-                    {dark ? <FaMoon /> : <FaSun />}
-                  </div>
-
-                  <div>
-                    <h3 className="font-semibold">
-                      Tema
-                    </h3>
-
-                    <p
-                      className={`text-sm ${
-                        dark ? 'text-slate-300' : 'text-slate-500'
-                      }`}
-                    >
-                      Escolha o tema do sistema
-                    </p>
-                  </div>
-                </div>
-
-                <select
-                  value={tema}
-                  onChange={(e) => setTema(e.target.value)}
-                  className={`rounded-lg border px-4 py-2 text-sm outline-none transition ${
-                    dark
-                      ? 'bg-[#0F172A] border-[#475569] text-white'
-                      : 'bg-white border-slate-300 text-black'
-                  }`}
-                >
-                  <option value="claro">Claro</option>
-                  <option value="escuro">Escuro</option>
-                </select>
-              </div>
-
-            </div>
-          </div>
-
-          {/* SEGURANÇA */}
-          <div
-            className={`overflow-hidden rounded-[24px] shadow-xl border ${
-              dark
-                ? 'bg-[#1E293B] border-[#334155]'
-                : 'bg-white border-slate-200'
-            }`}
-          >
-            <div className="flex items-center gap-3 bg-gradient-to-r from-[#004AF7] to-[#132190] px-6 py-5 text-lg font-semibold text-white">
-              <FaLock />
-              Segurança
-            </div>
-
-            <div className="p-6 space-y-5">
-
-              <button className="w-full rounded-xl bg-[#E4F2FE] px-5 py-4 font-semibold text-[#132190] transition hover:bg-[#87B7FE] hover:text-white flex items-center justify-center gap-3">
-                <FaLock />
-                Alterar Senha
-              </button>
-
-            </div>
-          </div>
-
-          {/* GERENCIAMENTO */}
-          <div
-            className={`overflow-hidden rounded-[24px] shadow-xl border ${
-              dark
-                ? 'bg-[#1E293B] border-[#334155]'
-                : 'bg-white border-slate-200'
-            }`}
-          >
-            <div className="flex items-center gap-3 bg-gradient-to-r from-[#004AF7] to-[#132190] px-6 py-5 text-lg font-semibold text-white">
-              <FaCog />
-              Gerenciamento
-            </div>
-
-            <div className="p-6 grid gap-4">
-
-              <button
-                onClick={() => navigate('/admin/consultas-dia')}
-                className="flex items-center justify-center gap-3 rounded-xl bg-[#E4F2FE] px-5 py-4 font-semibold text-[#132190] transition hover:bg-[#87B7FE] hover:text-white"
-              >
-                <FaCalendarCheck />
-                Agendamentos
-              </button>
-
-              <button
-                onClick={() => navigate('/admin/configuracoes')}
-                className="flex items-center justify-center gap-3 rounded-xl bg-[#E4F2FE] px-5 py-4 font-semibold text-[#132190] transition hover:bg-[#87B7FE] hover:text-white"
-              >
-                <FaUserCog />
-                Configurações de Admin
-              </button>
-
-            </div>
-          </div>
-
-          {/* AJUDA */}
-          <div
-            className={`overflow-hidden rounded-[24px] shadow-xl border ${
-              dark
-                ? 'bg-[#1E293B] border-[#334155]'
-                : 'bg-white border-slate-200'
-            }`}
-          >
-            <div className="flex items-center gap-3 bg-gradient-to-r from-[#004AF7] to-[#132190] px-6 py-5 text-lg font-semibold text-white">
-              <FaQuestionCircle />
-              Ajuda
-            </div>
-
-            <div className="p-6 space-y-4">
-
-              <button
-                onClick={() => navigate('/central-ajuda')}
-                className={`w-full rounded-xl border p-4 text-left transition ${
-                  dark
-                    ? 'border-[#475569] hover:bg-[#334155]'
-                    : 'border-slate-200 hover:bg-[#E4F2FE]'
-                }`}
-              >
-                <h3 className="font-semibold">
-                  Centro de Ajuda
-                </h3>
-
-                <p
-                  className={`text-sm ${
-                    dark ? 'text-slate-300' : 'text-slate-500'
-                  }`}
-                >
-                  Dúvidas frequentes e suporte
-                </p>
-              </button>
-
-              <div
-                className={`rounded-xl border p-4 flex items-center gap-3 ${
-                  dark
-                    ? 'border-[#475569]'
-                    : 'border-slate-200'
-                }`}
-              >
-                <FaEnvelope className="text-[#004AF7]" />
-
-                <div>
-                  <h3 className="font-semibold">
-                    Contato com Suporte
-                  </h3>
-
-                  <p
-                    className={`text-sm ${
-                      dark ? 'text-slate-300' : 'text-slate-500'
-                    }`}
-                  >
-                    suporte@nami.com
-                  </p>
-                </div>
-              </div>
-
-            </div>
-          </div>
-
-          {/* ACTIONS */}
-          <div
-            className={`rounded-[24px] p-6 shadow-xl border ${
-              dark
-                ? 'bg-[#1E293B] border-[#334155]'
-                : 'bg-white border-slate-200'
-            }`}
-          >
-            <div className="grid gap-4 md:grid-cols-2">
-
-              <button
-                onClick={() => navigate('/home')}
-                className="rounded-xl bg-[#E4F2FE] px-5 py-4 font-semibold text-[#132190] transition hover:bg-[#87B7FE] hover:text-white"
-              >
-                ← Voltar
-              </button>
-
-              <button
-                onClick={salvarTema}
-                className="flex items-center justify-center gap-3 rounded-xl bg-[#004AF7] px-5 py-4 font-semibold text-white transition hover:bg-[#132190]"
-              >
-                <FaSave />
-                Salvar
-              </button>
-
-              <button
-                onClick={handleLogout}
-                className="md:col-span-2 flex items-center justify-center gap-2 rounded-xl bg-red-500 px-5 py-4 font-semibold text-white transition hover:-translate-y-1 hover:bg-red-600"
-              >
-                <FaSignOutAlt />
-                Sair da Conta
-              </button>
-
-            </div>
-          </div>
-
-        </div>
-
-        {/* FOOTER */}
+        {/* PREFERÊNCIAS */}
         <div
-          className={`mt-10 text-center text-xs ${
-            dark ? 'text-slate-400' : 'text-slate-500'
+          className={`mb-6 overflow-hidden rounded-3xl border shadow-xl transition ${
+            dark
+              ? "bg-[#1E293B] border-slate-700"
+              : "bg-white border-slate-200"
           }`}
         >
-          © 2026 Nami Online - Todos os direitos reservados
+          <div className="flex items-center gap-3 bg-gradient-to-r from-[#004AF7] to-[#132190] px-6 py-5 text-white">
+            <FaEye />
+            Preferências
+          </div>
+
+          <div className="flex items-center justify-between p-6">
+            <div className="flex items-center gap-3">
+              {dark ? <FaMoon /> : <FaSun />}
+
+              <div>
+                <h3 className="font-semibold">Tema</h3>
+                <p className="text-sm opacity-70">
+                  Escolha o tema do sistema
+                </p>
+              </div>
+            </div>
+
+            <select
+              value={tema}
+              onChange={(e) => setTema(e.target.value)}
+              className={`rounded border px-3 py-2 transition ${
+                dark
+                  ? "bg-slate-800 text-white border-slate-600"
+                  : "bg-white text-black border-slate-300"
+              }`}
+            >
+              <option value="claro">Claro</option>
+              <option value="escuro">Escuro</option>
+            </select>
+          </div>
+        </div>
+
+        {/* SEGURANÇA */}
+        <div
+          className={`mb-6 overflow-hidden rounded-3xl border shadow-xl transition ${
+            dark
+              ? "bg-[#1E293B] border-slate-700"
+              : "bg-white border-slate-200"
+          }`}
+        >
+          <div className="flex items-center gap-3 bg-gradient-to-r from-[#004AF7] to-[#132190] px-6 py-5 text-white">
+            <FaLock />
+            Segurança
+          </div>
+
+          <div className="p-6">
+            <button
+              className={`w-full rounded-xl px-5 py-4 font-semibold transition ${
+                dark
+                  ? "bg-slate-800 text-white hover:bg-slate-700"
+                  : "bg-slate-200 text-slate-800 hover:bg-slate-300"
+              }`}
+            >
+              Alterar Senha
+            </button>
+          </div>
+        </div>
+
+        {/* ATALHOS */}
+        <div
+          className={`mb-6 overflow-hidden rounded-3xl border shadow-xl transition ${
+            dark
+              ? "bg-[#1E293B] border-slate-700"
+              : "bg-white border-slate-200"
+          }`}
+        >
+          <div className="flex items-center gap-3 bg-gradient-to-r from-[#004AF7] to-[#132190] px-6 py-5 text-white">
+            <FaCog />
+            Atalhos
+          </div>
+
+          <div className="p-6">
+            <button
+              onClick={() => navigate("/meus-agendamentos")}
+              className={`w-full rounded-xl px-5 py-4 font-semibold transition ${
+                dark
+                  ? "bg-slate-800 text-white hover:bg-slate-700"
+                  : "bg-slate-200 text-slate-800 hover:bg-slate-300"
+              }`}
+            >
+              <FaCalendarCheck /> Meus Agendamentos
+            </button>
+          </div>
+        </div>
+
+        {/* AJUDA */}
+        <div
+          className={`mb-6 overflow-hidden rounded-3xl border shadow-xl transition ${
+            dark
+              ? "bg-[#1E293B] border-slate-700"
+              : "bg-white border-slate-200"
+          }`}
+        >
+          <div className="flex items-center gap-3 bg-gradient-to-r from-[#004AF7] to-[#132190] px-6 py-5 text-white">
+            <FaQuestionCircle />
+            Ajuda
+          </div>
+
+          <div className="p-6 space-y-4">
+            <button
+              className={`w-full rounded-xl border p-4 text-left transition ${
+                dark
+                  ? "border-slate-600 hover:bg-slate-800"
+                  : "border-slate-200 hover:bg-slate-100"
+              }`}
+            >
+              Central de Ajuda
+            </button>
+
+            <div
+              className={`flex items-center gap-3 rounded-xl border p-4 ${
+                dark ? "border-slate-600" : "border-slate-200"
+              }`}
+            >
+              <FaEnvelope className="text-[#004AF7]" />
+              suporte@nami.com
+            </div>
+          </div>
+        </div>
+
+        {/* ACTIONS */}
+        <div
+          className={`rounded-3xl border p-6 shadow-xl transition ${
+            dark
+              ? "bg-[#1E293B] border-slate-700"
+              : "bg-white border-slate-200"
+          }`}
+        >
+          <div className="grid gap-4 md:grid-cols-2">
+
+            <button
+              onClick={() => navigate("/home")}
+              className={`rounded-xl px-5 py-4 font-semibold transition ${
+                dark
+                  ? "bg-slate-800 text-white hover:bg-slate-700"
+                  : "bg-slate-200 text-slate-800 hover:bg-slate-300"
+              }`}
+            >
+              Voltar
+            </button>
+
+            <button
+              onClick={salvarTema}
+              className="flex items-center justify-center gap-3 rounded-xl bg-[#004AF7] px-5 py-4 font-semibold text-white"
+            >
+              <FaSave />
+              Salvar Tema
+            </button>
+
+            <button
+              onClick={handleLogout}
+              className="md:col-span-2 flex items-center justify-center gap-2 rounded-xl bg-red-500 px-5 py-4 font-semibold text-white"
+            >
+              <FaSignOutAlt />
+              Sair
+            </button>
+
+          </div>
         </div>
 
       </div>
     </div>
-  )
+  );
 }

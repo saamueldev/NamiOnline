@@ -4,12 +4,17 @@ import { useNavigate } from "react-router-dom";
 import {
   FaArrowLeft,
   FaBell,
+  FaLock,
   FaEye,
-  FaMoon,
+  FaQuestionCircle,
+  FaSignOutAlt,
+  FaCalendarCheck,
+  FaCog,
   FaCheckCircle,
+  FaMoon,
   FaSun,
   FaSave,
-  FaSignOutAlt,
+  FaEnvelope,
 } from "react-icons/fa";
 
 import { AuthContext } from "../../context/AuthContext";
@@ -19,39 +24,18 @@ export default function TelaPerfil() {
   const navigate = useNavigate();
   const { user, logout, isAdmin } = useContext(AuthContext);
 
-  // =========================
-  // STATES
-  // =========================
   const [notificacoes, setNotificacoes] = useState(true);
-  const [tema, setTema] = useState("claro");
+  const [tema, setTema] = useState(localStorage.getItem("tema") || "claro");
 
   const dark = tema === "escuro";
 
   // =========================
-  // CARREGAR CONFIG DO BACKEND
+  // APLICAR TEMA GLOBAL
   // =========================
   useEffect(() => {
-    const carregarConfiguracoes = async () => {
-      try {
-        const { data } = await api.get("/configuracoes");
-
-        if (data?.tema) setTema(data.tema);
-        if (data?.notificacoes !== undefined) {
-          setNotificacoes(data.notificacoes);
-        }
-
-        if (data?.tema === "escuro") {
-          document.body.classList.add("dark");
-        } else {
-          document.body.classList.remove("dark");
-        }
-      } catch (error) {
-        console.error("Erro ao carregar configurações:", error);
-      }
-    };
-
-    carregarConfiguracoes();
-  }, []);
+    document.documentElement.classList.toggle("dark", dark);
+    document.body.classList.toggle("dark", dark);
+  }, [dark]);
 
   // =========================
   // SALVAR TEMA
@@ -62,32 +46,13 @@ export default function TelaPerfil() {
 
       localStorage.setItem("tema", tema);
 
-      if (tema === "escuro") {
-        document.body.classList.add("dark");
-      } else {
-        document.body.classList.remove("dark");
-      }
+      document.documentElement.classList.toggle("dark", dark);
+      document.body.classList.toggle("dark", dark);
 
       alert("Tema salvo com sucesso!");
     } catch (error) {
       console.error(error);
       alert("Erro ao salvar tema");
-    }
-  };
-
-  // =========================
-  // ALTERAR NOTIFICAÇÕES
-  // =========================
-  const alterarNotificacoes = async () => {
-    try {
-      const novoValor = !notificacoes;
-      setNotificacoes(novoValor);
-
-      await api.post("/configuracoes/notificacoes", {
-        notificacoes: novoValor,
-      });
-    } catch (error) {
-      console.error(error);
     }
   };
 
@@ -111,7 +76,7 @@ export default function TelaPerfil() {
         <div className="mb-10 flex items-center gap-4">
           <button
             onClick={() => navigate("/home")}
-            className="flex h-10 w-10 items-center justify-center rounded-full bg-[#132190] text-white hover:bg-[#004AF7]"
+            className="flex h-10 w-10 items-center justify-center rounded-full bg-[#132190] text-white"
           >
             <FaArrowLeft />
           </button>
@@ -119,26 +84,36 @@ export default function TelaPerfil() {
           <h1 className="text-3xl font-bold">Meu Perfil</h1>
         </div>
 
-        {/* USUÁRIO */}
-        <div className="mb-8 rounded-3xl border bg-white p-10 shadow-xl dark:bg-[#1E293B]">
-          <div className="text-center">
-            <h2 className="text-3xl font-bold">
-              {user?.nome || "Usuário"}
-            </h2>
+        {/* USER CARD */}
+        <div
+          className={`mb-8 rounded-3xl border p-10 text-center shadow-xl transition ${
+            dark
+              ? "bg-[#1E293B] border-slate-700"
+              : "bg-white border-slate-200"
+          }`}
+        >
+          <h2 className="text-3xl font-bold">
+            {user?.nome || "Usuário"}
+          </h2>
 
-            <p className="mt-2 text-gray-500">
-              Bem-vindo ao sistema Nami Online
-            </p>
+          <p className="mt-2 opacity-70">
+            Bem-vindo ao Nami Online
+          </p>
 
-            <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-green-100 px-4 py-2 text-green-700">
-              <FaCheckCircle />
-              {isAdmin() ? "Administrador" : "Conta ativa"}
-            </div>
+          <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-green-100 px-4 py-2 text-green-700">
+            <FaCheckCircle />
+            {isAdmin() ? "Administrador" : "Conta ativa"}
           </div>
         </div>
 
         {/* NOTIFICAÇÕES */}
-        <div className="mb-6 rounded-3xl border bg-white shadow-xl dark:bg-[#1E293B]">
+        <div
+          className={`mb-6 overflow-hidden rounded-3xl border shadow-xl transition ${
+            dark
+              ? "bg-[#1E293B] border-slate-700"
+              : "bg-white border-slate-200"
+          }`}
+        >
           <div className="flex items-center gap-3 bg-gradient-to-r from-[#004AF7] to-[#132190] px-6 py-5 text-white">
             <FaBell />
             Notificações
@@ -147,13 +122,13 @@ export default function TelaPerfil() {
           <div className="flex items-center justify-between p-6">
             <div>
               <h3 className="font-semibold">Notificações do App</h3>
-              <p className="text-sm text-gray-500">
+              <p className="text-sm opacity-70">
                 Receba avisos de consultas e retornos
               </p>
             </div>
 
             <button
-              onClick={alterarNotificacoes}
+              onClick={() => setNotificacoes(!notificacoes)}
               className={`relative h-8 w-14 rounded-full transition ${
                 notificacoes ? "bg-[#132190]" : "bg-gray-400"
               }`}
@@ -167,8 +142,14 @@ export default function TelaPerfil() {
           </div>
         </div>
 
-        {/* TEMA */}
-        <div className="mb-6 rounded-3xl border bg-white shadow-xl dark:bg-[#1E293B]">
+        {/* PREFERÊNCIAS */}
+        <div
+          className={`mb-6 overflow-hidden rounded-3xl border shadow-xl transition ${
+            dark
+              ? "bg-[#1E293B] border-slate-700"
+              : "bg-white border-slate-200"
+          }`}
+        >
           <div className="flex items-center gap-3 bg-gradient-to-r from-[#004AF7] to-[#132190] px-6 py-5 text-white">
             <FaEye />
             Preferências
@@ -180,7 +161,7 @@ export default function TelaPerfil() {
 
               <div>
                 <h3 className="font-semibold">Tema</h3>
-                <p className="text-sm text-gray-500">
+                <p className="text-sm opacity-70">
                   Escolha o tema do sistema
                 </p>
               </div>
@@ -189,7 +170,11 @@ export default function TelaPerfil() {
             <select
               value={tema}
               onChange={(e) => setTema(e.target.value)}
-              className="rounded border px-3 py-2 text-black"
+              className={`rounded border px-3 py-2 transition ${
+                dark
+                  ? "bg-slate-800 text-white border-slate-600"
+                  : "bg-white text-black border-slate-300"
+              }`}
             >
               <option value="claro">Claro</option>
               <option value="escuro">Escuro</option>
@@ -197,22 +182,121 @@ export default function TelaPerfil() {
           </div>
         </div>
 
-        {/* BOTÕES */}
-        <div className="rounded-3xl border bg-white p-6 shadow-xl dark:bg-[#1E293B]">
+        {/* SEGURANÇA */}
+        <div
+          className={`mb-6 overflow-hidden rounded-3xl border shadow-xl transition ${
+            dark
+              ? "bg-[#1E293B] border-slate-700"
+              : "bg-white border-slate-200"
+          }`}
+        >
+          <div className="flex items-center gap-3 bg-gradient-to-r from-[#004AF7] to-[#132190] px-6 py-5 text-white">
+            <FaLock />
+            Segurança
+          </div>
+
+          <div className="p-6">
+            <button
+              className={`w-full rounded-xl px-5 py-4 font-semibold transition ${
+                dark
+                  ? "bg-slate-800 text-white hover:bg-slate-700"
+                  : "bg-slate-200 text-slate-800 hover:bg-slate-300"
+              }`}
+            >
+              Alterar Senha
+            </button>
+          </div>
+        </div>
+
+        {/* ATALHOS */}
+        <div
+          className={`mb-6 overflow-hidden rounded-3xl border shadow-xl transition ${
+            dark
+              ? "bg-[#1E293B] border-slate-700"
+              : "bg-white border-slate-200"
+          }`}
+        >
+          <div className="flex items-center gap-3 bg-gradient-to-r from-[#004AF7] to-[#132190] px-6 py-5 text-white">
+            <FaCog />
+            Atalhos
+          </div>
+
+          <div className="p-6">
+            <button
+              onClick={() => navigate("/meus-agendamentos")}
+              className={`w-full rounded-xl px-5 py-4 font-semibold transition ${
+                dark
+                  ? "bg-slate-800 text-white hover:bg-slate-700"
+                  : "bg-slate-200 text-slate-800 hover:bg-slate-300"
+              }`}
+            >
+              <FaCalendarCheck /> Meus Agendamentos
+            </button>
+          </div>
+        </div>
+
+        {/* AJUDA */}
+        <div
+          className={`mb-6 overflow-hidden rounded-3xl border shadow-xl transition ${
+            dark
+              ? "bg-[#1E293B] border-slate-700"
+              : "bg-white border-slate-200"
+          }`}
+        >
+          <div className="flex items-center gap-3 bg-gradient-to-r from-[#004AF7] to-[#132190] px-6 py-5 text-white">
+            <FaQuestionCircle />
+            Ajuda
+          </div>
+
+          <div className="p-6 space-y-4">
+            <button
+              className={`w-full rounded-xl border p-4 text-left transition ${
+                dark
+                  ? "border-slate-600 hover:bg-slate-800"
+                  : "border-slate-200 hover:bg-slate-100"
+              }`}
+            >
+              Central de Ajuda
+            </button>
+
+            <div
+              className={`flex items-center gap-3 rounded-xl border p-4 ${
+                dark ? "border-slate-600" : "border-slate-200"
+              }`}
+            >
+              <FaEnvelope className="text-[#004AF7]" />
+              suporte@nami.com
+            </div>
+          </div>
+        </div>
+
+        {/* ACTIONS */}
+        <div
+          className={`rounded-3xl border p-6 shadow-xl transition ${
+            dark
+              ? "bg-[#1E293B] border-slate-700"
+              : "bg-white border-slate-200"
+          }`}
+        >
           <div className="grid gap-4 md:grid-cols-2">
 
             <button
               onClick={() => navigate("/home")}
-              className="rounded-xl bg-gray-200 px-5 py-4 font-semibold"
+              className={`rounded-xl px-5 py-4 font-semibold transition ${
+                dark
+                  ? "bg-slate-800 text-white hover:bg-slate-700"
+                  : "bg-slate-200 text-slate-800 hover:bg-slate-300"
+              }`}
             >
               Voltar
             </button>
 
             <button
               onClick={salvarTema}
-              className="rounded-xl bg-[#004AF7] px-5 py-4 font-semibold text-white"
+              className="flex items-center justify-center gap-3 rounded-xl bg-[#004AF7] px-5 py-4 font-semibold text-white"
             >
-              <FaSave /> Salvar Tema
+              <FaSave />
+              Salvar Tema
             </button>
 
             <button
@@ -220,7 +304,7 @@ export default function TelaPerfil() {
               className="md:col-span-2 flex items-center justify-center gap-2 rounded-xl bg-red-500 px-5 py-4 font-semibold text-white"
             >
               <FaSignOutAlt />
-              Sair da Conta
+              Sair
             </button>
 
           </div>

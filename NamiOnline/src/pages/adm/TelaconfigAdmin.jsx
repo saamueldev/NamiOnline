@@ -19,30 +19,56 @@ export default function TelaconfigAdmin() {
   const [editar, setEditar] = useState(false)
   const [formData, setFormData] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
 
-  // 🔥 CARREGAR USUÁRIO LOGADO
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        setLoading(true)
+  // =========================
+  // 🔥 BUSCAR USUÁRIO COMPLETO DO BANCO
+  // =========================
+  const fetchUser = async () => {
+    try {
+      setLoading(true)
+      setError(null)
 
-        const response = await api.get('/me')
+      // 🔥 busca usuário logado completo
+      const response = await api.get('/me')
 
-        console.log('✅ USUÁRIO CARREGADO:', response.data)
+      const user = response.data
 
-        setFormData(response.data)
+      // normaliza dados caso backend venha incompleto
+      const userFormatted = {
+        _id: user?._id,
+        nome: user?.nome || '',
+        email: user?.email || '',
+        status: user?.status || 'ativo',
+        tipo: user?.tipo || 'paciente',
 
-      } catch (error) {
-        console.error('❌ ERRO AO BUSCAR USUÁRIO:', error)
-      } finally {
-        setLoading(false)
+        // métricas (vindas do banco ou default)
+        totalConsultas: user?.totalConsultas ?? 0,
+        ultimaConsulta: user?.ultimaConsulta || 'N/A',
+        cpf: user?.cpf || 'N/A',
+
+        // extras futuros
+        telefone: user?.telefone || '',
+        createdAt: user?.createdAt || null,
       }
-    }
 
+      setFormData(userFormatted)
+
+    } catch (error) {
+      console.error('❌ ERRO AO BUSCAR USUÁRIO:', error)
+      setError('Erro ao carregar dados do usuário')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
     fetchUser()
   }, [])
 
-  // 🔥 HANDLE INPUT
+  // =========================
+  // INPUT CHANGE
+  // =========================
   const handleChange = (e) => {
     const { name, value } = e.target
 
@@ -52,18 +78,27 @@ export default function TelaconfigAdmin() {
     }))
   }
 
-  // 🔥 SALVAR
+  // =========================
+  // SALVAR NO BANCO
+  // =========================
   const handleSalvar = async () => {
     try {
-      await api.put(`/${formData._id}`, formData)
+      await api.put(`/usuarios/${formData._id}`, formData)
 
-      console.log('✅ SALVO COM SUCESSO')
       setEditar(false)
+
+      // 🔥 recarrega dados atualizados do banco
+      await fetchUser()
+
+      console.log('✅ USUÁRIO ATUALIZADO COM SUCESSO')
 
     } catch (error) {
       console.error('❌ ERRO AO SALVAR:', error)
+      alert('Erro ao salvar alterações')
     }
   }
+
+  const isBlocked = formData?.status === 'bloqueado'
 
   const inputClass = `
     w-full rounded-xl border border-slate-300
@@ -72,16 +107,26 @@ export default function TelaconfigAdmin() {
     disabled:bg-slate-100 disabled:text-slate-400
   `
 
-  const isBlocked = formData?.status === 'bloqueado'
-
-  // 🔄 LOADING
-  if (loading || !formData) {
+  // =========================
+  // LOADING / ERROR
+  // =========================
+  if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#0B1220] text-white">
         Carregando usuário...
       </div>
     )
   }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#0B1220] text-red-400">
+        {error}
+      </div>
+    )
+  }
+
+  if (!formData) return null
 
   return (
     <div className="min-h-screen bg-[#0B1220] px-5 py-10 text-white">
@@ -97,9 +142,11 @@ export default function TelaconfigAdmin() {
           </button>
 
           <div>
-            <h1 className="text-3xl font-bold">Configuração do Usuário</h1>
+            <h1 className="text-3xl font-bold">
+              Configuração do Usuário
+            </h1>
             <p className="text-slate-400">
-              Dados do usuário logado
+              Dados completos do usuário no sistema
             </p>
           </div>
         </div>
@@ -124,7 +171,7 @@ export default function TelaconfigAdmin() {
           )}
         </div>
 
-        {/* BOTÃO EDITAR */}
+        {/* EDITAR */}
         {!editar && (
           <div className="mb-6 text-right">
             <button
@@ -137,7 +184,7 @@ export default function TelaconfigAdmin() {
           </div>
         )}
 
-        {/* DADOS */}
+        {/* DADOS USUÁRIO */}
         <section className="mb-6 rounded-2xl bg-[#111A2E] p-6">
           <div className="mb-5 flex items-center gap-2 text-blue-400">
             <FaUser />
@@ -148,7 +195,7 @@ export default function TelaconfigAdmin() {
 
             <input
               name="nome"
-              value={formData.nome || ''}
+              value={formData.nome}
               onChange={handleChange}
               disabled={!editar}
               className={inputClass}
@@ -156,7 +203,7 @@ export default function TelaconfigAdmin() {
 
             <input
               name="email"
-              value={formData.email || ''}
+              value={formData.email}
               onChange={handleChange}
               disabled={!editar}
               className={inputClass}
@@ -164,7 +211,7 @@ export default function TelaconfigAdmin() {
 
             <select
               name="status"
-              value={formData.status || ''}
+              value={formData.status}
               onChange={handleChange}
               disabled={!editar}
               className={inputClass}
@@ -175,7 +222,7 @@ export default function TelaconfigAdmin() {
 
             <select
               name="tipo"
-              value={formData.tipo || ''}
+              value={formData.tipo}
               onChange={handleChange}
               disabled={!editar}
               className={inputClass}
@@ -185,6 +232,22 @@ export default function TelaconfigAdmin() {
               <option value="admin">Admin</option>
             </select>
 
+            <input
+              name="telefone"
+              value={formData.telefone}
+              onChange={handleChange}
+              disabled={!editar}
+              className={inputClass}
+              placeholder="Telefone"
+            />
+
+            <input
+              name="cpf"
+              value={formData.cpf}
+              onChange={handleChange}
+              disabled
+              className={inputClass}
+            />
           </div>
         </section>
 
@@ -192,35 +255,38 @@ export default function TelaconfigAdmin() {
         <section className="mb-6 rounded-2xl bg-[#111A2E] p-6">
           <div className="mb-5 flex items-center gap-2 text-purple-400">
             <FaShieldAlt />
-            <h2 className="text-lg font-bold">Métricas</h2>
+            <h2 className="text-lg font-bold">Métricas do Sistema</h2>
           </div>
 
           <div className="grid gap-4 md:grid-cols-3">
+
             <div className="rounded-xl bg-white/5 p-4">
               <p className="text-slate-400">Consultas</p>
               <h3 className="text-2xl font-bold">
-                {formData.totalConsultas || 0}
+                {formData.totalConsultas}
               </h3>
             </div>
 
             <div className="rounded-xl bg-white/5 p-4">
               <p className="text-slate-400">Última consulta</p>
               <h3 className="text-lg font-bold">
-                {formData.ultimaConsulta || 'N/A'}
+                {formData.ultimaConsulta}
               </h3>
             </div>
 
             <div className="rounded-xl bg-white/5 p-4">
               <p className="text-slate-400">CPF</p>
               <h3 className="text-lg font-bold">
-                {formData.cpf || 'N/A'}
+                {formData.cpf}
               </h3>
             </div>
+
           </div>
         </section>
 
         {/* BOTÕES */}
         <div className="flex gap-4">
+
           {editar ? (
             <>
               <button
@@ -240,12 +306,13 @@ export default function TelaconfigAdmin() {
             </>
           ) : (
             <button
-              onClick={() => navigate('/admin/dashboard')}
+              onClick={() => navigate('/admin')}
               className="flex-1 rounded-xl bg-white/10 py-4 font-semibold"
             >
               Voltar
             </button>
           )}
+
         </div>
 
       </div>

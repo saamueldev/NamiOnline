@@ -1,167 +1,210 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { FaArrowLeft, FaCalendar, FaUser, FaClock, FaMapMarkerAlt, FaTrash } from 'react-icons/fa'
+
+import {
+  FaArrowLeft,
+  FaCalendarAlt,
+  FaUserMd,
+  FaClock,
+  FaMapMarkerAlt,
+  FaTrash,
+  FaCalendarCheck,
+  FaCheckCircle,
+  FaHourglassHalf,
+  FaRegCalendarPlus,
+  FaRegCalendarTimes
+} from 'react-icons/fa'
+
+import api from '../../services/api'
 import './style_agendamentos.css'
 
 export default function TelaAgendamentos() {
   const navigate = useNavigate()
-  const [agendamentos, setAgendamentos] = useState([
-    {
-      id: 1,
-      especialidade: 'Cardiologia',
-      medico: 'Dra. Marina Soares',
-      data: '2026-05-12',
-      hora: '14:30',
-      local: 'Clínica Nami • Sala 03',
-      status: 'confirmado'
-    },
-    {
-      id: 2,
-      especialidade: 'Dermatologia',
-      medico: 'Dr. Lucas Mota',
-      data: '2026-06-08',
-      hora: '10:00',
-      local: 'Clínica Nami • Sala 05',
-      status: 'confirmado'
-    },
-    {
-      id: 3,
-      especialidade: 'Ortopedia',
-      medico: 'Dra. Fernanda Alves',
-      data: '2026-07-15',
-      hora: '09:30',
-      local: 'Clínica Nami • Sala 02',
-      status: 'pendente'
-    }
-  ])
 
-  const handleCancelar = (id) => {
-    setAgendamentos(agendamentos.filter(item => item.id !== id))
+  const [agendamentos, setAgendamentos] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  // =========================
+  // CARREGAR RETORNOS DO BANCO
+  // =========================
+  useEffect(() => {
+    async function carregar() {
+      try {
+        setLoading(true)
+
+        const user = JSON.parse(
+          localStorage.getItem('nami_user') ||
+          sessionStorage.getItem('nami_user') ||
+          'null'
+        )
+
+        const usuarioId = user?._id || user?.id
+
+        const { data } = await api.get('/retornos', {
+          params: { usuarioId }
+        })
+
+        setAgendamentos(data)
+      } catch (error) {
+        console.error('Erro ao buscar retornos:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    carregar()
+  }, [])
+
+  const handleCancelar = async (id) => {
+    try {
+      await api.delete(`/retornos/${id}`)
+
+      setAgendamentos(prev =>
+        prev.filter(item => item._id !== id)
+      )
+    } catch (error) {
+      alert('Erro ao cancelar retorno')
+    }
   }
 
   const getStatusColor = (status) => {
     return status === 'confirmado' ? '#2e7d32' : '#f57c00'
   }
 
+  const getStatusIcon = (status) => {
+    return status === 'confirmado'
+      ? FaCheckCircle
+      : FaHourglassHalf
+  }
+
   const getStatusText = (status) => {
-    return status === 'confirmado' ? 'Confirmado' : 'Pendente'
+    return status === 'confirmado'
+      ? 'Confirmado'
+      : 'Pendente'
   }
 
   return (
     <div className="agendamentos-container">
       <div className="agendamentos-wrapper">
-        
-        {/* Header */}
+
+        {/* HEADER */}
         <div className="agendamentos-header">
-          <button className="agendamentos-back-btn" onClick={() => navigate('/home')}>
+          <button
+            className="agendamentos-back-btn"
+            onClick={() => navigate('/home')}
+          >
             <FaArrowLeft />
           </button>
-          <h1 className="agendamentos-title">Meus Agendamentos</h1>
+
+          <h1 className="agendamentos-title">
+            Meus Retornos
+          </h1>
         </div>
 
-        {/* Info Cards */}
-        <div className="agendamentos-info-cards">
-          <div className="info-card">
-            <div className="info-icon">📅</div>
-            <div className="info-content">
-              <h3>{agendamentos.length}</h3>
-              <p>Agendamentos Totais</p>
-            </div>
-          </div>
-          <div className="info-card">
-            <div className="info-icon">✓</div>
-            <div className="info-content">
-              <h3>{agendamentos.filter(a => a.status === 'confirmado').length}</h3>
-              <p>Confirmados</p>
-            </div>
-          </div>
-          <div className="info-card">
-            <div className="info-icon">⏳</div>
-            <div className="info-content">
-              <h3>{agendamentos.filter(a => a.status === 'pendente').length}</h3>
-              <p>Pendentes</p>
-            </div>
-          </div>
-        </div>
+        {/* LOADING */}
+        {loading ? (
+          <p>Carregando retornos...</p>
+        ) : agendamentos.length === 0 ? (
+          <div className="agendamentos-vazio">
+            <FaRegCalendarTimes size={40} />
+            <h3>Nenhum retorno agendado</h3>
 
-        {/* Agendamentos List */}
-        <div className="agendamentos-section">
-          <div className="agendamentos-section-title">
-            <FaCalendar /> Próximas Consultas
+            <button
+              className="agendamentos-btn-novo"
+              onClick={() => navigate('/retornos/agendar')}
+            >
+              <FaRegCalendarPlus />
+              Agendar retorno
+            </button>
           </div>
+        ) : (
+          <div className="agendamentos-list">
 
-          {agendamentos.length === 0 ? (
-            <div className="agendamentos-vazio">
-              <div className="vazio-icon">📭</div>
-              <h3>Nenhum agendamento</h3>
-              <p>Você não possui agendamentos no momento</p>
-              <button 
-                className="agendamentos-btn-novo"
-                onClick={() => navigate('/especialidades')}
-              >
-                Agendar Consulta
-              </button>
-            </div>
-          ) : (
-            <div className="agendamentos-list">
-              {agendamentos.map((agendamento) => (
-                <div key={agendamento.id} className="agendamento-card">
+            {agendamentos.map((item) => {
+              const StatusIcon = getStatusIcon(item.status)
+
+              return (
+                <div key={item._id} className="agendamento-card">
+
                   <div className="agendamento-card-left">
+
                     <div className="agendamento-especialidade">
-                      {agendamento.especialidade}
+                      {item.especialidade}
                     </div>
-                    
+
                     <div className="agendamento-detalhes">
+
                       <div className="detalhe">
-                        <FaUser /> <span>{agendamento.medico}</span>
+                        <FaUserMd />
+                        <span>{item.medico}</span>
                       </div>
+
                       <div className="detalhe">
-                        <FaCalendar /> <span>{new Date(agendamento.data).toLocaleDateString('pt-BR')}</span>
+                        <FaCalendarAlt />
+                        <span>
+                          {new Date(item.data).toLocaleDateString('pt-BR')}
+                        </span>
                       </div>
+
                       <div className="detalhe">
-                        <FaClock /> <span>{agendamento.hora}</span>
+                        <FaClock />
+                        <span>{item.horario}</span>
                       </div>
+
                       <div className="detalhe">
-                        <FaMapMarkerAlt /> <span>{agendamento.local}</span>
+                        <FaMapMarkerAlt />
+                        <span>Clínica Nami</span>
                       </div>
+
                     </div>
                   </div>
 
                   <div className="agendamento-card-right">
-                    <div 
+
+                    <div
                       className="agendamento-status"
-                      style={{backgroundColor: `${getStatusColor(agendamento.status)}20`, color: getStatusColor(agendamento.status)}}
+                      style={{
+                        backgroundColor: `${getStatusColor(item.status)}20`,
+                        color: getStatusColor(item.status)
+                      }}
                     >
-                      {getStatusText(agendamento.status)}
+                      <StatusIcon />
+                      {getStatusText(item.status)}
                     </div>
-                    <button 
+
+                    <button
                       className="agendamento-btn-cancelar"
-                      onClick={() => handleCancelar(agendamento.id)}
-                      title="Cancelar agendamento"
+                      onClick={() => handleCancelar(item._id)}
                     >
                       <FaTrash />
                     </button>
+
                   </div>
                 </div>
-              ))}
-            </div>
-          )}
-        </div>
+              )
+            })}
+          </div>
+        )}
 
-        {/* Ações */}
+        {/* FOOTER */}
         <div className="agendamentos-acoes">
-          <button 
+
+          <button
             className="agendamentos-btn-voltar"
             onClick={() => navigate('/home')}
           >
-            ← Voltar
+            <FaArrowLeft />
+            Voltar
           </button>
-          <button 
+
+          <button
             className="agendamentos-btn-novo"
-            onClick={() => navigate('/especialidades')}
+            onClick={() => navigate('/retornos/agendar')}
           >
-            + Novo Agendamento
+            <FaRegCalendarPlus />
+            Novo retorno
           </button>
+
         </div>
 
       </div>

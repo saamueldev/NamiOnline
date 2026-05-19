@@ -34,6 +34,7 @@ import AdicionarMedico from "./pages/adm/AdminAdicionarMedico";
 import CadastrarPaciente from "./pages/adm/AdminCadastrarPaciente"
 import AdicionarEspecialidade from "./pages/adm/CadastroEspecialidades";
 import TelaNotificacaoAdmin from './pages/adm/TelaNotificacaoAdmin';
+import AdminSelecionarExame from './pages/adm/AdminSelecionarExame';
 import AdminAgendarExame from './pages/adm/AdminAgendarExame';
 import AdminEditarExames from './pages/adm/AdminEditarExames';
 import AdminCadastrarCategoriasExames from './pages/adm/AdminCadastrarCategoriasExames';
@@ -130,7 +131,8 @@ function App() {
               <Route path="/admin/aprovar-guias" element={<AprovarGuia />} />
               <Route path="/admin/consultas-dia" element={<ConsultaDia />} />
               {/* Gestão de Exames */}
-              <Route path="/admin/exames/agendar" element={<AdminAgendarExame />} />
+              <Route path="/admin/exames/selecionar" element={<AdminSelecionarExame />} />
+              <Route path="/admin/exames/agendar/:exameId" element={<AdminAgendarExame />} />
               <Route path="/admin/categorias-exames/:categoriaId/exames" element={<AdminEditarExames />} />
               <Route path="/admin/exames/cadastrar-categorias-exames" element={<AdminCadastrarCategoriasExames />} />
               <Route path="/admin/exames/cadastrar-tipos-exames" element={<AdminCadastrarTiposExames />} />

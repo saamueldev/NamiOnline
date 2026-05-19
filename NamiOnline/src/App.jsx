@@ -45,8 +45,6 @@ import TelaEventosAdmin from './pages/adm/TelaEventosAdmin';
 import AprovarGuia from './pages/adm/AprovarGuia';
 import ConsultaDia from "./pages/adm/AdminConsultaDia";
 import TelaconfigAdmin from "./pages/adm/TelaconfigAdmin";
-import TelaChatAdm from "./pages/adm/TelaChatAdm";
-import TelaChat from "./pages/user/TelaChat";
 
 function ProtectedLayout() {
   const { authLoading, isLoggedIn, user } = useContext(AuthContext);
@@ -111,7 +109,7 @@ function App() {
               <Route path="/perfil/configuracoes" element={<TelaConfiguracaoUsuario />} />
               <Route path="/notificacoes" element={<TelaNotificacoes />} />
               <Route path="/central-ajuda" element={<CentralAjuda />} />
-              <Route path="/chat" element={<TelaChat />} />
+            
               {/* CONSULTAS */}
               <Route path="/meus-agendamentos" element={<TelaAgendamentos />} />
               <Route path="/especialidades" element={<ConsultaEspecialidade />} />
@@ -148,7 +146,7 @@ function App() {
               <Route path="/admin/notificacoes" element={<TelaNotificacaoAdmin />} />
               <Route path="/admin/noticias" element={<TelaNoticiasAdmin />} />
               <Route path="/admin/eventos" element={<TelaEventosAdmin />} />
-              <Route path="/admin/chat" element={<TelaChatAdm />} />
+              
             </Route>
           </Route>
 

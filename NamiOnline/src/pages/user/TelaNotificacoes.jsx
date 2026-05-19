@@ -1,80 +1,100 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-
 import {
-  FaBell,
   FaArrowLeft,
-  FaCalendarCheck,
-  FaCheckCircle,
-  FaQuestionCircle,
-  FaMoon,
-  FaSun,
+  FaBell,
+  FaCheck,
+  FaCheckDouble,
+  FaTrash,
 } from "react-icons/fa";
-
 import api from "../../services/api";
 
 export default function TelaNotificacoes() {
   const navigate = useNavigate();
 
   const [notificacoes, setNotificacoes] = useState([]);
-  const [tema, setTema] = useState(localStorage.getItem("tema") || "claro");
-
-  const dark = tema === "escuro";
+  const [loading, setLoading] = useState(false);
 
   const usuario =
-    JSON.parse(localStorage.getItem("nami_user")) || {};
+    JSON.parse(localStorage.getItem("nami_user")) ||
+    JSON.parse(sessionStorage.getItem("nami_user"));
+
+  const usuarioId = usuario?._id || usuario?.id;
 
   // =========================
-  // CARREGAR TEMA
+  // CARREGAR NOTIFICAÇÕES (AUTO UPDATE)
   // =========================
-  useEffect(() => {
-    if (tema === "escuro") {
-      document.body.classList.add("dark");
-    } else {
-      document.body.classList.remove("dark");
-    }
-  }, [tema]);
-
-  // =========================
-  // CARREGAR NOTIFICAÇÕES
-  // =========================
-  useEffect(() => {
-    if (!usuario?.id) return;
-
-    carregarNotificacoes();
-
-    const interval = setInterval(() => {
-      carregarNotificacoes(false);
-    }, 4000);
-
-    return () => clearInterval(interval);
-  }, [usuario?.id]);
-
   const carregarNotificacoes = async () => {
+    if (!usuarioId) return;
+
     try {
+      setLoading(true);
+
       const { data } = await api.get(
-        `/notificacoes?usuarioId=${usuario.id}`
+        `/notificacoes?usuarioId=${usuarioId}`
       );
 
-      const ordenadas = (data || []).sort(
-        (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
-      );
-
-      setNotificacoes(ordenadas);
+      setNotificacoes(data || []);
     } catch (error) {
-      console.error("Erro ao buscar notificações:", error);
+      console.error("Erro ao carregar notificações:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
+  // =========================
+  // USE EFFECT AUTO REFRESH
+  // =========================
+  useEffect(() => {
+    carregarNotificacoes();
+
+    const interval = setInterval(() => {
+      carregarNotificacoes();
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [usuarioId]);
+
+  // =========================
+  // MARCAR COMO LIDA
+  // =========================
+  const marcarComoLida = async (id) => {
+    try {
+      await api.patch(`/notificacoes/${id}/lida`);
+
+      setNotificacoes((prev) =>
+        prev.map((n) =>
+          n._id === id ? { ...n, lida: true } : n
+        )
+      );
+    } catch (error) {
+      console.error("Erro ao marcar como lida:", error);
+    }
+  };
+
+  // =========================
+  // DELETAR NOTIFICAÇÃO
+  // =========================
+  const deletarNotificacao = async (id) => {
+    try {
+      await api.delete(`/notificacoes/${id}`);
+
+      setNotificacoes((prev) =>
+        prev.filter((n) => n._id !== id)
+      );
+    } catch (error) {
+      console.error("Erro ao deletar:", error);
+    }
+  };
+
+  const naoLidas = notificacoes.filter((n) => !n.lida).length;
+
   return (
-    <div
-      className={`min-h-screen p-8 transition-all duration-300 ${
-        dark ? "bg-[#0f172a] text-white" : "bg-[#f4f8ff] text-slate-800"
-      }`}
-    >
-      {/* HEADER */}
-      <div className="mb-8 flex items-center justify-between">
-        <div className="flex items-center gap-4">
+    <div className="min-h-screen bg-[#F8FAFC] p-8">
+      <div className="mx-auto max-w-5xl">
+
+        {/* HEADER */}
+        <div className="mb-8 flex items-center gap-4">
           <button
             onClick={() => navigate(-1)}
             className="flex h-11 w-11 items-center justify-center rounded-full bg-[#132190] text-white"
@@ -82,82 +102,101 @@ export default function TelaNotificacoes() {
             <FaArrowLeft />
           </button>
 
-          <h1 className="flex items-center gap-3 text-3xl font-bold">
-            <FaBell />
-            Notificações
-          </h1>
+          <div>
+            <h1 className="flex items-center gap-3 text-3xl font-bold">
+              <FaBell />
+              Notificações
+            </h1>
+            <p className="opacity-70">
+              Suas notificações do sistema
+            </p>
+          </div>
         </div>
 
-        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white dark:bg-slate-800">
-          {dark ? <FaMoon /> : <FaSun />}
-        </div>
-      </div>
+        {/* CARDS */}
+        <div className="mb-6 grid gap-4 md:grid-cols-2">
+          <div className="rounded-2xl bg-white p-6 shadow">
+            <h2 className="text-3xl font-bold">
+              {notificacoes.length}
+            </h2>
+            <p>Total</p>
+          </div>
 
-      {/* CONTEÚDO */}
-      <div
-        className={`mx-auto max-w-3xl rounded-3xl p-8 shadow-lg ${
-          dark ? "bg-slate-900" : "bg-white"
-        }`}
-      >
-        {notificacoes.length > 0 ? (
-          <div className="space-y-5">
-            {notificacoes.map((item) => (
+          <div className="rounded-2xl bg-blue-600 p-6 text-white shadow">
+            <h2 className="text-3xl font-bold">
+              {naoLidas}
+            </h2>
+            <p>Não lidas</p>
+          </div>
+        </div>
+
+        {/* MARCAR TODAS */}
+        {naoLidas > 0 && (
+          <button
+            onClick={() =>
+              Promise.all(
+                notificacoes.map((n) =>
+                  !n.lida ? marcarComoLida(n._id) : null
+                )
+              )
+            }
+            className="mb-6 flex items-center gap-2 rounded-xl bg-blue-600 px-6 py-3 text-white"
+          >
+            <FaCheckDouble />
+            Marcar todas como lidas
+          </button>
+        )}
+
+        {/* LISTA */}
+        {loading ? (
+          <p>Carregando notificações...</p>
+        ) : (
+          <div className="space-y-4">
+            {notificacoes.map((notif) => (
               <div
-                key={item._id}
-                className={`flex gap-4 rounded-2xl border p-5 ${
-                  dark ? "border-slate-700 bg-slate-800" : "border-blue-100 bg-blue-50"
+                key={notif._id}
+                className={`rounded-2xl border p-5 ${
+                  notif.lida
+                    ? "bg-white"
+                    : "bg-blue-50 border-blue-200"
                 }`}
               >
-                <div className="rounded-full bg-[#004AF7] p-3 text-white">
-                  <FaCalendarCheck />
-                </div>
+                <div className="flex justify-between">
+                  <div>
+                    <h2 className="text-xl font-bold">
+                      {notif.titulo}
+                    </h2>
+                    <p className="opacity-80">
+                      {notif.mensagem}
+                    </p>
+                  </div>
 
-                <div>
-                  <h2 className="text-lg font-bold">{item.titulo}</h2>
-                  <p className="text-sm opacity-80">{item.mensagem}</p>
+                  <div className="flex gap-2">
+                    {!notif.lida && (
+                      <button
+                        onClick={() =>
+                          marcarComoLida(notif._id)
+                        }
+                        className="rounded-lg bg-green-600 p-2 text-white"
+                      >
+                        <FaCheck />
+                      </button>
+                    )}
 
-                  <div className="mt-3 flex items-center gap-2 text-green-500">
-                    <FaCheckCircle />
-                    Recebido
+                    <button
+                      onClick={() =>
+                        deletarNotificacao(notif._id)
+                      }
+                      className="rounded-lg bg-red-600 p-2 text-white"
+                    >
+                      <FaTrash />
+                    </button>
                   </div>
                 </div>
               </div>
             ))}
           </div>
-        ) : (
-          <div className="text-center opacity-70">
-            Nenhuma notificação encontrada
-          </div>
         )}
-
-        {/* FAQ */}
-        <div className="mt-8 rounded-3xl border p-6">
-          <div className="mb-4 flex items-center gap-3">
-            <FaQuestionCircle className="text-[#004AF7]" />
-            <h2 className="text-xl font-bold">FAQ</h2>
-          </div>
-
-          <div className="space-y-3">
-            <button className="w-full rounded-xl border p-3 text-left">
-              Como remarcar consulta?
-            </button>
-
-            <button className="w-full rounded-xl border p-3 text-left">
-              Como acessar exames?
-            </button>
-
-            <button className="w-full rounded-xl border p-3 text-left">
-              Como alterar retorno?
-            </button>
-          </div>
-        </div>
-
-        <button
-          onClick={() => navigate("/home")}
-          className="mt-8 w-full rounded-2xl bg-gradient-to-r from-[#004AF7] to-[#132190] py-4 font-bold text-white"
-        >
-          Voltar para Home
-        </button>
       </div>
     </div>
   );

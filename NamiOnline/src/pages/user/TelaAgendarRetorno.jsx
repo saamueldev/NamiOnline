@@ -31,24 +31,79 @@ export default function TelaAgendarRetorno() {
   };
 
   // =========================
-  // AGENDAR RETORNO
+  // PEGAR USUÁRIO (ROBUSTO)
+  // =========================
+  const getUser = () => {
+    try {
+      const stored =
+        localStorage.getItem("nami_user") ||
+        sessionStorage.getItem("nami_user");
+
+      return stored ? JSON.parse(stored) : null;
+    } catch {
+      return null;
+    }
+  };
+
+  // =========================
+  // AGENDAR RETORNO + NOTIFICAÇÃO
   // =========================
   const agendarRetorno = async (e) => {
     e.preventDefault();
-
     setLoading(true);
 
     try {
-      const response = await api.post("/retornos", form);
+      const user = getUser();
 
-      console.log("Resposta:", response.data);
+      const usuarioId = user?._id || user?.id;
+      const usuarioNome = user?.nome || "Usuário";
+
+      if (!usuarioId) {
+        alert("Sessão expirada. Faça login novamente.");
+        navigate("/login");
+        return;
+      }
+
+      if (!form.data || !form.horario) {
+        alert("Preencha data e horário.");
+        return;
+      }
+
+      // =========================
+      // 1. SALVAR RETORNO
+      // =========================
+      await api.post("/retornos", {
+        especialidade: form.especialidade,
+        medico: form.medico,
+        data: form.data,
+        horario: form.horario,
+        observacoes: form.observacoes,
+        usuarioId,
+        usuarioNome,
+      });
+
+      // =========================
+      // 2. CRIAR NOTIFICAÇÃO
+      // =========================
+      await api.post("/notificacoes", {
+        usuarioId,
+        titulo: "Retorno agendado com sucesso",
+        mensagem: `Olá ${usuarioNome}, seu retorno com ${form.medico} foi agendado para ${form.data} às ${form.horario}.`,
+        tipo: "retorno",
+        rota: "/retornos",
+        lida: false,
+        createdAt: new Date().toISOString(),
+      });
 
       alert("Retorno agendado com sucesso!");
-
       navigate("/retornos");
+
     } catch (error) {
-      console.error("Erro ao agendar retorno:", error);
-      alert("Erro ao agendar retorno");
+      console.error("Erro ao agendar retorno:", error?.response?.data || error.message);
+      alert(
+        error?.response?.data?.message ||
+        "Erro ao agendar retorno"
+      );
     } finally {
       setLoading(false);
     }
@@ -83,7 +138,6 @@ export default function TelaAgendarRetorno() {
 
             <div className="grid gap-5 md:grid-cols-2">
 
-              {/* ESPECIALIDADE */}
               <div>
                 <label className="flex items-center gap-2 font-semibold">
                   <FaNotesMedical /> Especialidade
@@ -101,7 +155,6 @@ export default function TelaAgendarRetorno() {
                 </select>
               </div>
 
-              {/* MÉDICO */}
               <div>
                 <label className="flex items-center gap-2 font-semibold">
                   <FaUserMd /> Médico
@@ -119,7 +172,6 @@ export default function TelaAgendarRetorno() {
                 </select>
               </div>
 
-              {/* DATA */}
               <div>
                 <label className="flex items-center gap-2 font-semibold">
                   <FaCalendarCheck /> Data
@@ -134,7 +186,6 @@ export default function TelaAgendarRetorno() {
                 />
               </div>
 
-              {/* HORÁRIO */}
               <div>
                 <label className="flex items-center gap-2 font-semibold">
                   <FaClock /> Horário
@@ -148,9 +199,9 @@ export default function TelaAgendarRetorno() {
                   className="w-full rounded-xl border px-4 py-3"
                 />
               </div>
+
             </div>
 
-            {/* OBS */}
             <div>
               <label className="flex items-center gap-2 font-semibold">
                 <FaNotesMedical /> Observações
@@ -165,7 +216,6 @@ export default function TelaAgendarRetorno() {
               />
             </div>
 
-            {/* BOTÕES */}
             <div className="flex gap-4">
               <Link
                 to="/home"

@@ -10,6 +10,7 @@ import {
   Clock,
   Loader2,
   MapPin,
+  Stethoscope,
   User,
   X
 } from "lucide-react";
@@ -40,6 +41,10 @@ function normalizarId(valor) {
 
 function nomeEspecialidade(especialidade) {
   return especialidade?.name || especialidade?.nome || "Especialidade";
+}
+
+function especialidadeDoMedico(medico) {
+  return medico?.especialidadeId || medico?.especialidade || medico?.especialidadeID || null;
 }
 
 function minutosDoHorario(horario) {
@@ -94,6 +99,11 @@ function formatarData(data) {
   });
 }
 
+function horarioDaConsulta(consulta) {
+  const dataConsulta = new Date(consulta.dataConsulta);
+  return formatarHorario(dataConsulta.getHours() * 60 + dataConsulta.getMinutes());
+}
+
 const ConfirmarConsulta = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -112,6 +122,7 @@ const ConfirmarConsulta = () => {
   const [mesAtual, setMesAtual] = useState(() => new Date(hoje.getFullYear(), hoje.getMonth(), 1));
   const [horariosFixos, setHorariosFixos] = useState({});
   const [medicos, setMedicos] = useState([]);
+  const [consultas, setConsultas] = useState([]);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState("");
   const [selectedDoctorId, setSelectedDoctorId] = useState("");
@@ -131,19 +142,39 @@ const ConfirmarConsulta = () => {
           api.get("/horarios-fixos")
         ]);
 
+        const consultasResponse = await api.get("/consultas").catch((error) => {
+          console.warn("Nao foi possivel carregar consultas ocupadas:", error);
+          return { data: [] };
+        });
+
         const medicosApi = Array.isArray(medicosResponse.data) ? medicosResponse.data : [];
+        const nomeEspecialidadeSelecionada = nomeEspecialidade(especialidade).toLowerCase();
         const medicosFiltrados = especialidadeId
-          ? medicosApi.filter((medico) => normalizarId(medico.especialidadeId) === especialidadeId)
+          ? medicosApi.filter((medico) => {
+              const especialidadeMedico = especialidadeDoMedico(medico);
+              const medicoEspecialidadeId = normalizarId(especialidadeMedico);
+              const medicoEspecialidadeNome = nomeEspecialidade(especialidadeMedico).toLowerCase();
+
+              return (
+                medicoEspecialidadeId === especialidadeId ||
+                medicoEspecialidadeNome === nomeEspecialidadeSelecionada
+              );
+            })
           : medicosApi;
 
         setMedicos(medicosFiltrados);
         setHorariosFixos(horariosResponse.data || {});
+        setConsultas(Array.isArray(consultasResponse.data) ? consultasResponse.data : []);
         setSelectedDoctorId(normalizarId(medicosFiltrados[0]));
       } catch (error) {
         console.error("Erro ao carregar agendamento:", error);
         setMedicos([]);
         setHorariosFixos({});
-        setErro("Nao foi possivel carregar medicos e horarios do servidor.");
+        setErro(
+          error.response?.status === 403
+            ? "Seu usuario nao tem permissao para listar medicos. Reinicie a API para aplicar a liberacao da rota /medicos."
+            : "Nao foi possivel carregar medicos e horarios do servidor."
+        );
       } finally {
         setCarregando(false);
       }
@@ -156,6 +187,24 @@ const ConfirmarConsulta = () => {
     () => medicos.find((medico) => normalizarId(medico) === selectedDoctorId),
     [medicos, selectedDoctorId]
   );
+
+  const horariosOcupados = useMemo(() => {
+    if (!selectedDoctor || !selectedDate) return new Set();
+
+    return new Set(
+      consultas
+        .filter((consulta) => {
+          const dataConsulta = new Date(consulta.dataConsulta);
+
+          return (
+            normalizarId(consulta.medicoId) === normalizarId(selectedDoctor) &&
+            consulta.status !== "CANCELADO" &&
+            mesmoDia(dataConsulta, selectedDate)
+          );
+        })
+        .map(horarioDaConsulta)
+    );
+  }, [consultas, selectedDate, selectedDoctor]);
 
   const diasDoMes = useMemo(() => {
     const ano = mesAtual.getFullYear();
@@ -173,7 +222,23 @@ const ConfirmarConsulta = () => {
       data.setHours(0, 0, 0, 0);
 
       const horarios = gerarHorariosDoDia(data, horariosFixos, duracaoConsulta);
-      const disponivel = data >= hoje && horarios.length > 0 && medicos.length > 0;
+      const horariosLivres = selectedDoctor
+        ? horarios.filter((horario) => {
+            const ocupado = consultas.some((consulta) => {
+              const dataConsulta = new Date(consulta.dataConsulta);
+
+              return (
+                normalizarId(consulta.medicoId) === normalizarId(selectedDoctor) &&
+                consulta.status !== "CANCELADO" &&
+                mesmoDia(dataConsulta, data) &&
+                horarioDaConsulta(consulta) === horario
+              );
+            });
+
+            return !ocupado;
+          })
+        : horarios;
+      const disponivel = data >= hoje && horariosLivres.length > 0 && medicos.length > 0;
 
       return {
         tipo: "day",
@@ -185,12 +250,14 @@ const ConfirmarConsulta = () => {
     });
 
     return [...espacosIniciais, ...dias];
-  }, [duracaoConsulta, hoje, horariosFixos, medicos.length, mesAtual]);
+  }, [consultas, duracaoConsulta, hoje, horariosFixos, medicos.length, mesAtual, selectedDoctor]);
 
   const horariosDisponiveis = useMemo(() => {
     if (!selectedDate || !selectedDoctor) return [];
-    return gerarHorariosDoDia(selectedDate, horariosFixos, duracaoConsulta);
-  }, [duracaoConsulta, horariosFixos, selectedDate, selectedDoctor]);
+    return gerarHorariosDoDia(selectedDate, horariosFixos, duracaoConsulta).filter(
+      (horario) => !horariosOcupados.has(horario)
+    );
+  }, [duracaoConsulta, horariosFixos, horariosOcupados, selectedDate, selectedDoctor]);
 
   useEffect(() => {
     const dataAindaExiste =
@@ -230,19 +297,21 @@ const ConfirmarConsulta = () => {
 
       const dataConsulta = criarDataConsulta(selectedDate, selectedTime);
 
-      await api.post("/consultas", {
+      const response = await api.post("/consultas", {
         medicoId: normalizarId(selectedDoctor),
-        especialidadeId: especialidadeId || normalizarId(selectedDoctor.especialidadeId),
+        especialidadeId: especialidadeId || normalizarId(especialidadeDoMedico(selectedDoctor)),
         guiaId: normalizarId(guia) || null,
         dataConsulta: dataConsulta.toISOString(),
         tipo: "CONSULTA"
       });
 
+      setConsultas((consultasAtuais) => [...consultasAtuais, response.data]);
       setConsultaConfirmada({
         local: LOCAL_NAMI,
         data: selectedDate,
         horario: selectedTime,
-        medico: selectedDoctor
+        medico: selectedDoctor,
+        especialidade: especialidade || especialidadeDoMedico(selectedDoctor)
       });
     } catch (error) {
       console.error("Erro ao confirmar consulta:", error);
@@ -412,7 +481,7 @@ const ConfirmarConsulta = () => {
                         </div>
                         <div>
                           <p className="font-bold text-[#132190]">{doc.name || doc.nome}</p>
-                          <p className="text-xs text-slate-500">{nomeEspecialidade(doc.especialidadeId)}</p>
+                          <p className="text-xs text-slate-500">{nomeEspecialidade(especialidadeDoMedico(doc))}</p>
                         </div>
                       </div>
 
@@ -516,6 +585,14 @@ const ConfirmarConsulta = () => {
                 <div>
                   <p className="font-bold text-[#132190]">Data marcada</p>
                   <p className="text-sm capitalize text-slate-600">{formatarData(consultaConfirmada.data)}</p>
+                </div>
+              </div>
+
+              <div className="flex gap-3">
+                <Stethoscope className="mt-1 h-5 w-5 shrink-0 text-[#004AF7]" />
+                <div>
+                  <p className="font-bold text-[#132190]">Especialidade</p>
+                  <p className="text-sm text-slate-600">{nomeEspecialidade(consultaConfirmada.especialidade)}</p>
                 </div>
               </div>
 

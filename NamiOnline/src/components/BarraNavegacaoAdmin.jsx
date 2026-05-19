@@ -30,7 +30,7 @@ const BarraNavegacao = () => {
   };
 
   const handleNotificacaoClick = () => {
-    navigate("/notificacoes");
+    navigate("/admin/notificacoes");
   };
 
 

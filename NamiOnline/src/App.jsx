@@ -35,7 +35,6 @@ import CadastrarPaciente from "./pages/adm/AdminCadastrarPaciente"
 import AdicionarEspecialidade from "./pages/adm/CadastroEspecialidades";
 import TelaNotificacaoAdmin from './pages/adm/TelaNotificacaoAdmin';
 import AdminAgendarExame from './pages/adm/AdminAgendarExame';
-import AdminAgendarConsulta from './pages/adm/AdminAgendarConsulta';
 import AdminEditarExames from './pages/adm/AdminEditarExames';
 import AdminCadastrarCategoriasExames from './pages/adm/AdminCadastrarCategoriasExames';
 import AdminCadastrarTiposExames from './pages/adm/AdminCadastrarTiposExames';
@@ -43,7 +42,9 @@ import TelaNoticiasAdmin from './pages/adm/TelaNoticiasAdmin';
 import TelaEventosAdmin from './pages/adm/TelaEventosAdmin';
 import AprovarGuia from './pages/adm/AprovarGuia';
 import ConsultaDia from "./pages/adm/AdminConsultaDia";
-
+import TelaconfigAdmin from "./pages/adm/TelaconfigAdmin";
+import TelaChatAdm from "./pages/adm/TelaChatAdm";
+import TelaChat from "./pages/user/TelaChat";
 
 function ProtectedLayout() {
   const { authLoading, isLoggedIn, user } = useContext(AuthContext);
@@ -131,7 +132,6 @@ function App() {
               <Route path="/admin/cadastrar-especialidade" element={<AdicionarEspecialidade />} />
               <Route path="/admin/aprovar-guias" element={<AprovarGuia />} />
               <Route path="/admin/consultas-dia" element={<ConsultaDia />} />
-              <Route path="/admin/consultas/agendar" element={<AdminAgendarConsulta />} />
               {/* Gestão de Exames */}
               <Route path="/admin/exames/agendar" element={<AdminAgendarExame />} />
               <Route path="/admin/categorias-exames/:categoriaId/exames" element={<AdminEditarExames />} />

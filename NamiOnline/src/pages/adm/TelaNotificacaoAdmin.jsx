@@ -1,243 +1,244 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { FaArrowLeft, FaBell, FaCheck, FaTimes, FaTrash, FaCheckDouble } from 'react-icons/fa'
-import './style_notificacao_admin.css'
+import { useEffect, useState } from "react";
+import {
+  FaArrowLeft,
+  FaBell,
+  FaCheck,
+  FaCheckDouble,
+  FaTrash,
+  FaComments,
+} from "react-icons/fa";
+
+import { useNavigate } from "react-router-dom";
+import api from "../../services/api";
 
 export default function TelaNotificacaoAdmin() {
-  const navigate = useNavigate()
-  const [notificacoes, setNotificacoes] = useState([
-    {
-      id: 1,
-      tipo: 'nova_consulta',
-      titulo: 'Nova Consulta Agendada',
-      mensagem: 'João Silva agendou consulta com Cardiologia para 12/05/2026',
-      timestamp: '2026-04-17T14:30:00',
-      lida: false,
-      urgencia: 'normal'
-    },
-    {
-      id: 2,
-      tipo: 'cancelamento',
-      titulo: 'Consulta Cancelada',
-      mensagem: 'Maria Santos cancelou consulta de Dermatologia do dia 08/06/2026',
-      timestamp: '2026-04-17T13:15:00',
-      lida: false,
-      urgencia: 'alto'
-    },
-    {
-      id: 3,
-      tipo: 'novo_usuario',
-      titulo: 'Novo Usuário Cadastrado',
-      mensagem: 'Pedro Costa se cadastrou no sistema',
-      timestamp: '2026-04-17T12:00:00',
-      lida: true,
-      urgencia: 'baixo'
-    },
-    {
-      id: 4,
-      tipo: 'retorno_agendado',
-      titulo: 'Retorno Agendado',
-      mensagem: 'Ana Silva agendou retorno em Cardiologia para 30/05/2026',
-      timestamp: '2026-04-17T11:45:00',
-      lida: true,
-      urgencia: 'normal'
-    },
-    {
-      id: 5,
-      tipo: 'sistema',
-      titulo: 'Atualização do Sistema',
-      mensagem: 'Nova versão do aplicativo disponível para download',
-      timestamp: '2026-04-17T10:30:00',
-      lida: true,
-      urgencia: 'baixo'
+  const navigate = useNavigate();
+
+  const [notificacoes, setNotificacoes] = useState([]);
+
+  // =========================
+  // BUSCAR NOTIFICAÇÕES
+  // =========================
+  useEffect(() => {
+    carregarNotificacoes();
+  }, []);
+
+  const carregarNotificacoes = async () => {
+    try {
+      const response = await api.get(
+        "/notificacoes"
+      );
+
+      setNotificacoes(response.data);
+    } catch (error) {
+      console.error(error);
     }
-  ])
+  };
 
-  const [filtro, setFiltro] = useState('todas')
+  // =========================
+  // MARCAR COMO LIDA
+  // =========================
+  const marcarComoLida = async (id) => {
+    try {
+      await api.patch(
+        `/notificacoes/${id}/lida`
+      );
 
-  const notificacoesNaoLidas = notificacoes.filter(n => !n.lida).length
-  
-  const notificacoesFiltradas = filtro === 'nao_lidas' 
-    ? notificacoes.filter(n => !n.lida)
-    : notificacoes
-
-  const handleMarcarLida = (id) => {
-    setNotificacoes(notificacoes.map(n => 
-      n.id === id ? { ...n, lida: true } : n
-    ))
-  }
-
-  const handleMarcarTodasLidas = () => {
-    setNotificacoes(notificacoes.map(n => ({ ...n, lida: true })))
-  }
-
-  const handleDeletar = (id) => {
-    setNotificacoes(notificacoes.filter(n => n.id !== id))
-  }
-
-  const getIconoTipo = (tipo) => {
-    const iconos = {
-      'nova_consulta': '📅',
-      'cancelamento': '❌',
-      'novo_usuario': '👤',
-      'retorno_agendado': '🔄',
-      'sistema': '⚙️'
+      setNotificacoes((prev) =>
+        prev.map((n) =>
+          n._id === id
+            ? { ...n, lida: true }
+            : n
+        )
+      );
+    } catch (error) {
+      console.error(error);
     }
-    return iconos[tipo] || '📬'
-  }
+  };
 
-  const getCorUrgencia = (urgencia) => {
-    const cores = {
-      'alto': '#ff6b6b',
-      'normal': '#667eea',
-      'baixo': '#4caf50'
+  // =========================
+  // DELETAR
+  // =========================
+  const deletarNotificacao = async (id) => {
+    try {
+      await api.delete(`/notificacoes/${id}`);
+
+      setNotificacoes((prev) =>
+        prev.filter((n) => n._id !== id)
+      );
+    } catch (error) {
+      console.error(error);
     }
-    return cores[urgencia] || '#667eea'
-  }
+  };
 
-  const formatarData = (timestamp) => {
-    const data = new Date(timestamp)
-    const agora = new Date()
-    const diff = agora - data
-    
-    const minutos = Math.floor(diff / 60000)
-    const horas = Math.floor(diff / 3600000)
-    const dias = Math.floor(diff / 86400000)
-    
-    if (minutos < 1) return 'Agora'
-    if (minutos < 60) return `${minutos}m atrás`
-    if (horas < 24) return `${horas}h atrás`
-    if (dias < 7) return `${dias}d atrás`
-    
-    return data.toLocaleDateString('pt-BR')
-  }
+  // =========================
+  // TODAS LIDAS
+  // =========================
+  const marcarTodas = async () => {
+    try {
+      await api.patch(
+        "/notificacoes/marcar-todas"
+      );
+
+      carregarNotificacoes();
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const naoLidas = notificacoes.filter(
+    (n) => !n.lida
+  ).length;
 
   return (
-    <div className="notif-admin-container">
-      <div className="notif-admin-wrapper">
-        
-        {/* Header */}
-        <div className="notif-admin-header">
-          <button className="notif-admin-back-btn" onClick={() => navigate('/perfil')}>
+    <div className="min-h-screen bg-[#0F172A] p-8 text-white">
+
+      <div className="mx-auto max-w-5xl">
+
+        {/* HEADER */}
+        <div className="mb-8 flex items-center gap-4">
+
+          <button
+            onClick={() => navigate(-1)}
+            className="rounded-full bg-[#132190] p-4 transition hover:bg-[#004AF7]"
+          >
             <FaArrowLeft />
           </button>
-          <h1 className="notif-admin-title">
-            <FaBell /> Notificações Admin
-          </h1>
-        </div>
 
-        {/* Info Cards */}
-        <div className="notif-admin-info">
-          <div className="notif-info-card">
-            <div className="notif-info-icon">📬</div>
-            <div>
-              <h3>{notificacoes.length}</h3>
-              <p>Total de Notificações</p>
-            </div>
-          </div>
-          <div className="notif-info-card notif-info-highlight">
-            <div className="notif-info-icon">🔔</div>
-            <div>
-              <h3>{notificacoesNaoLidas}</h3>
-              <p>Não Lidas</p>
-            </div>
-          </div>
-        </div>
+          <div>
+            <h1 className="flex items-center gap-3 text-4xl font-bold">
+              <FaBell />
+              Notificações Admin
+            </h1>
 
-        {/* Controles */}
-        <div className="notif-admin-controles">
-          <div className="notif-filtros">
-            <button 
-              className={`notif-filtro ${filtro === 'todas' ? 'ativo' : ''}`}
-              onClick={() => setFiltro('todas')}
-            >
-              Todas ({notificacoes.length})
-            </button>
-            <button 
-              className={`notif-filtro ${filtro === 'nao_lidas' ? 'ativo' : ''}`}
-              onClick={() => setFiltro('nao_lidas')}
-            >
-              Não Lidas ({notificacoesNaoLidas})
-            </button>
+            <p className="mt-1 text-slate-300">
+              Central de notificações do sistema
+            </p>
           </div>
 
-          {notificacoesNaoLidas > 0 && (
-            <button 
-              className="notif-btn-marcar-todas"
-              onClick={handleMarcarTodasLidas}
-            >
-              <FaCheckDouble /> Marcar Todas como Lidas
-            </button>
-          )}
         </div>
 
-        {/* Lista de Notificações */}
-        <div className="notif-admin-lista">
-          {notificacoesFiltradas.length === 0 ? (
-            <div className="notif-vazio">
-              <div className="notif-vazio-icon">📭</div>
-              <h3>Nenhuma notificação</h3>
-              <p>Você está com todas as notificações lidas</p>
-            </div>
-          ) : (
-            notificacoesFiltradas.map((notif) => (
-              <div 
-                key={notif.id} 
-                className={`notif-item ${!notif.lida ? 'nao-lida' : ''}`}
-              >
-                <div className="notif-item-esquerda">
-                  <div className="notif-icone">
-                    {getIconoTipo(notif.tipo)}
-                  </div>
-                  <div className="notif-conteudo">
-                    <div className="notif-cabecalho">
-                      <h3 className="notif-titulo">{notif.titulo}</h3>
-                      <span 
-                        className="notif-urgencia"
-                        style={{backgroundColor: getCorUrgencia(notif.urgencia)}}
-                      >
-                        {notif.urgencia.charAt(0).toUpperCase() + notif.urgencia.slice(1)}
-                      </span>
-                    </div>
-                    <p className="notif-mensagem">{notif.mensagem}</p>
-                    <span className="notif-tempo">{formatarData(notif.timestamp)}</span>
-                  </div>
+        {/* CARDS */}
+        <div className="mb-8 grid gap-5 md:grid-cols-3">
+
+          <div className="rounded-3xl bg-[#1E293B] p-6 shadow-xl">
+            <h2 className="text-4xl font-bold">
+              {notificacoes.length}
+            </h2>
+
+            <p className="mt-2 text-slate-300">
+              Total
+            </p>
+          </div>
+
+          <div className="rounded-3xl bg-gradient-to-r from-[#004AF7] to-[#132190] p-6 shadow-xl">
+            <h2 className="text-4xl font-bold">
+              {naoLidas}
+            </h2>
+
+            <p className="mt-2 text-slate-100">
+              Não lidas
+            </p>
+          </div>
+
+          <button
+            onClick={() =>
+              navigate("/admin/chat")
+            }
+            className="rounded-3xl bg-[#1E293B] p-6 text-left transition hover:scale-105"
+          >
+            <FaComments className="mb-3 text-4xl text-cyan-400" />
+
+            <h2 className="text-2xl font-bold">
+              Novo Chat
+            </h2>
+
+            <p className="mt-2 text-slate-300">
+              Iniciar atendimento
+            </p>
+          </button>
+
+        </div>
+
+        {/* BOTÃO */}
+        {naoLidas > 0 && (
+          <div className="mb-6">
+            <button
+              onClick={marcarTodas}
+              className="flex items-center gap-3 rounded-2xl bg-gradient-to-r from-[#004AF7] to-[#132190] px-6 py-4 font-semibold transition hover:scale-105"
+            >
+              <FaCheckDouble />
+              Marcar todas como lidas
+            </button>
+          </div>
+        )}
+
+        {/* LISTA */}
+        <div className="space-y-5">
+
+          {notificacoes.map((notif) => (
+            <button
+              key={notif._id}
+              onClick={() =>
+                navigate(
+                  notif.rota || "/chat-admin"
+                )
+              }
+              className={`w-full rounded-3xl border p-6 text-left transition hover:scale-[1.01] ${
+                notif.lida
+                  ? "border-slate-700 bg-[#1E293B]"
+                  : "border-[#004AF7] bg-[#132190]"
+              }`}
+            >
+
+              <div className="flex items-start justify-between gap-5">
+
+                <div>
+                  <h2 className="text-2xl font-bold">
+                    {notif.titulo}
+                  </h2>
+
+                  <p className="mt-3 text-slate-200">
+                    {notif.mensagem}
+                  </p>
                 </div>
 
-                <div className="notif-item-direita">
+                <div className="flex gap-3">
+
                   {!notif.lida && (
-                    <button 
-                      className="notif-btn-acao notif-btn-lida"
-                      onClick={() => handleMarcarLida(notif.id)}
-                      title="Marcar como lida"
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        marcarComoLida(notif._id);
+                      }}
+                      className="rounded-xl bg-green-600 p-3"
                     >
                       <FaCheck />
                     </button>
                   )}
-                  <button 
-                    className="notif-btn-acao notif-btn-deletar"
-                    onClick={() => handleDeletar(notif.id)}
-                    title="Deletar notificação"
+
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      deletarNotificacao(
+                        notif._id
+                      );
+                    }}
+                    className="rounded-xl bg-red-600 p-3"
                   >
                     <FaTrash />
                   </button>
-                </div>
-              </div>
-            ))
-          )}
-        </div>
 
-        {/* Voltar */}
-        <div className="notif-admin-footer">
-          <button 
-            className="notif-btn-voltar"
-            onClick={() => navigate('/perfil')}
-          >
-            ← Voltar
-          </button>
+                </div>
+
+              </div>
+
+            </button>
+          ))}
+
         </div>
 
       </div>
     </div>
-  )
+  );
 }

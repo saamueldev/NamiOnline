@@ -1,45 +1,15 @@
-import { useNavigate, Link } from 'react-router-dom'
 import React, { useMemo, useState } from "react";
 import {
+  AlertCircle,
   CalendarDays,
   Edit,
   Eye,
-  Newspaper,
   Plus,
-  Search,
+  Save,
   Trash2,
   X,
-  Save,
-  AlertCircle,
 } from "lucide-react";
-
-const initialNews = [
-  {
-    id: 1,
-    title: "Novo fluxo de marcação de consultas disponível",
-    category: "Comunicado",
-    status: "Publicado",
-    author: "Admin Hospitalar",
-    date: "2026-04-22",
-    summary:
-      "Pacientes agora podem acompanhar o status da consulta diretamente pelo portal.",
-    content:
-      "O sistema de marcação de consultas hospitalares recebeu uma atualização importante. A partir desta semana, os pacientes poderão visualizar o status da solicitação, confirmação, cancelamento e reagendamento de consultas diretamente pelo portal do paciente.",
-  },
-
-  {
-    id: 2,
-    title: "Campanha de atualização cadastral dos pacientes",
-    category: "Institucional",
-    status: "Publicado",
-    author: "Recepção Central",
-    date: "2026-04-27",
-    summary:
-      "Pacientes devem manter telefone, e-mail e dados pessoais atualizados.",
-    content:
-      "Para garantir maior eficiência na confirmação de consultas, envio de lembretes e comunicação hospitalar, solicitamos que todos os pacientes atualizem seus dados cadastrais no sistema.",
-  },
-];
+import { getApiErrorMessage, useConteudo } from "../../context/ConteudoContext";
 
 const emptyForm = {
   title: "",
@@ -48,43 +18,86 @@ const emptyForm = {
   date: new Date().toISOString().slice(0, 10),
   summary: "",
   content: "",
+  imageDataUrl: "",
 };
+const MAX_IMAGE_SIZE_MB = 5;
+const MAX_IMAGE_SIZE_BYTES = MAX_IMAGE_SIZE_MB * 1024 * 1024;
 
 export default function AdminNewsCrud() {
-  const [news, setNews] = useState(initialNews);
-  const [search, setSearch] = useState("");
+  const {
+    noticias: news,
+    loadingConteudo,
+    conteudoError,
+    criarNoticia,
+    atualizarNoticia,
+    excluirNoticia,
+  } = useConteudo();
+  const [search] = useState("");
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isViewOpen, setIsViewOpen] = useState(false);
   const [selectedNews, setSelectedNews] = useState(null);
   const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState(emptyForm);
+  const [formError, setFormError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isReadingImage, setIsReadingImage] = useState(false);
 
   const filteredNews = useMemo(() => {
     const normalizedSearch = search.toLowerCase().trim();
-
     if (!normalizedSearch) return news;
 
-    return news.filter((item) => {
-      return (
-        item.title.toLowerCase().includes(normalizedSearch) ||
-        item.category.toLowerCase().includes(normalizedSearch) ||
-        item.status.toLowerCase().includes(normalizedSearch) ||
-        item.author.toLowerCase().includes(normalizedSearch)
-      );
-    });
+    return news.filter((item) =>
+      [item.title, item.category, item.status, item.author]
+        .join(" ")
+        .toLowerCase()
+        .includes(normalizedSearch)
+    );
   }, [news, search]);
 
   const publishedCount = news.filter((item) => item.status === "Publicado").length;
-  
 
   function handleChange(event) {
     const { name, value } = event.target;
     setForm((currentForm) => ({ ...currentForm, [name]: value }));
   }
 
+  function handleImageChange(event) {
+    const file = event.target.files?.[0];
+
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      setFormError("Selecione um arquivo de imagem valido.");
+      return;
+    }
+
+    if (file.size > MAX_IMAGE_SIZE_BYTES) {
+      setFormError(`Selecione uma imagem de ate ${MAX_IMAGE_SIZE_MB}MB.`);
+      event.target.value = "";
+      return;
+    }
+
+    const reader = new FileReader();
+    setIsReadingImage(true);
+
+    reader.onload = () => {
+      setForm((currentForm) => ({ ...currentForm, imageDataUrl: reader.result }));
+      setFormError("");
+      setIsReadingImage(false);
+    };
+
+    reader.onerror = () => {
+      setFormError("Nao foi possivel carregar a imagem selecionada.");
+      setIsReadingImage(false);
+    };
+
+    reader.readAsDataURL(file);
+  }
+
   function openCreateForm() {
     setEditingId(null);
     setForm(emptyForm);
+    setFormError("");
     setIsFormOpen(true);
   }
 
@@ -93,12 +106,13 @@ export default function AdminNewsCrud() {
     setForm({
       title: item.title,
       category: item.category,
-      status: item.status,
       author: item.author,
       date: item.date,
       summary: item.summary,
       content: item.content,
+      imageDataUrl: item.imageUrl,
     });
+    setFormError("");
     setIsFormOpen(true);
   }
 
@@ -111,6 +125,8 @@ export default function AdminNewsCrud() {
     setIsFormOpen(false);
     setEditingId(null);
     setForm(emptyForm);
+    setFormError("");
+    setIsReadingImage(false);
   }
 
   function closeViewModal() {
@@ -118,8 +134,13 @@ export default function AdminNewsCrud() {
     setSelectedNews(null);
   }
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault();
+
+    if (isReadingImage) {
+      setFormError("Aguarde a imagem terminar de carregar.");
+      return;
+    }
 
     const payload = {
       ...form,
@@ -130,193 +151,145 @@ export default function AdminNewsCrud() {
     };
 
     if (!payload.title || !payload.author || !payload.summary || !payload.content) {
+      setFormError("Preencha todos os campos obrigatorios.");
       return;
     }
 
-    if (editingId) {
-      setNews((currentNews) =>
-        currentNews.map((item) =>
-          item.id === editingId ? { ...item, ...payload } : item
-        )
-      );
-    } else {
-      const newItem = {
-        id: Date.now(),
-        ...payload,
-      };
-      setNews((currentNews) => [newItem, ...currentNews]);
-    }
+    try {
+      setIsSubmitting(true);
+      setFormError("");
 
-    closeFormModal();
+      if (editingId) {
+        await atualizarNoticia(editingId, payload);
+      } else {
+        await criarNoticia(payload);
+      }
+
+      closeFormModal();
+    } catch (error) {
+      setFormError(
+        getApiErrorMessage(error, "Nao foi possivel salvar a noticia.")
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
-  function handleDelete(id) {
+  async function handleDelete(id) {
     const shouldDelete = window.confirm(
-      "Tem certeza que deseja apagar esta notícia? Esta ação não poderá ser desfeita."
+      "Tem certeza que deseja apagar esta noticia? Esta acao nao podera ser desfeita."
     );
 
     if (!shouldDelete) return;
 
-    setNews((currentNews) => currentNews.filter((item) => item.id !== id));
+    try {
+      await excluirNoticia(id);
+    } catch (error) {
+      window.alert(
+        getApiErrorMessage(error, "Nao foi possivel excluir a noticia.")
+      );
+    }
   }
-
-  fetch(`${import.meta.env.VITE_API_URL}/usuarios`)
 
   return (
     <div className="min-h-screen bg-slate-100 p-4 text-slate-900 md:p-8">
       <div className="mx-auto max-w-7xl space-y-8">
         <header className="overflow-hidden rounded-3xl bg-gradient-to-r from-blue-700 via-blue-600 to-cyan-500 p-6 text-white shadow-xl md:p-8">
           <div className="flex flex-col justify-between gap-6 md:flex-row md:items-center">
-            <div>
-              <h1 className="text-3xl font-bold tracking-tight md:text-4xl">
-                Gerenciar Noticias
-              </h1>
-            </div>  
-          
-
-          <div className="relative w-full md:max-w-sm">
-              
-              
-              </div>
-            </div>
+            <h1 className="text-3xl font-bold tracking-tight md:text-4xl">
+              Gerenciar Noticias
+            </h1>
+          </div>
         </header>
 
-        <section className="grid gap-4 md:grid-cols-3 mb-4">
+        <section className="mb-4 grid gap-4 md:grid-cols-3">
           <DashboardCard
-            title="Total de notícias"
-            value={news.length}
+            title="Total de noticias"
+            value={loadingConteudo ? "..." : news.length}
             description="Registros cadastrados"
           />
           <DashboardCard
             title="Publicadas"
-            value={publishedCount}
-            description="Visíveis no portal"
+            value={loadingConteudo ? "..." : publishedCount}
+            description="Visiveis no portal"
           />
-    
-
-           <button
-              onClick={openCreateForm}
-              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white px-5 py-3 font-semibold text-blue-700 shadow-lg transition hover:bg-blue-50"
-            >
-              <Plus size={20} />
-              Nova notícia
-            </button>
+          <button
+            onClick={openCreateForm}
+            className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white px-5 py-3 font-semibold text-blue-700 shadow-lg transition hover:bg-blue-50"
+          >
+            <Plus size={20} />
+            Nova noticia
+          </button>
         </section>
 
         <main className="rounded-3xl bg-white p-6 shadow-lg md:p-8">
-          <div className="mb-8 flex flex-col justify-between gap-6 md:flex-row md:items-center">
-            <div>
-              <h2 className="text-xl font-bold text-slate-900">Notícias cadastradas</h2>
-              <p className="text-sm text-slate-500">
-                Visualize, edite, exclua ou publique notícias do sistema hospitalar.
-              </p>
-            </div>
-
-            
+          <div className="mb-8">
+            <h2 className="text-xl font-bold text-slate-900">Noticias cadastradas</h2>
+            <p className="text-sm text-slate-500">
+              Visualize, edite ou exclua noticias do sistema hospitalar.
+            </p>
           </div>
 
           <div className="overflow-hidden rounded-2xl border border-slate-200">
             <div className="hidden grid-cols-12 bg-slate-50 px-4 py-3 text-xs font-bold uppercase tracking-wide text-slate-500 md:grid">
-              <span className="col-span-4">Título</span>
+              <span className="col-span-4">Titulo</span>
               <span className="col-span-2">Categoria</span>
               <span className="col-span-2">Status</span>
               <span className="col-span-2">Data</span>
-              <span className="col-span-2 text-right">Ações</span>
+              <span className="col-span-2 text-right">Acoes</span>
             </div>
 
-            {filteredNews.length > 0 ? (
+            {conteudoError ? (
+              <EmptyState text={conteudoError} danger />
+            ) : filteredNews.length > 0 ? (
               filteredNews.map((item) => (
                 <article
                   key={item.id}
                   className="grid gap-3 border-t border-slate-200 p-2 transition hover:bg-blue-50/40 md:grid-cols-12 md:items-center"
                 >
                   <div className="md:col-span-4">
-                    <h3 className="font-semibold text-slate-900 p-8">{item.title}</h3>
+                    <h3 className="p-8 font-semibold text-slate-900">{item.title}</h3>
                     <p className="mt-1 line-clamp-1 text-sm text-slate-500">
                       {item.summary}
                     </p>
                   </div>
-
                   <div className="md:col-span-2">
                     <span className="inline-flex rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700">
                       {item.category}
                     </span>
                   </div>
-
                   <div className="md:col-span-2">
                     <StatusBadge status={item.status} />
                   </div>
-
                   <div className="flex items-center gap-2 text-sm text-slate-500 md:col-span-2">
                     <CalendarDays size={16} />
                     {formatDate(item.date)}
                   </div>
-
                   <div className="flex justify-start gap-2 md:col-span-2 md:justify-end">
-                    <ActionButton
-                      label="Visualizar"
-                      icon={<Eye size={17} />}
-                      onClick={() => openViewModal(item)}
-                    />
-                    <ActionButton
-                      label="Editar"
-                      icon={<Edit size={17} />}
-                      onClick={() => openEditForm(item)}
-                    />
-                    <ActionButton
-                      label="Apagar"
-                      icon={<Trash2 size={17} />}
-                      danger
-                      onClick={() => handleDelete(item.id)}
-                    />
+                    <ActionButton label="Visualizar" icon={<Eye size={17} />} onClick={() => openViewModal(item)} />
+                    <ActionButton label="Editar" icon={<Edit size={17} />} onClick={() => openEditForm(item)} />
+                    <ActionButton label="Apagar" icon={<Trash2 size={17} />} danger onClick={() => handleDelete(item.id)} />
                   </div>
                 </article>
               ))
             ) : (
-              <div className="flex flex-col items-center justify-center gap-3 border-t border-slate-200 p-10 text-center">
-                <AlertCircle className="text-blue-600" size={36} />
-                <div>
-                  <h3 className="font-semibold text-slate-800">
-                    Nenhuma notícia encontrada
-                  </h3>
-                  <p className="text-sm text-slate-500">
-                    Tente buscar por outro termo ou cadastre uma nova notícia.
-                  </p>
-                </div>
-              </div>
+              <EmptyState text="Nenhuma noticia encontrada." />
             )}
           </div>
         </main>
       </div>
 
       {isFormOpen && (
-        <Modal onClose={closeFormModal}>
+        <Modal>
           <form onSubmit={handleSubmit} className="space-y-5">
             <ModalHeader
-              title={editingId ? "Editar notícia" : "Criar notícia"}
-              subtitle="Preencha as informações que serão exibidas no portal hospitalar."
+              title={editingId ? "Editar noticia" : "Criar noticia"}
+              subtitle="Preencha as informacoes que serao exibidas no portal hospitalar."
               onClose={closeFormModal}
             />
-
             <div className="grid gap-4 md:grid-cols-2">
-              <Input
-                label="Título"
-                name="title"
-                value={form.title}
-                onChange={handleChange}
-                placeholder="Digite o título da notícia"
-                required
-              />
-
-              <Input
-                label="Autor"
-                name="author"
-                value={form.author}
-                onChange={handleChange}
-                placeholder="Ex: Admin Hospitalar"
-                required
-              />
-
+              <Input label="Titulo" name="title" value={form.title} onChange={handleChange} required />
+              <Input label="Autor" name="author" value={form.author} onChange={handleChange} required />
               <Select
                 label="Categoria"
                 name="category"
@@ -324,36 +297,16 @@ export default function AdminNewsCrud() {
                 onChange={handleChange}
                 options={["Comunicado", "Sistema", "Institucional", "Urgente"]}
               />
-
-              <Input
-                label="Data"
-                name="date"
-                type="date"
-                value={form.date}
-                onChange={handleChange}
-              />
+              <Input label="Data" name="date" type="date" value={form.date} onChange={handleChange} required />
             </div>
-
-            <Textarea
-              label="Resumo"
-              name="summary"
-              value={form.summary}
-              onChange={handleChange}
-              placeholder="Escreva um resumo curto da notícia"
-              rows={3}
-              required
-            />
-
-            <Textarea
-              label="Conteúdo"
-              name="content"
-              value={form.content}
-              onChange={handleChange}
-              placeholder="Digite o conteúdo completo da notícia"
-              rows={7}
-              required
-            />
-
+            <Textarea label="Resumo" name="summary" value={form.summary} onChange={handleChange} rows={3} required />
+            <Textarea label="Conteudo" name="content" value={form.content} onChange={handleChange} rows={7} required />
+            <ImagePicker imageUrl={form.imageDataUrl} onChange={handleImageChange} isLoading={isReadingImage} />
+            {formError && (
+              <p className="rounded-2xl bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">
+                {formError}
+              </p>
+            )}
             <div className="flex flex-col-reverse gap-3 border-t border-slate-200 pt-5 sm:flex-row sm:justify-end">
               <button
                 type="button"
@@ -364,10 +317,11 @@ export default function AdminNewsCrud() {
               </button>
               <button
                 type="submit"
-                className="inline-flex items-center justify-center gap-2 rounded-2xl bg-blue-600 px-5 py-3 font-semibold text-white shadow-lg shadow-blue-200 transition hover:bg-blue-700"
+                disabled={isSubmitting || isReadingImage}
+                className="inline-flex items-center justify-center gap-2 rounded-2xl bg-blue-600 px-5 py-3 font-semibold text-white shadow-lg shadow-blue-200 transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-70"
               >
                 <Save size={18} />
-                {editingId ? "Salvar alterações" : "Cadastrar notícia"}
+                {isReadingImage ? "Carregando imagem..." : isSubmitting ? "Salvando..." : editingId ? "Salvar alteracoes" : "Cadastrar noticia"}
               </button>
             </div>
           </form>
@@ -375,13 +329,8 @@ export default function AdminNewsCrud() {
       )}
 
       {isViewOpen && selectedNews && (
-        <Modal onClose={closeViewModal}>
-          <ModalHeader
-            title="Visualizar notícia"
-            subtitle="Prévia da notícia cadastrada no sistema."
-            onClose={closeViewModal}
-          />
-
+        <Modal>
+          <ModalHeader title="Visualizar noticia" subtitle="Previa da noticia cadastrada no sistema." onClose={closeViewModal} />
           <article className="space-y-5">
             <div className="rounded-3xl bg-gradient-to-r from-blue-700 to-cyan-500 p-6 text-white">
               <div className="mb-4 flex flex-wrap gap-2">
@@ -395,22 +344,18 @@ export default function AdminNewsCrud() {
               <h2 className="text-2xl font-bold">{selectedNews.title}</h2>
               <p className="mt-3 text-blue-50">{selectedNews.summary}</p>
             </div>
-
             <div className="flex flex-wrap gap-4 text-sm text-slate-500">
               <span>Autor: {selectedNews.author}</span>
               <span>Data: {formatDate(selectedNews.date)}</span>
             </div>
-
             <p className="leading-7 text-slate-700">{selectedNews.content}</p>
-
-            <div className="flex justify-end border-t border-slate-200 pt-5">
-              <button
-                onClick={closeViewModal}
-                className="rounded-2xl bg-blue-600 px-5 py-3 font-semibold text-white transition hover:bg-blue-700"
-              >
-                Fechar
-              </button>
-            </div>
+            {selectedNews.imageUrl && (
+              <img
+                className="max-h-80 w-full rounded-2xl object-cover"
+                src={selectedNews.imageUrl}
+                alt={selectedNews.title}
+              />
+            )}
           </article>
         </Modal>
       )}
@@ -432,13 +377,7 @@ function StatusBadge({ status }) {
   const isPublished = status === "Publicado";
 
   return (
-    <span
-      className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${
-        isPublished
-          ? "bg-emerald-100 text-emerald-700"
-          : "bg-amber-100 text-amber-700"
-      }`}
-    >
+    <span className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${isPublished ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700"}`}>
       {status}
     </span>
   );
@@ -450,11 +389,7 @@ function ActionButton({ label, icon, onClick, danger = false }) {
       type="button"
       title={label}
       onClick={onClick}
-      className={`inline-flex h-10 w-10 items-center justify-center rounded-xl transition ${
-        danger
-          ? "bg-red-50 text-red-600 hover:bg-red-100"
-          : "bg-blue-50 text-blue-700 hover:bg-blue-100"
-      }`}
+      className={`inline-flex h-10 w-10 items-center justify-center rounded-xl transition ${danger ? "bg-red-50 text-red-600 hover:bg-red-100" : "bg-blue-50 text-blue-700 hover:bg-blue-100"}`}
     >
       {icon}
       <span className="sr-only">{label}</span>
@@ -462,7 +397,16 @@ function ActionButton({ label, icon, onClick, danger = false }) {
   );
 }
 
-function Modal({ children, onClose }) {
+function EmptyState({ text, danger = false }) {
+  return (
+    <div className="flex flex-col items-center justify-center gap-3 border-t border-slate-200 p-10 text-center">
+      <AlertCircle className={danger ? "text-red-600" : "text-blue-600"} size={36} />
+      <p className={`text-sm font-semibold ${danger ? "text-red-700" : "text-slate-600"}`}>{text}</p>
+    </div>
+  );
+}
+
+function Modal({ children }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-sm">
       <div className="max-h-[92vh] w-full max-w-3xl overflow-y-auto rounded-3xl bg-white p-5 shadow-2xl md:p-7">
@@ -480,6 +424,7 @@ function ModalHeader({ title, subtitle, onClose }) {
         <p className="mt-1 text-sm text-slate-500">{subtitle}</p>
       </div>
       <button
+        type="button"
         onClick={onClose}
         className="rounded-xl bg-slate-100 p-2 text-slate-500 transition hover:bg-slate-200 hover:text-slate-700"
       >
@@ -531,7 +476,33 @@ function Textarea({ label, ...props }) {
   );
 }
 
+function ImagePicker({ imageUrl, onChange, isLoading = false }) {
+  return (
+    <label className="block space-y-2">
+      <span className="text-sm font-semibold text-slate-700">Imagem</span>
+      <input
+        type="file"
+        accept="image/*"
+        onChange={onChange}
+        className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none transition file:mr-4 file:rounded-xl file:border-0 file:bg-blue-50 file:px-4 file:py-2 file:font-semibold file:text-blue-700 hover:file:bg-blue-100 focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+      />
+      {imageUrl && (
+        <img
+          src={imageUrl}
+          alt="Previa da imagem selecionada"
+          className="h-44 w-full rounded-2xl object-cover"
+        />
+      )}
+      {isLoading && (
+        <p className="text-sm font-semibold text-blue-700">Carregando imagem...</p>
+      )}
+    </label>
+  );
+}
+
 function formatDate(date) {
+  if (!date) return "-";
+
   return new Intl.DateTimeFormat("pt-BR", {
     day: "2-digit",
     month: "2-digit",

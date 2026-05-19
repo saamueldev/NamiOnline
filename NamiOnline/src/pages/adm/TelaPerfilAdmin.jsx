@@ -296,7 +296,7 @@ export default function TelaPerfil() {
               </button>
 
               <button
-                onClick={() => navigate('/perfil/configuracoes')}
+                onClick={() => navigate('/admin/configuracoes')}
                 className="flex items-center justify-center gap-3 rounded-xl bg-[#E4F2FE] px-5 py-4 font-semibold text-[#132190] transition hover:bg-[#87B7FE] hover:text-white"
               >
                 <FaUserCog />

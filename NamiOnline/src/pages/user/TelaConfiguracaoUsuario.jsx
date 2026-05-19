@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect, useContext } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 import {
@@ -8,44 +8,124 @@ import {
   FaMapMarkerAlt,
   FaHeart,
   FaEdit,
-  FaSave
+  FaSave,
+  FaSpinner
 } from 'react-icons/fa'
 
+import { AuthContext } from '../../context/AuthContext'
+import api from '../../services/api'
+
 export default function TelaConfiguracaoUsuario() {
+
   const navigate = useNavigate()
 
+  const { user } = useContext(AuthContext)
+
   const [editar, setEditar] = useState(false)
+  const [loading, setLoading] = useState(true)
 
   const [formData, setFormData] = useState({
-    nome: 'João Silva Santos',
-    email: 'joao.silva@email.com',
-    telefone: '(85) 99999-8888',
-    cpf: '123.456.789-00',
-    dataNascimento: '1990-05-15',
-    sexo: 'masculino',
-    sangue: 'O+',
-    endereco: 'Rua das Flores, 123',
-    cidade: 'Fortaleza',
-    estado: 'CE',
-    cep: '60000-000',
-    responsavel: 'Maria Santos',
-    telefonResponsavel: '(85) 98888-7777',
-    alergias: 'Penicilina, Amendoim',
-    medicamentos: 'Losartana 50mg (diariamente)'
+    nome: '',
+    email: '',
+    telefone: '',
+    cpf: '',
+    dataNascimento: '',
+    sexo: '',
+    sangue: '',
+    endereco: '',
+    cidade: '',
+    estado: '',
+    cep: '',
+    responsavel: '',
+    telefonResponsavel: '',
+    alergias: '',
+    medicamentos: ''
   })
 
+  // =========================
+  // BUSCAR DADOS DO USUÁRIO
+  // =========================
+  useEffect(() => {
+
+    async function carregarUsuario() {
+
+      try {
+
+        const response = await api.get(`/usuarios/${user.id}`)
+
+        const dados = response.data
+
+        setFormData({
+          nome: dados.nome || '',
+          email: dados.email || '',
+          telefone: dados.telefone || '',
+          cpf: dados.cpf || '',
+          dataNascimento: dados.dataNascimento
+            ? dados.dataNascimento.substring(0, 10)
+            : '',
+          sexo: dados.sexo || '',
+          sangue: dados.sangue || '',
+          endereco: dados.endereco || '',
+          cidade: dados.cidade || '',
+          estado: dados.estado || '',
+          cep: dados.cep || '',
+          responsavel: dados.responsavel || '',
+          telefonResponsavel: dados.telefonResponsavel || '',
+          alergias: dados.alergias || '',
+          medicamentos: dados.medicamentos || '',
+        })
+
+      } catch (error) {
+
+        console.error('Erro ao buscar usuário:', error)
+        alert('Erro ao carregar dados do usuário')
+
+      } finally {
+
+        setLoading(false)
+
+      }
+    }
+
+    if (user?.id) {
+      carregarUsuario()
+    }
+
+  }, [user])
+
+  // =========================
+  // ALTERAR INPUTS
+  // =========================
   const handleChange = (e) => {
+
     const { name, value } = e.target
 
     setFormData({
       ...formData,
       [name]: value
     })
+
   }
 
-  const handleSalvar = () => {
-    console.log('Dados salvos:', formData)
-    setEditar(false)
+  // =========================
+  // SALVAR
+  // =========================
+  const handleSalvar = async () => {
+
+    try {
+
+      await api.put(`/usuarios/${user.id}`, formData)
+
+      alert('Dados atualizados com sucesso!')
+
+      setEditar(false)
+
+    } catch (error) {
+
+      console.error(error)
+      alert('Erro ao atualizar dados')
+
+    }
   }
 
   const inputClass = `
@@ -55,9 +135,32 @@ export default function TelaConfiguracaoUsuario() {
     disabled:bg-slate-100 disabled:text-slate-400
   `
 
+  // =========================
+  // LOADING
+  // =========================
+  if (loading) {
+
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-[#004AF7] to-[#132190]">
+
+        <div className="flex flex-col items-center gap-4 text-white">
+
+          <FaSpinner className="animate-spin text-5xl" />
+
+          <h2 className="text-2xl font-bold">
+            Carregando usuário...
+          </h2>
+
+        </div>
+
+      </div>
+    )
+  }
+
   return (
+
     <div className="min-h-screen bg-gradient-to-br from-[#004AF7] to-[#132190] px-5 py-10">
-      
+
       <div className="mx-auto max-w-5xl">
 
         {/* HEADER */}
@@ -70,9 +173,17 @@ export default function TelaConfiguracaoUsuario() {
             <FaArrowLeft />
           </button>
 
-          <h1 className="text-3xl font-bold text-white">
-            Configurações Pessoais
-          </h1>
+          <div>
+
+            <h1 className="text-3xl font-bold text-white">
+              Configurações Pessoais
+            </h1>
+
+            <p className="mt-1 text-blue-100">
+              Bem-vindo(a), {formData.nome}
+            </p>
+
+          </div>
 
         </div>
 
@@ -145,6 +256,7 @@ export default function TelaConfiguracaoUsuario() {
                   disabled={!editar}
                   className={inputClass}
                 >
+                  <option value="">Selecione</option>
                   <option value="masculino">Masculino</option>
                   <option value="feminino">Feminino</option>
                   <option value="outro">Outro</option>
@@ -163,6 +275,7 @@ export default function TelaConfiguracaoUsuario() {
                   disabled={!editar}
                   className={inputClass}
                 >
+                  <option value="">Selecione</option>
                   <option>O+</option>
                   <option>O-</option>
                   <option>A+</option>
@@ -190,6 +303,7 @@ export default function TelaConfiguracaoUsuario() {
             </div>
 
           </div>
+
         </section>
 
         {/* CONTATO */}
@@ -267,6 +381,7 @@ export default function TelaConfiguracaoUsuario() {
             </div>
 
           </div>
+
         </section>
 
         {/* ENDEREÇO */}
@@ -344,6 +459,7 @@ export default function TelaConfiguracaoUsuario() {
             </div>
 
           </div>
+
         </section>
 
         {/* INFORMAÇÕES MÉDICAS */}
@@ -387,6 +503,7 @@ export default function TelaConfiguracaoUsuario() {
             </div>
 
           </div>
+
         </section>
 
         {/* BOTÕES */}

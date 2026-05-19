@@ -15,28 +15,33 @@ import {
 
 
 export default function TelaAgendarRetorno() {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
+
+  const [loading, setLoading] = useState(false);
 
   const [form, setForm] = useState({
-    especialidade: 'Cardiologia',
-    medico: 'Dr. Lucas Mota',
-    data: '',
-    horario: '',
-    observacoes: '',
-  })
+    especialidade: "Cardiologia",
+    medico: "Dr. Lucas Mota",
+    data: "",
+    horario: "",
+    observacoes: "",
+  });
 
   const handleChange = (e) => {
     setForm({
       ...form,
       [e.target.name]: e.target.value,
-    })
-  }
+    });
+  };
 
+  // =========================
+  // AGENDAR RETORNO (MONGO/API)
+  // =========================
   const agendarRetorno = async (e) => {
     e.preventDefault()
 
     try {
-      const { medico, especialidade, data, horario, observacoes } = form
+
 
       const response = await api.post('/retornos', {
         medico,
@@ -47,15 +52,31 @@ export default function TelaAgendarRetorno() {
       })
 
       const dataResponse = response.data
-      console.log(dataResponse)
+
+      const response = await fetch('http://localhost:3000/retornos', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(form),
+      })
+
+      const data = await response.json()
+
+
+      console.log(data)
 
       alert('Retorno agendado com sucesso!')
+
       navigate('/retornos')
+
     } catch (error) {
-      console.error(error)
-      alert('Erro ao agendar retorno')
+      console.error("Erro ao agendar retorno:", error);
+      alert("Erro ao agendar retorno");
+    } finally {
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] px-5 py-10">
@@ -76,7 +97,6 @@ export default function TelaAgendarRetorno() {
             <h1 className="text-3xl font-bold text-[#132190]">
               Agendar Retorno
             </h1>
-
             <p className="text-slate-500">
               Agende seu próximo atendimento
             </p>
@@ -87,10 +107,7 @@ export default function TelaAgendarRetorno() {
         {/* CARD */}
         <div className="rounded-[28px] border border-slate-200 bg-white p-8 shadow-xl">
 
-          <form
-            onSubmit={agendarRetorno}
-            className="space-y-6"
-          >
+          <form onSubmit={agendarRetorno} className="space-y-6">
 
             {/* GRID */}
             <div className="grid gap-5 md:grid-cols-2">
@@ -106,7 +123,7 @@ export default function TelaAgendarRetorno() {
                   name="especialidade"
                   value={form.especialidade}
                   onChange={handleChange}
-                  className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none transition focus:border-[#004AF7]"
+                  className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-[#004AF7]"
                 >
                   <option>Cardiologia</option>
                   <option>Dermatologia</option>
@@ -125,7 +142,7 @@ export default function TelaAgendarRetorno() {
                   name="medico"
                   value={form.medico}
                   onChange={handleChange}
-                  className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none transition focus:border-[#004AF7]"
+                  className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-[#004AF7]"
                 >
                   <option>Dr. Lucas Mota</option>
                   <option>Dra. Marina Soares</option>
@@ -145,7 +162,7 @@ export default function TelaAgendarRetorno() {
                   name="data"
                   value={form.data}
                   onChange={handleChange}
-                  className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none transition focus:border-[#004AF7]"
+                  className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-[#004AF7]"
                 />
               </div>
 
@@ -161,13 +178,13 @@ export default function TelaAgendarRetorno() {
                   name="horario"
                   value={form.horario}
                   onChange={handleChange}
-                  className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none transition focus:border-[#004AF7]"
+                  className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-[#004AF7]"
                 />
               </div>
 
             </div>
 
-            {/* OBS */}
+            {/* OBSERVAÇÕES */}
             <div>
               <label className="mb-2 flex items-center gap-2 font-semibold text-slate-700">
                 <FaNotesMedical className="text-[#004AF7]" />
@@ -180,7 +197,7 @@ export default function TelaAgendarRetorno() {
                 value={form.observacoes}
                 onChange={handleChange}
                 placeholder="Digite observações adicionais..."
-                className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none transition focus:border-[#004AF7]"
+                className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-[#004AF7]"
               />
             </div>
 
@@ -189,17 +206,18 @@ export default function TelaAgendarRetorno() {
 
               <Link
                 to="/home"
-                className="flex items-center justify-center rounded-xl bg-slate-200 px-6 py-4 font-semibold text-slate-700 transition hover:bg-slate-300"
+                className="flex items-center justify-center rounded-xl bg-slate-200 px-6 py-4 font-semibold text-slate-700 hover:bg-slate-300"
               >
                 Voltar
               </Link>
 
               <button
                 type="submit"
-                className="flex items-center justify-center gap-3 rounded-xl bg-[#004AF7] px-6 py-4 font-semibold text-white transition hover:bg-[#132190]"
+                disabled={loading}
+                className="flex items-center justify-center gap-3 rounded-xl bg-[#004AF7] px-6 py-4 font-semibold text-white hover:bg-[#132190] disabled:opacity-60"
               >
                 <FaCheckCircle />
-                Confirmar Agendamento
+                {loading ? "Salvando..." : "Confirmar Agendamento"}
               </button>
 
             </div>
@@ -209,7 +227,6 @@ export default function TelaAgendarRetorno() {
         </div>
 
       </div>
-
     </div>
-  )
+  );
 }

@@ -15,17 +15,20 @@ import {
   FaSun,
   FaSave,
   FaEnvelope,
+  FaUserCog,
 } from "react-icons/fa";
 
 import { AuthContext } from "../../context/AuthContext";
 import api from "../../services/api";
 
-export default function TelaPerfil() {
+export default function TelaPerfilAdmin() {
   const navigate = useNavigate();
   const { user, logout, isAdmin } = useContext(AuthContext);
 
   const [notificacoes, setNotificacoes] = useState(true);
-  const [tema, setTema] = useState(localStorage.getItem("tema") || "claro");
+  const [tema, setTema] = useState(
+    localStorage.getItem("tema") || "claro"
+  );
 
   const dark = tema === "escuro";
 
@@ -67,7 +70,9 @@ export default function TelaPerfil() {
   return (
     <div
       className={`min-h-screen px-5 py-10 transition-all duration-300 ${
-        dark ? "bg-[#0F172A] text-white" : "bg-[#F8FAFC] text-slate-800"
+        dark
+          ? "bg-[#0F172A] text-white"
+          : "bg-[#F8FAFC] text-slate-800"
       }`}
     >
       <div className="mx-auto max-w-5xl">
@@ -81,7 +86,9 @@ export default function TelaPerfil() {
             <FaArrowLeft />
           </button>
 
-          <h1 className="text-3xl font-bold">Meu Perfil</h1>
+          <h1 className="text-3xl font-bold">
+            Meu Perfil
+          </h1>
         </div>
 
         {/* USER CARD */}
@@ -121,7 +128,10 @@ export default function TelaPerfil() {
 
           <div className="flex items-center justify-between p-6">
             <div>
-              <h3 className="font-semibold">Notificações do App</h3>
+              <h3 className="font-semibold">
+                Notificações do App
+              </h3>
+
               <p className="text-sm opacity-70">
                 Receba avisos de consultas e retornos
               </p>
@@ -130,12 +140,16 @@ export default function TelaPerfil() {
             <button
               onClick={() => setNotificacoes(!notificacoes)}
               className={`relative h-8 w-14 rounded-full transition ${
-                notificacoes ? "bg-[#132190]" : "bg-gray-400"
+                notificacoes
+                  ? "bg-[#132190]"
+                  : "bg-gray-400"
               }`}
             >
               <span
                 className={`absolute top-1 h-6 w-6 rounded-full bg-white transition ${
-                  notificacoes ? "left-7" : "left-1"
+                  notificacoes
+                    ? "left-7"
+                    : "left-1"
                 }`}
               />
             </button>
@@ -157,10 +171,14 @@ export default function TelaPerfil() {
 
           <div className="flex items-center justify-between p-6">
             <div className="flex items-center gap-3">
+
               {dark ? <FaMoon /> : <FaSun />}
 
               <div>
-                <h3 className="font-semibold">Tema</h3>
+                <h3 className="font-semibold">
+                  Tema
+                </h3>
+
                 <p className="text-sm opacity-70">
                   Escolha o tema do sistema
                 </p>
@@ -176,9 +194,42 @@ export default function TelaPerfil() {
                   : "bg-white text-black border-slate-300"
               }`}
             >
-              <option value="claro">Claro</option>
-              <option value="escuro">Escuro</option>
+              <option value="claro">
+                Claro
+              </option>
+
+              <option value="escuro">
+                Escuro
+              </option>
             </select>
+          </div>
+        </div>
+
+        {/* CONFIG USUARIO */}
+        <div
+          className={`mb-6 overflow-hidden rounded-3xl border shadow-xl transition ${
+            dark
+              ? "bg-[#1E293B] border-slate-700"
+              : "bg-white border-slate-200"
+          }`}
+        >
+          <div className="flex items-center gap-3 bg-gradient-to-r from-[#004AF7] to-[#132190] px-6 py-5 text-white">
+            <FaUserCog />
+            Configurações da Conta
+          </div>
+
+          <div className="p-6">
+            <button
+              onClick={() => navigate("/perfil/configuracoes/usuario")}
+              className={`flex w-full items-center justify-center gap-3 rounded-xl px-5 py-4 font-semibold transition ${
+                dark
+                  ? "bg-slate-800 text-white hover:bg-slate-700"
+                  : "bg-slate-200 text-slate-800 hover:bg-slate-300"
+              }`}
+            >
+              <FaCog />
+              Abrir Configurações do Usuário
+            </button>
           </div>
         </div>
 
@@ -202,6 +253,7 @@ export default function TelaPerfil() {
                   ? "bg-slate-800 text-white hover:bg-slate-700"
                   : "bg-slate-200 text-slate-800 hover:bg-slate-300"
               }`}
+              onClick={() => navigate("/redefinir-senha/:token")}
             >
               Alterar Senha
             </button>
@@ -224,13 +276,14 @@ export default function TelaPerfil() {
           <div className="p-6">
             <button
               onClick={() => navigate("/meus-agendamentos")}
-              className={`w-full rounded-xl px-5 py-4 font-semibold transition ${
+              className={`flex w-full items-center justify-center gap-3 rounded-xl px-5 py-4 font-semibold transition ${
                 dark
                   ? "bg-slate-800 text-white hover:bg-slate-700"
                   : "bg-slate-200 text-slate-800 hover:bg-slate-300"
               }`}
             >
-              <FaCalendarCheck /> Meus Agendamentos
+              <FaCalendarCheck />
+              Meus Agendamentos
             </button>
           </div>
         </div>
@@ -248,25 +301,30 @@ export default function TelaPerfil() {
             Ajuda
           </div>
 
-          <div className="p-6 space-y-4">
+          <div className="space-y-4 p-6">
+
             <button
               className={`w-full rounded-xl border p-4 text-left transition ${
                 dark
                   ? "border-slate-600 hover:bg-slate-800"
                   : "border-slate-200 hover:bg-slate-100"
               }`}
+              onClick={() => navigate("/central-ajuda")}
             >
               Central de Ajuda
             </button>
 
             <div
               className={`flex items-center gap-3 rounded-xl border p-4 ${
-                dark ? "border-slate-600" : "border-slate-200"
+                dark
+                  ? "border-slate-600"
+                  : "border-slate-200"
               }`}
             >
               <FaEnvelope className="text-[#004AF7]" />
               suporte@nami.com
             </div>
+
           </div>
         </div>
 
@@ -301,7 +359,7 @@ export default function TelaPerfil() {
 
             <button
               onClick={handleLogout}
-              className="md:col-span-2 flex items-center justify-center gap-2 rounded-xl bg-red-500 px-5 py-4 font-semibold text-white"
+              className="md:col-span-2 flex items-center justify-center gap-3 rounded-xl bg-red-500 px-5 py-4 font-semibold text-white"
             >
               <FaSignOutAlt />
               Sair

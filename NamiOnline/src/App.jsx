@@ -15,7 +15,6 @@ import RedefinirSenha from './pages/autenticacao/RedefinirSenha';
 // --- COMPONENTES DO PACIENTE (USER) ---
 import TelaInicial from "./pages/user/TelaInicial";
 import TelaPerfil from './pages/user/TelaPerfil';
-import TelaConfiguracaoUsuario from './pages/user/TelaConfiguracaoUsuario';
 import TelaAgendamentos from './pages/user/TelaAgendamentos';
 import ConsultaEspecialidade from "./pages/user/ConsultaEspecialidade";
 import AnexarGuiaConsulta from "./pages/user/AnexarGuiaConsulta";
@@ -27,6 +26,8 @@ import AgendarExamePaciente from './pages/user/AgendarExame';
 import ModalSolicitacaoSucesso from './pages/user/ModalSolicitacaoSucesso';
 import TelaNotificacoes from "./pages/user/TelaNotificacoes";
 import CentralAjuda from './pages/user/CentralAjuda';
+import TelaConfigUsuario from './pages/user/TelaConfigUsuario';
+
 
 // --- COMPONENTES DO ADMINISTRADOR (ADM) ---
 import TelaInicialAdmin from './pages/adm/TelaInicialAdmin';
@@ -44,9 +45,9 @@ import TelaNoticiasAdmin from './pages/adm/TelaNoticiasAdmin';
 import TelaEventosAdmin from './pages/adm/TelaEventosAdmin';
 import AprovarGuia from './pages/adm/AprovarGuia';
 import ConsultaDia from "./pages/adm/AdminConsultaDia";
-import TelaconfigAdmin from "./pages/adm/TelaconfigAdmin";
-import TelaChatAdm from "./pages/adm/TelaChatAdm";
+import TelaConfigUsuarioAdm from './pages/adm/TelaConfigUsuarioAdm';
 import AdminAgendarConsulta from "./pages/adm/AdminAgendarConsulta"
+import CentralAjudaAdm from "./pages/adm/CentralAjudaAdm";
 
 function ProtectedLayout() {
   const { authLoading, isLoggedIn, user } = useContext(AuthContext);
@@ -108,7 +109,7 @@ function App() {
               {/* USER */}
               <Route path="/home" element={<TelaInicial />} />
               <Route path="/perfil" element={<TelaPerfil />} />
-              <Route path="/perfil/configuracoes" element={<TelaConfiguracaoUsuario />} />
+              <Route path="/perfil/configuracoes/usuario" element={<TelaConfigUsuario />} />
               <Route path="/notificacoes" element={<TelaNotificacoes />} />
               <Route path="/central-ajuda" element={<CentralAjuda />} />
               {/* CONSULTAS */}
@@ -135,6 +136,9 @@ function App() {
               <Route path="/admin/cadastrar-especialidade" element={<AdicionarEspecialidade />} />
               <Route path="/admin/aprovar-guias" element={<AprovarGuia />} />
               <Route path="/admin/consultas-dia" element={<ConsultaDia />} />
+              <Route path="/admin/configuracoes" element={<TelaConfigUsuarioAdm/>}/>
+              <Route path="/admin/central-ajuda" element={<CentralAjudaAdm />} />
+
               {/* Gestão de Exames */}
               <Route path="/admin/exames/selecionar" element={<AdminSelecionarExame />} />
               <Route path="/admin/exames/agendar" element={<Navigate to="/admin/exames/selecionar" replace />} />

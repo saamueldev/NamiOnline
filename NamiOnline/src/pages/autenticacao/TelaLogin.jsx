@@ -142,12 +142,6 @@ export default function TelaLogin() {
               </Link>
             </p>
           </div>
-
-          <div className="mt-[15px] rounded-lg bg-[#f5f5f5] p-[15px]">
-            <p className="mt-[15px] text-center text-xs text-[#888]">
-              <strong>Teste Admin:</strong> admin@nami.com / admin123
-            </p>
-          </div>
         </form>
       </div>
     </div>

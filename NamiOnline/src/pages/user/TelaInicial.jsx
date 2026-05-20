@@ -94,6 +94,7 @@ export default function TelaInicial() {
   const [loadingConsulta, setLoadingConsulta] = useState(true);
   const [erroConsulta, setErroConsulta] = useState("");
   const [mostrarDetalhesConsulta, setMostrarDetalhesConsulta] = useState(false);
+  const [noticiaSelecionada, setNoticiaSelecionada] = useState(null);
 
   const noticiasOrdenadas = useMemo(() => {
     return [...noticias].sort(
@@ -112,6 +113,7 @@ export default function TelaInicial() {
   }, [noticiasOrdenadas.length]);
 
   useEffect(() => {
+    if (noticiaSelecionada) return undefined;
     if (noticiasOrdenadas.length <= 1) return undefined;
 
     const interval = setInterval(() => {
@@ -119,7 +121,7 @@ export default function TelaInicial() {
     }, 6000);
 
     return () => clearInterval(interval);
-  }, [noticiasOrdenadas.length]);
+  }, [noticiaSelecionada, noticiasOrdenadas.length]);
 
   useEffect(() => {
     async function carregarDadosDoUsuario() {
@@ -141,24 +143,24 @@ export default function TelaInicial() {
         const consultas =
           consultasResponse.status === "fulfilled" && Array.isArray(consultasResponse.value.data)
             ? consultasResponse.value.data
-                .filter((consulta) => consultaPertenceAoUsuario(consulta, user.id))
-                .filter((consulta) => !["CANCELADO", "CONCLUIDO"].includes(String(consulta.status || "").toUpperCase()))
-                .map((consulta) => ({
-                  ...consulta,
-                  tipoAgendamento: "CONSULTA",
-                  dataAgendamento: new Date(consulta.dataConsulta),
-                }))
+              .filter((consulta) => consultaPertenceAoUsuario(consulta, user.id))
+              .filter((consulta) => !["CANCELADO", "CONCLUIDO"].includes(String(consulta.status || "").toUpperCase()))
+              .map((consulta) => ({
+                ...consulta,
+                tipoAgendamento: "CONSULTA",
+                dataAgendamento: new Date(consulta.dataConsulta),
+              }))
             : [];
 
         const exames =
           examesResponse.status === "fulfilled" && Array.isArray(examesResponse.value.data)
             ? examesResponse.value.data
-                .filter((exame) => !["CANCELADO", "REALIZADO", "CONCLUIDO"].includes(String(exame.status || "").toUpperCase()))
-                .map((exame) => ({
-                  ...exame,
-                  tipoAgendamento: "EXAME",
-                  dataAgendamento: criarDataExame(exame.data, exame.horario),
-                }))
+              .filter((exame) => !["CANCELADO", "REALIZADO", "CONCLUIDO"].includes(String(exame.status || "").toUpperCase()))
+              .map((exame) => ({
+                ...exame,
+                tipoAgendamento: "EXAME",
+                dataAgendamento: criarDataExame(exame.data, exame.horario),
+              }))
             : [];
 
         setConsultasUsuario(
@@ -182,24 +184,47 @@ export default function TelaInicial() {
     (consulta) => consulta.dataAgendamento.getTime() >= Date.now()
   ) || consultasUsuario[0];
 
+  function abrirNoticia(noticia) {
+    setIndex(noticiasOrdenadas.findIndex((item) => item.id === noticia.id));
+    setNoticiaSelecionada(noticia);
+  }
+
+  function fecharNoticia() {
+    setNoticiaSelecionada(null);
+  }
+
   return (
     <div className="min-h-screen bg-[#f5f7fa]">
-      <main className="mx-auto w-full max-w-[1280px] px-4 py-8 sm:px-6 md:px-10 lg:px-12">
+      <main className={`mx-auto w-full max-w-[1280px] px-4 py-8 transition duration-200 sm:px-6 md:px-10 lg:px-12 ${noticiaSelecionada ? "blur-sm" : ""}`}>
         <section className="grid items-start gap-7 lg:grid-cols-[minmax(0,1.55fr)_minmax(340px,0.85fr)] xl:gap-10">
           <article className="overflow-hidden rounded-[22px] bg-white shadow-[0_18px_45px_rgba(15,23,42,0.10)] ring-1 ring-slate-200/80">
             <div className="relative aspect-[16/10] min-h-[300px] w-full sm:min-h-[420px] lg:min-h-[500px]">
               {noticiaEmDestaque ? (
                 <>
                   {noticiaEmDestaque.imageUrl ? (
-                    <img
-                      className="h-full w-full object-cover"
-                      src={noticiaEmDestaque.imageUrl}
-                      alt={noticiaEmDestaque.title}
-                    />
+                    <button
+                      type="button"
+                      className="h-full w-full cursor-pointer text-left"
+                      onClick={() => abrirNoticia(noticiaEmDestaque)}
+                      aria-label={`Abrir noticia: ${noticiaEmDestaque.title}`}
+                    >
+                      <img
+                        className="h-full w-full object-cover transition duration-300 hover:scale-[1.02]"
+                        src={noticiaEmDestaque.imageUrl}
+                        alt={noticiaEmDestaque.title}
+                      />
+                    </button>
                   ) : (
-                    <ImagePlaceholder className="h-full w-full" />
+                    <button
+                      type="button"
+                      className="h-full w-full cursor-pointer"
+                      onClick={() => abrirNoticia(noticiaEmDestaque)}
+                      aria-label={`Abrir noticia: ${noticiaEmDestaque.title}`}
+                    >
+                      <ImagePlaceholder className="h-full w-full" />
+                    </button>
                   )}
-                  <div className="absolute inset-x-0 bottom-0 bg-[#004AF7] px-6 py-5 sm:px-7 sm:py-6">
+                  <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-[#004AF7] px-6 py-5 sm:px-7 sm:py-6">
                     <time
                       className="mb-2 block text-sm font-bold uppercase text-blue-100"
                       dateTime={noticiaEmDestaque.date}
@@ -232,9 +257,11 @@ export default function TelaInicial() {
 
             <div className="space-y-7">
               {noticiasOrdenadas.map((noticia, noticiaIndex) => (
-                <article
+                <button
+                  type="button"
                   key={noticia.id}
-                  className={`grid grid-cols-[120px_minmax(0,1fr)] gap-4 ${noticiaIndex === index ? "opacity-100" : "opacity-90"}`}
+                  className={`grid w-full grid-cols-[120px_minmax(0,1fr)] gap-4 rounded-lg p-2 text-left transition hover:bg-blue-50 ${noticiaIndex === index ? "bg-blue-50 opacity-100" : "opacity-90"}`}
+                  onClick={() => setIndex(noticiaIndex)}
                 >
                   {noticia.imageUrl ? (
                     <img
@@ -260,7 +287,7 @@ export default function TelaInicial() {
                       {noticia.summary}
                     </p>
                   </div>
-                </article>
+                </button>
               ))}
             </div>
           </aside>
@@ -280,7 +307,7 @@ export default function TelaInicial() {
         </section>
 
         <section className="grid gap-[25px] lg:grid-cols-2">
-          <div className="rounded-xl bg-white p-[25px] shadow-[0_8px_20px_rgba(0,0,0,0.1)]">
+          <div className="self-start rounded-xl bg-white p-[25px] shadow-[0_8px_20px_rgba(0,0,0,0.1)]">
             <h3 className="mb-[15px] flex items-center gap-[10px] text-[22px] font-semibold text-[#132190]">
               <span>Proximo atendimento</span>
             </h3>
@@ -324,8 +351,8 @@ export default function TelaInicial() {
             </h3>
 
             {eventosOrdenados.length > 0 ? (
-              <ul className="space-y-3">
-                {eventosOrdenados.slice(0, 4).map((evento) => (
+              <ul className="max-h-[420px] space-y-3 overflow-y-auto pr-2">
+                {eventosOrdenados.map((evento) => (
                   <li key={evento.id} className="rounded-lg border border-slate-100 p-3">
                     {evento.imageUrl && (
                       <img
@@ -334,10 +361,13 @@ export default function TelaInicial() {
                         alt={evento.title}
                       />
                     )}
+
                     <strong className="block text-slate-900">{evento.title}</strong>
+
                     <span className="text-sm text-slate-600">
                       {formatarData(evento.date)} as {evento.time} - {evento.location}
                     </span>
+
                     <p className="mt-1 line-clamp-2 text-sm text-slate-700">
                       {evento.description}
                     </p>
@@ -346,12 +376,57 @@ export default function TelaInicial() {
               </ul>
             ) : (
               <p className="text-sm font-semibold text-slate-600">
-                {loadingConteudo ? "Carregando eventos..." : "Nenhum evento cadastrado no momento."}
+                {loadingConteudo
+                  ? "Carregando eventos..."
+                  : "Nenhum evento cadastrado no momento."}
               </p>
             )}
           </div>
         </section>
       </main>
+
+      {noticiaSelecionada && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-white/30 p-4 backdrop-blur-sm"
+          onClick={fecharNoticia}
+        >
+          <div
+            className="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-xl bg-white p-6 shadow-2xl"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="flex items-start justify-between gap-4 border-b border-slate-200 pb-4">
+              <div>
+                <h2 className="text-2xl font-bold text-[#132190]">
+                  Detalhes da noticia
+                </h2>
+                <p className="mt-1 text-sm text-slate-600">
+                  Todas as informacoes disponiveis para a noticia selecionada.
+                </p>
+              </div>
+              <button
+                type="button"
+                className="rounded-md bg-slate-100 px-3 py-1 text-sm font-bold text-slate-700 transition hover:bg-slate-200"
+                onClick={fecharNoticia}
+              >
+                Fechar
+              </button>
+            </div>
+
+            <div className="mt-5">
+              <DetalheGrupo
+                titulo="Noticia"
+                itens={[
+                  ["Titulo", texto(noticiaSelecionada.title)],
+                  ["Autor", texto(noticiaSelecionada.author)],
+                  ["Data", formatarData(noticiaSelecionada.date)],
+                  ["Categoria", texto(noticiaSelecionada.category)],
+                  ["Conteudo", texto(noticiaSelecionada.content)],
+                ]}
+              />
+            </div>
+          </div>
+        </div>
+      )}
 
       {mostrarDetalhesConsulta && proximaConsulta && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 p-4">
@@ -435,7 +510,7 @@ function DetalheGrupo({ titulo, itens }) {
         {itens.map(([label, valor]) => (
           <div key={label}>
             <dt className="text-xs font-bold uppercase text-slate-500">{label}</dt>
-            <dd className="mt-1 break-words text-sm font-semibold text-slate-800">
+            <dd className="mt-1 whitespace-pre-line break-words text-sm font-semibold text-slate-800">
               {valor}
             </dd>
           </div>

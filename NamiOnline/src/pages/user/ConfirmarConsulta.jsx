@@ -90,6 +90,10 @@ function criarDataConsulta(data, horario) {
   return dataConsulta;
 }
 
+function horarioAindaDisponivel(data, horario, agora) {
+  return criarDataConsulta(data, horario) > agora;
+}
+
 function formatarData(data) {
   return data.toLocaleDateString("pt-BR", {
     weekday: "long",
@@ -131,6 +135,12 @@ const ConfirmarConsulta = () => {
   const [selectedTime, setSelectedTime] = useState("");
   const [confirmando, setConfirmando] = useState(false);
   const [consultaConfirmada, setConsultaConfirmada] = useState(null);
+  const [agora, setAgora] = useState(() => new Date());
+
+  useEffect(() => {
+    const intervalo = setInterval(() => setAgora(new Date()), 60000);
+    return () => clearInterval(intervalo);
+  }, []);
 
   useEffect(() => {
     async function carregarDadosAgendamento() {
@@ -223,8 +233,9 @@ const ConfirmarConsulta = () => {
       data.setHours(0, 0, 0, 0);
 
       const horarios = gerarHorariosDoDia(data, horariosFixos, duracaoConsulta);
+      const horariosFuturos = horarios.filter((horario) => horarioAindaDisponivel(data, horario, agora));
       const horariosLivres = selectedDoctor
-        ? horarios.filter((horario) => {
+        ? horariosFuturos.filter((horario) => {
             const ocupado = consultas.some((consulta) => {
               const dataConsulta = new Date(consulta.dataConsulta);
 
@@ -238,7 +249,7 @@ const ConfirmarConsulta = () => {
 
             return !ocupado;
           })
-        : horarios;
+        : horariosFuturos;
       const disponivel = data >= hoje && horariosLivres.length > 0 && medicos.length > 0;
 
       return {
@@ -251,14 +262,14 @@ const ConfirmarConsulta = () => {
     });
 
     return [...espacosIniciais, ...dias];
-  }, [consultas, duracaoConsulta, hoje, horariosFixos, medicos.length, mesAtual, selectedDoctor]);
+  }, [agora, consultas, duracaoConsulta, hoje, horariosFixos, medicos.length, mesAtual, selectedDoctor]);
 
   const horariosDisponiveis = useMemo(() => {
     if (!selectedDate || !selectedDoctor) return [];
     return gerarHorariosDoDia(selectedDate, horariosFixos, duracaoConsulta).filter(
-      (horario) => !horariosOcupados.has(horario)
+      (horario) => horarioAindaDisponivel(selectedDate, horario, agora) && !horariosOcupados.has(horario)
     );
-  }, [duracaoConsulta, horariosFixos, horariosOcupados, selectedDate, selectedDoctor]);
+  }, [agora, duracaoConsulta, horariosFixos, horariosOcupados, selectedDate, selectedDoctor]);
 
   useEffect(() => {
     const dataAindaExiste =
@@ -292,11 +303,17 @@ const ConfirmarConsulta = () => {
       return;
     }
 
+    const dataConsulta = criarDataConsulta(selectedDate, selectedTime);
+
+    if (dataConsulta <= new Date()) {
+      setErro("Este horario ja passou. Escolha outro horario disponivel.");
+      return;
+    }
+
     try {
       setConfirmando(true);
       setErro("");
 
-      const dataConsulta = criarDataConsulta(selectedDate, selectedTime);
       const statusConsulta = consultaRequerGuia ? "PENDENTE" : "AGENDADO";
 
       const response = await api.post("/consultas", {

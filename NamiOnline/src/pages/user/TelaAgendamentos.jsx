@@ -149,6 +149,10 @@ function dataOrdenacao(data, horario) {
   return Number.isNaN(dataObj.getTime()) ? Number.MAX_SAFE_INTEGER : dataObj.getTime();
 }
 
+function agendamentoAindaNaoPassou(agendamento, agora = Date.now()) {
+  return agendamento.ordenacao >= agora;
+}
+
 function consultaPertenceAoUsuario(consulta, usuarioId) {
   return normalizarId(consulta?.pacienteId?.user) === usuarioId;
 }
@@ -237,6 +241,12 @@ export default function TelaAgendamentos() {
   const [agendamentoSelecionado, setAgendamentoSelecionado] = useState(null);
   const [agendamentoCancelando, setAgendamentoCancelando] = useState(null);
   const [cancelando, setCancelando] = useState(false);
+  const [agora, setAgora] = useState(() => Date.now());
+
+  useEffect(() => {
+    const intervalo = setInterval(() => setAgora(Date.now()), 60000);
+    return () => clearInterval(intervalo);
+  }, []);
 
   const carregarAgendamentos = useCallback(async () => {
     const usuarioId = user?.id;
@@ -280,6 +290,7 @@ export default function TelaAgendamentos() {
       setAgendamentos(
         [...consultas, ...exames]
           .filter((agendamento) => !statusOcultos.includes(agendamento.status))
+          .filter((agendamento) => agendamentoAindaNaoPassou(agendamento))
           .sort((a, b) => a.ordenacao - b.ordenacao)
       );
     } catch (error) {
@@ -294,6 +305,11 @@ export default function TelaAgendamentos() {
   useEffect(() => {
     carregarAgendamentos();
   }, [carregarAgendamentos]);
+
+  const agendamentosAtuais = useMemo(
+    () => agendamentos.filter((agendamento) => agendamentoAindaNaoPassou(agendamento, agora)),
+    [agendamentos, agora]
+  );
 
   function podeCancelarAgendamento(agendamento) {
     return !["CANCELADO", "CONCLUIDO", "REALIZADO"].includes(agendamento.status);
@@ -330,31 +346,30 @@ export default function TelaAgendamentos() {
   }
 
   const contadores = useMemo(() => {
-    const ativos = agendamentos.filter(
+    const ativos = agendamentosAtuais.filter(
       (item) => !["CANCELADO", "CONCLUIDO", "REALIZADO"].includes(item.status)
     );
 
     return {
-      total: agendamentos.length,
+      total: agendamentosAtuais.length,
       proximos: ativos.length,
-      consultas: agendamentos.filter((item) => item.tipo === "CONSULTA").length,
-      exames: agendamentos.filter((item) => item.tipo === "EXAME").length,
+      consultas: agendamentosAtuais.filter((item) => item.tipo === "CONSULTA").length,
+      exames: agendamentosAtuais.filter((item) => item.tipo === "EXAME").length,
     };
-  }, [agendamentos]);
+  }, [agendamentosAtuais]);
 
   const proximoAgendamento = useMemo(() => {
-    const agora = Date.now();
-    return agendamentos.find(
+    return agendamentosAtuais.find(
       (item) =>
         !["CANCELADO", "CONCLUIDO", "REALIZADO"].includes(item.status) &&
         item.ordenacao >= agora
     );
-  }, [agendamentos]);
+  }, [agendamentosAtuais, agora]);
 
   const agendamentosFiltrados = useMemo(() => {
     const termo = busca.toLowerCase().trim();
 
-    return agendamentos.filter((agendamento) => {
+    return agendamentosAtuais.filter((agendamento) => {
       const correspondeTipo =
         tipoSelecionado === "TODOS" || agendamento.tipo === tipoSelecionado;
 
@@ -370,7 +385,7 @@ export default function TelaAgendamentos() {
 
       return correspondeTipo && textoBusca.includes(termo);
     });
-  }, [agendamentos, busca, tipoSelecionado]);
+  }, [agendamentosAtuais, busca, tipoSelecionado]);
 
   return (
     <div className="min-h-screen bg-[#F4F8FF] text-slate-900">

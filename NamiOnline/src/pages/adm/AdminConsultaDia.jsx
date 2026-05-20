@@ -4,6 +4,7 @@ import {
   Calendar,
   Clock,
   Edit3,
+  Funnel,
   FlaskConical,
   Loader2,
   RefreshCw,
@@ -63,6 +64,25 @@ function nomeEspecialidade(especialidade) {
   return especialidade?.name || especialidade?.nome || "";
 }
 
+function slugTexto(valor) {
+  return texto(valor, "sem-identificacao")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+function idTipoExame(exame, tipoExame, categoria) {
+  return (
+    normalizarId(tipoExame) ||
+    normalizarId(exame.tipoExameId) ||
+    normalizarId(exame.exameId) ||
+    normalizarId(categoria) ||
+    slugTexto(tipoExame?.nome || exame.nome || exame.titulo)
+  );
+}
+
 function normalizarStatus(status) {
   return String(status || "AGENDADO").toUpperCase();
 }
@@ -70,12 +90,34 @@ function normalizarStatus(status) {
 function criarData(data, horario) {
   if (!data) return null;
 
-  const valor =
-    typeof data === "string" && /^\d{4}-\d{2}-\d{2}$/.test(data)
-      ? `${data}T${horario || "00:00"}:00`
-      : data;
+  if (horario) {
+    const dataBase = new Date(data);
 
-  const dataObj = new Date(valor);
+    if (!Number.isNaN(dataBase.getTime())) {
+      const [hora = 0, minuto = 0] = String(horario).split(":").map(Number);
+      return new Date(
+        dataBase.getFullYear(),
+        dataBase.getMonth(),
+        dataBase.getDate(),
+        hora,
+        minuto,
+        0,
+        0
+      );
+    }
+  }
+
+  if (typeof data === "string" && /^\d{4}-\d{2}-\d{2}$/.test(data)) {
+    const dataIso = data.match(/^(\d{4})-(\d{2})-(\d{2})/);
+
+    if (dataIso) {
+      const [, ano, mes, dia] = dataIso;
+      const [hora = 0, minuto = 0] = String(horario || "00:00").split(":").map(Number);
+      return new Date(Number(ano), Number(mes) - 1, Number(dia), hora, minuto, 0, 0);
+    }
+  }
+
+  const dataObj = new Date(data);
   return Number.isNaN(dataObj.getTime()) ? null : dataObj;
 }
 
@@ -146,9 +188,9 @@ function criarDataConsultaParaApi(data, hora) {
   return dataConsulta.toISOString();
 }
 
-function atendimentoFuturo(item) {
+function atendimentoFuturo(item, agora = Date.now()) {
   if (!Number.isFinite(item.ordenacao)) return false;
-  return item.ordenacao >= Date.now();
+  return item.ordenacao >= agora;
 }
 
 function mapearConsulta(consulta) {
@@ -180,18 +222,21 @@ function mapearConsulta(consulta) {
 
 function mapearExame(exame) {
   const tipoExame = exame.tipoExameId;
-  const categoria = tipoExame?.categoriaExameId;
+  const categoria =
+    tipoExame?.categoriaExameId || exame.categoriaExameId || exame.categoriaExame || exame.categoria;
+  const nomeExame = texto(tipoExame?.nome || exame.nome || exame.titulo, "Exame agendado");
+  const categoriaNome = texto(categoria?.nome || categoria, "Exames");
   const status = normalizarStatus(exame.status);
 
   return {
     id: exame._id || exame.id,
     tipo: "EXAME",
     status,
-    titulo: texto(tipoExame?.nome || exame.nome, "Exame agendado"),
+    titulo: nomeExame,
     paciente: nomePaciente(exame.usuarioId || exame.pacienteId),
-    profissionalId: "equipe-exames",
+    profissionalId: `equipe-exames-${idTipoExame(exame, tipoExame, categoria)}`,
     profissional: "Equipe de exames",
-    detalheProfissional: texto(categoria?.nome, "Exames"),
+    detalheProfissional: `${categoriaNome} - ${nomeExame}`,
     data: exame.data,
     hora: exame.horario || horarioDaData(exame.data),
     dataInput: dataParaInput(exame.data),
@@ -261,6 +306,15 @@ export default function ConsultasDoDia() {
   const [cancelamento, setCancelamento] = useState(null);
   const [edicao, setEdicao] = useState(null);
   const [salvando, setSalvando] = useState(false);
+  const [agora, setAgora] = useState(() => Date.now());
+  const [filtrosAbertos, setFiltrosAbertos] = useState(false);
+  const [filtroData, setFiltroData] = useState("");
+  const [filtroTipo, setFiltroTipo] = useState("TODOS");
+
+  useEffect(() => {
+    const intervalo = setInterval(() => setAgora(Date.now()), 60000);
+    return () => clearInterval(intervalo);
+  }, []);
 
   const carregarAgenda = useCallback(async () => {
     try {
@@ -375,16 +429,39 @@ export default function ConsultasDoDia() {
     carregarAgenda();
   }, [carregarAgenda]);
 
-  const dias = useMemo(() => agruparPorDiaEProfissional(agendamentos), [agendamentos]);
+  const agendamentosAtuais = useMemo(
+    () => agendamentos.filter((item) => atendimentoFuturo(item, agora)),
+    [agendamentos, agora]
+  );
+
+  const agendamentosFiltrados = useMemo(
+    () =>
+      agendamentosAtuais.filter((item) => {
+        const correspondeTipo = filtroTipo === "TODOS" || item.tipo === filtroTipo;
+        const correspondeData = !filtroData || dataParaInput(item.data) === filtroData;
+
+        return correspondeTipo && correspondeData;
+      }),
+    [agendamentosAtuais, filtroData, filtroTipo]
+  );
+
+  const dias = useMemo(() => agruparPorDiaEProfissional(agendamentosFiltrados), [agendamentosFiltrados]);
 
   const contadores = useMemo(
     () => ({
-      total: agendamentos.length,
-      consultas: agendamentos.filter((item) => item.tipo === "CONSULTA").length,
-      exames: agendamentos.filter((item) => item.tipo === "EXAME").length,
+      total: agendamentosFiltrados.length,
+      consultas: agendamentosFiltrados.filter((item) => item.tipo === "CONSULTA").length,
+      exames: agendamentosFiltrados.filter((item) => item.tipo === "EXAME").length,
     }),
-    [agendamentos]
+    [agendamentosFiltrados]
   );
+
+  const filtrosAtivos = Boolean(filtroData || filtroTipo !== "TODOS");
+
+  function limparFiltros() {
+    setFiltroData("");
+    setFiltroTipo("TODOS");
+  }
 
   return (
     <div className="min-h-screen bg-[#E4F2FE] px-4 py-8 font-sans text-slate-900 md:px-8">
@@ -397,7 +474,7 @@ export default function ConsultasDoDia() {
               </span>
 
               <h1 className="mt-4 text-3xl font-extrabold tracking-tight text-[#132190] md:text-5xl">
-                Consultas e exames por dia
+                Consultas e exames 
               </h1>
 
               <div className="mt-3 flex flex-wrap items-center gap-4 text-sm font-semibold text-slate-600">
@@ -410,17 +487,104 @@ export default function ConsultasDoDia() {
               </div>
             </div>
 
-            <button
-              type="button"
-              onClick={carregarAgenda}
-              disabled={carregando}
-              className="flex items-center justify-center gap-2 rounded-xl border border-[#87B7FE]/20 bg-white px-5 py-3 text-sm font-bold text-[#132190] shadow-sm transition-all hover:bg-[#F4F8FF] disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              <RefreshCw size={18} className={carregando ? "animate-spin" : ""} />
-              Atualizar
-            </button>
+            <div className="flex flex-col gap-3 sm:flex-row">
+              <button
+                type="button"
+                onClick={() => setFiltrosAbertos((aberto) => !aberto)}
+                className={`relative flex items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-bold shadow-sm transition-all ${
+                  filtrosAtivos
+                    ? "bg-[#004AF7] text-white hover:bg-[#132190]"
+                    : "border border-[#87B7FE]/20 bg-white text-[#132190] hover:bg-[#F4F8FF]"
+                }`}
+              >
+                <Funnel size={18} />
+                Filtros
+                {filtrosAtivos && (
+                  <span className="absolute -right-1 -top-1 h-3 w-3 rounded-full border-2 border-white bg-[#8FD7A5]" />
+                )}
+              </button>
+
+              <button
+                type="button"
+                onClick={carregarAgenda}
+                disabled={carregando}
+                className="flex items-center justify-center gap-2 rounded-xl border border-[#87B7FE]/20 bg-white px-5 py-3 text-sm font-bold text-[#132190] shadow-sm transition-all hover:bg-[#F4F8FF] disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                <RefreshCw size={18} className={carregando ? "animate-spin" : ""} />
+                Atualizar
+              </button>
+            </div>
           </div>
         </header>
+
+        {filtrosAbertos && (
+          <section className="mb-6 overflow-hidden rounded-3xl border border-[#87B7FE]/20 bg-white shadow-sm">
+            <div className="border-b border-slate-100 bg-[#F8FBFF] px-5 py-4">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <h2 className="text-sm font-extrabold uppercase tracking-wide text-[#132190]">
+                    Filtrar agenda
+                  </h2>
+                  <p className="mt-1 text-xs font-semibold text-slate-500">
+                    Refine os atendimentos por data e tipo.
+                  </p>
+                </div>
+
+                {filtrosAtivos && (
+                  <span className="inline-flex w-fit rounded-full bg-[#DDF8E6] px-3 py-1 text-xs font-bold text-[#137333]">
+                    Filtro ativo
+                  </span>
+                )}
+              </div>
+            </div>
+
+            <div className="grid gap-4 p-5 md:grid-cols-[1fr_1.2fr_auto] md:items-end">
+              <label className="block">
+                <span className="mb-2 flex items-center gap-2 text-sm font-bold text-[#132190]">
+                  <Calendar className="h-4 w-4 text-[#004AF7]" />
+                  Data
+                </span>
+                <input
+                  type="date"
+                  value={filtroData}
+                  onChange={(event) => setFiltroData(event.target.value)}
+                  className="h-12 w-full rounded-xl border border-[#87B7FE]/30 bg-[#F8FBFF] px-4 text-sm font-semibold text-slate-700 outline-none focus:border-[#004AF7] focus:ring-2 focus:ring-[#004AF7]/10"
+                />
+              </label>
+
+              <div>
+                <span className="mb-2 block text-sm font-bold text-[#132190]">
+                  Tipo
+                </span>
+                <div className="grid grid-cols-3 gap-2 rounded-xl border border-[#87B7FE]/20 bg-[#F8FBFF] p-1">
+                  {["TODOS", "CONSULTA", "EXAME"].map((tipo) => (
+                    <button
+                      key={tipo}
+                      type="button"
+                      onClick={() => setFiltroTipo(tipo)}
+                      className={`h-10 rounded-lg px-3 text-xs font-bold transition ${
+                        filtroTipo === tipo
+                          ? "bg-[#132190] text-white shadow-sm"
+                          : "text-[#004AF7] hover:bg-[#E4F2FE]"
+                      }`}
+                    >
+                      {tipo === "TODOS" ? "Todos" : dadosTipo[tipo].label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={limparFiltros}
+                disabled={!filtrosAtivos}
+                className="h-12 rounded-xl border border-slate-200 bg-white px-5 text-sm font-bold text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                Limpar
+              </button>
+            </div>
+          </section>
+        )}
 
         {erro && (
           <div className="mb-6 flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm font-semibold text-amber-800">

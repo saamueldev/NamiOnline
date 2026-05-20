@@ -53,7 +53,7 @@ export default function TelaInicialADM() {
             </Link>
 
             <Link
-              to="/admin/cadastrar-exame"
+              to="/admin/exames/cadastrar-categorias-exames"
               className="no-underline px-[14px] py-3 rounded-lg text-[#333] font-medium transition duration-200 hover:bg-[#004AF7] hover:text-white"
             >
               Cadastro Exames

@@ -10,7 +10,7 @@ const BarraNavegacao = () => {
   };
 
   const handleConsultasClick = () => {
-    navigate("/agendar/especialidades");
+    navigate("/especialidades");
   };
 
   const handleExamesClick = () => {

@@ -176,9 +176,10 @@ export default function AgendarExame() {
   const [carregandoDisponibilidade, setCarregandoDisponibilidade] =
     useState(false)
 
-  const [tipoAtendimento, setTipoAtendimento] = useState('Particular')
   const [observacoes, setObservacoes] = useState('')
   const [guiaArquivo, setGuiaArquivo] = useState(null)
+
+  const tipoAtendimento = 'Particular'
 
   async function carregarExameSelecionado() {
     if (!exameId || exameId === 'undefined') {
@@ -392,8 +393,8 @@ export default function AgendarExame() {
   async function confirmarAgendamento(event) {
     event.preventDefault()
 
-    if (!dataSelecionada || !horario || !tipoAtendimento) {
-      alert('Preencha data, horário e tipo de atendimento.')
+    if (!dataSelecionada || !horario) {
+      alert('Preencha data e horário.')
       return
     }
 
@@ -795,15 +796,11 @@ export default function AgendarExame() {
                       Tipo de atendimento
                     </label>
 
-                    <select
-                      value={tipoAtendimento}
-                      disabled={salvandoAgendamento}
-                      onChange={(event) => setTipoAtendimento(event.target.value)}
-                      className="w-full rounded-2xl border border-[#87B7FE]/30 bg-[#F8FBFF] px-4 py-4 text-sm text-slate-700 outline-none transition focus:border-[#004AF7] focus:ring-4 focus:ring-[#004AF7]/10 disabled:cursor-not-allowed disabled:opacity-60"
-                    >
-                      <option value="Particular">Particular</option>
-                      <option value="Convênio">Convênio</option>
-                    </select>
+                    <div className="rounded-2xl border border-[#87B7FE]/30 bg-[#F8FBFF] px-4 py-4 text-sm font-semibold text-[#132190]">
+                      Particular
+                    </div>
+
+
                   </div>
                 </div>
 
@@ -969,7 +966,7 @@ export default function AgendarExame() {
                   </li>
 
                   <li className="rounded-2xl bg-[#F8FBFF] p-4">
-                    Em caso de convênio, confirme a cobertura antes do atendimento.
+                    Este atendimento será realizado na modalidade particular.
                   </li>
                 </ul>
               </section>

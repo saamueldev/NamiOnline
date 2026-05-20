@@ -169,7 +169,6 @@ export default function AdminAgendarExame() {
   const [diasPassados, setDiasPassados] = useState([])
 
   const [guiaArquivo, setGuiaArquivo] = useState(null)
-  const [tipoAtendimento, setTipoAtendimento] = useState('Particular')
   const [observacoes, setObservacoes] = useState('')
 
   const [carregandoExame, setCarregandoExame] = useState(true)
@@ -181,6 +180,8 @@ export default function AdminAgendarExame() {
 
   const [modalSucessoAberto, setModalSucessoAberto] = useState(false)
   const [agendamentoCriado, setAgendamentoCriado] = useState(null)
+
+  const tipoAtendimento = 'Particular'
 
   async function carregarExame() {
     if (!exameId || exameId === 'undefined') {
@@ -458,8 +459,8 @@ export default function AdminAgendarExame() {
       return
     }
 
-    if (!dataSelecionada || !horario || !tipoAtendimento) {
-      alert('Preencha data, horário e tipo de atendimento.')
+    if (!dataSelecionada || !horario) {
+      alert('Preencha data e horário.')
       return
     }
 
@@ -933,15 +934,13 @@ export default function AdminAgendarExame() {
                     Tipo de atendimento
                   </label>
 
-                  <select
-                    value={tipoAtendimento}
-                    onChange={(event) => setTipoAtendimento(event.target.value)}
-                    disabled={salvandoAgendamento}
-                    className="w-full rounded-2xl border border-[#87B7FE]/30 bg-[#F8FBFF] px-4 py-4 text-sm text-slate-700 outline-none transition focus:border-[#004AF7] focus:ring-4 focus:ring-[#004AF7]/10 disabled:cursor-not-allowed disabled:opacity-60"
-                  >
-                    <option value="Particular">Particular</option>
-                    <option value="Convênio">Convênio</option>
-                  </select>
+                  <div className="rounded-2xl border border-[#87B7FE]/30 bg-[#F8FBFF] px-4 py-4 text-sm font-semibold text-[#132190]">
+                    Particular
+                  </div>
+
+                  <p className="mt-2 text-xs text-slate-500">
+                    O hospital trabalha exclusivamente com atendimento particular para exames.
+                  </p>
                 </div>
               </div>
 

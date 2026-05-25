@@ -182,7 +182,7 @@ export default function TelaConfigUsuario() {
         </button>
 
         <h1 className="text-3xl font-bold text-[#132190]">
-          Configurações do Usuário
+          Configurações do Administrador
         </h1>
       </div>
 

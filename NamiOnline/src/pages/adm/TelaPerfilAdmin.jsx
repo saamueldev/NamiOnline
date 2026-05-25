@@ -219,7 +219,7 @@ export default function TelaPerfilAdmin() {
 
           <div className="p-6">
             <button
-              onClick={() => navigate("/perfil/configuracoes/usuario")}
+              onClick={() => navigate("/admin/configuracoes")}
               className={`flex w-full items-center justify-center gap-3 rounded-xl px-5 py-4 font-semibold transition ${
                 dark
                   ? "bg-slate-800 text-white hover:bg-slate-700"
@@ -227,7 +227,7 @@ export default function TelaPerfilAdmin() {
               }`}
             >
               <FaCog />
-              Abrir Configurações do Usuário
+              Abrir Configurações do Administrador
             </button>
           </div>
         </div>

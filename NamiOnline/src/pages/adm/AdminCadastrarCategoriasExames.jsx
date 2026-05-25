@@ -13,7 +13,6 @@ import {
 
 import api from '../../services/api'
 
-
 export default function AdminCadastrarCategoriasExames() {
   const navigate = useNavigate()
 
@@ -79,7 +78,6 @@ export default function AdminCadastrarCategoriasExames() {
   }
 
   function gerenciarExamesCategoria(categoria) {
-    
     navigate(`/admin/categorias-exames/${categoria._id}/exames`)
   }
 
@@ -204,12 +202,12 @@ export default function AdminCadastrarCategoriasExames() {
                 <h2 className="text-2xl font-bold text-[#132190]">
                   Adicionar categoria de exame
                 </h2>
+
                 <p className="mt-1 text-sm text-slate-600">
                   Cadastre uma nova categoria para organização dos exames.
                 </p>
               </div>
             </div>
-
             <form onSubmit={cadastrarCategoriaExame} className="space-y-6">
               <div>
                 <label className="mb-2 block text-sm font-semibold text-[#132190]">
@@ -258,6 +256,33 @@ export default function AdminCadastrarCategoriasExames() {
                 </button>
               </div>
             </form>
+            <div className="mt-8 rounded-3xl border border-[#87B7FE]/20 bg-[#F8FBFF] p-5">
+              <div className="flex items-start gap-4">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#E4F2FE]">
+                  <ClipboardList className="h-6 w-6 text-[#004AF7]" />
+                </div>
+
+                <div className="flex-1">
+                  <h3 className="text-base font-bold text-[#132190]">
+                    Cadastrar tipo de exame
+                  </h3>
+
+                  <p className="mt-1 text-sm leading-6 text-slate-600">
+                    Após criar uma categoria, cadastre os exames vinculados a ela,
+                    definindo nome, descrição, tempo médio e necessidade de guia médica.
+                  </p>
+
+                  <button
+                    type="button"
+                    onClick={() => navigate('/admin/exames/cadastrar-tipos-exames')}
+                    className="mt-4 inline-flex items-center gap-2 rounded-2xl bg-[#004AF7] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#132190]"
+                  >
+                    <Plus className="h-4 w-4" />
+                    Cadastrar tipo de exame
+                  </button>
+                </div>
+              </div>
+            </div>
           </section>
 
           <section className="rounded-3xl border border-[#87B7FE]/25 bg-white p-6 shadow-sm md:p-8">

@@ -13,6 +13,15 @@ import {
   Clock3,
   FileText,
   UserRound,
+  Eye,
+  Ear,
+  Wind,
+  Droplets,
+  Stethoscope,
+  Activity,
+  Microscope,
+  Syringe,
+  Venus,
 } from 'lucide-react'
 
 import api from '../../services/api'
@@ -27,6 +36,22 @@ const iconesCategorias = {
   Neurológicos: Brain,
   Ortopédicos: Bone,
   Imagem: ScanLine,
+
+  Ginecológicos: Venus,
+  Urológicos: Droplets,
+  Gastroenterológicos: Stethoscope,
+  Pneumológicos: Wind,
+  Oftalmológicos: Eye,
+  Otorrinolaringológicos: Ear,
+  Dermatológicos: Activity,
+  Vasculares: Activity,
+  Nefrológicos: Droplets,
+  Endocrinológicos: Activity,
+  Hematológicos: Microscope,
+  Oncológicos: Microscope,
+  Infectológicos: Syringe,
+  Reumatológicos: Bone,
+  'Avaliação geral': ClipboardList,
 }
 
 export default function AdminSelecionarExame() {

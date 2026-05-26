@@ -1,7 +1,9 @@
 import axios from "axios";
 
+const baseURL = import.meta.env.VITE_API_URL || "https://nami-online-api.vercel.app";
+
 const api = axios.create({
-    baseURL: 'http://localhost:3000',
+    baseURL,
 });
 //Hugo - Alteração para a função Lembre-me.
 api.interceptors.request.use((config) => {
